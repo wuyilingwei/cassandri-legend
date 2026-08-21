@@ -109,6 +109,8 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 }
 .choice-btn:hover{background:#1e2a1a;color:var(--accent2);}
 .choice-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--bg-deep);background:var(--accent2);color:var(--bg-deep);}
+.choice-btn:disabled{opacity:.4;cursor:not-allowed;}
+.choice-btn:disabled:hover{background:var(--panel2);color:var(--text);}
 #hud{
   width:288px;flex-shrink:0;background:var(--panel);
   padding:12px;overflow-y:auto;
@@ -473,8 +475,8 @@ function damageAddedPercent(){
   if (G.hermit) d=hermitPower();
   return d;
 }
-function critDamage(){ const dap=damageAddedPercent(); return Math.trunc(G.ATK+G.ATK*G.BS+dap*G.ATK); }
-function normalDamage(){ const dap=damageAddedPercent(); return Math.trunc(G.ATK+dap*G.ATK); }
+function critDamage(){ const dap=damageAddedPercent(); return Math.floor(G.ATK+G.ATK*G.BS+dap*G.ATK); }
+function normalDamage(){ const dap=damageAddedPercent(); return Math.floor(G.ATK+dap*G.ATK); }
 
 /* ---------- DOM / 打字机 ---------- */
 const termEl=document.getElementById('terminal');
@@ -526,8 +528,8 @@ function appendHTMLBlock(html){
   scrollBottom();
 }
 function fmtDelta(cur,next,isPercent){
-  const c=isPercent?Math.trunc(cur*100):cur;
-  const n=isPercent?Math.trunc(next*100):next;
+  const c=isPercent?Math.floor(cur*100):cur;
+  const n=isPercent?Math.floor(next*100):next;
   const cls=n>c?'delta-up':(n<c?'delta-down':'delta-same');
   const suf=isPercent?' %':'';
   return `${c}${suf} → <span class="${cls}">${n}${suf}</span>`;
@@ -627,7 +629,7 @@ async function continuePrompt(){
 
 /* ---------- HUD ---------- */
 function panelText(){
-  return `ATK: ${G.ATK}\nHP: ${G.HP}\nBJ: ${Math.trunc(G.BJ*100)} %\nBS: ${Math.trunc(G.BS*100)} %\nCRT: ${Math.trunc(G.CRT*100)} %`;
+  return `ATK: ${G.ATK}\nHP: ${G.HP}\nBJ: ${Math.floor(G.BJ*100)} %\nBS: ${Math.floor(G.BS*100)} %\nCRT: ${Math.floor(G.CRT*100)} %`;
 }
 function hpBarClass(cur,max){
   if (max<=0) return 'danger';
@@ -647,14 +649,14 @@ function updateHUD(){
   if (prevHUD.BS!==null && G.BS!==prevHUD.BS){ flashEl(bsEl,G.BS-prevHUD.BS); flashEl(mBs,G.BS-prevHUD.BS); }
   if (prevHUD.CRT!==null && G.CRT!==prevHUD.CRT){ flashEl(crtEl,G.CRT-prevHUD.CRT); flashEl(mCrt,G.CRT-prevHUD.CRT); }
   atkEl.textContent=G.ATK;
-  bjEl.textContent=Math.trunc(G.BJ*100)+' %';
-  bsEl.textContent=Math.trunc(G.BS*100)+' %';
-  crtEl.textContent=Math.trunc(G.CRT*100)+' %';
+  bjEl.textContent=Math.floor(G.BJ*100)+' %';
+  bsEl.textContent=Math.floor(G.BS*100)+' %';
+  crtEl.textContent=Math.floor(G.CRT*100)+' %';
   /* 非战斗态（装备/结算界面）按 G.HP 满血渲染，避免与已过期的 G.ZDYHP 比较产生假溢出/假残血 */
   const dispCur = G.combat ? G.ZDYHP : G.HP;
   const hpTextEl=document.getElementById('hud-hp');
-  const overflowAmt=dispCur>G.HP ? Math.trunc(dispCur-G.HP) : 0;
-  hpTextEl.textContent=`${Math.trunc(dispCur)} / ${G.HP}`+(overflowAmt>0?` (+${overflowAmt})`:'');
+  const overflowAmt=dispCur>G.HP ? Math.floor(dispCur-G.HP) : 0;
+  hpTextEl.textContent=`${Math.floor(dispCur)} / ${G.HP}`+(overflowAmt>0?` (+${overflowAmt})`:'');
   hpTextEl.classList.toggle('overflow',overflowAmt>0);
   document.getElementById('hud-war').textContent = G.WAR>0 ? Math.min(G.WAR,20) : '-';
 
@@ -671,9 +673,9 @@ function updateHUD(){
     spawnFloatNumber(document.getElementById('hudm-hpbar'), dtxt, dcls);
   }
 
-  mAtk.textContent=G.ATK; mBj.textContent=Math.trunc(G.BJ*100)+'%'; mBs.textContent=Math.trunc(G.BS*100)+'%';
-  mCrt.textContent=Math.trunc(G.CRT*100)+'%';
-  mHpText.textContent=`${Math.trunc(dispCur)}/${G.HP}`+(overflowAmt>0?` (+${overflowAmt})`:'');
+  mAtk.textContent=G.ATK; mBj.textContent=Math.floor(G.BJ*100)+'%'; mBs.textContent=Math.floor(G.BS*100)+'%';
+  mCrt.textContent=Math.floor(G.CRT*100)+'%';
+  mHpText.textContent=`${Math.floor(dispCur)}/${G.HP}`+(overflowAmt>0?` (+${overflowAmt})`:'');
   mHpText.classList.toggle('overflow',overflowAmt>0);
   mHpFill.style.width=hpPct+'%';
   mHpFill.className='fill '+hpBarClass(dispCur,G.HP);
@@ -691,7 +693,7 @@ function updateHUD(){
       nameDiv.className='slot-name'; nameDiv.textContent=s.name;
       const statDiv=document.createElement('div');
       statDiv.className='slot-stats';
-      statDiv.textContent=`ATK${sg(s.atk)} HP${sg(s.hp)} BJ${sg(Math.trunc(s.bj*100))}% BS${sg(Math.trunc(s.bs*100))}% CRT${sg(Math.trunc(s.crt*100))}%`;
+      statDiv.textContent=`ATK${sg(s.atk)} HP${sg(s.hp)} BJ${sg(Math.floor(s.bj*100))}% BS${sg(Math.floor(s.bs*100))}% CRT${sg(Math.floor(s.crt*100))}%`;
       el.appendChild(nameDiv); el.appendChild(statDiv);
     } else {
       el.classList.remove('filled');
@@ -724,7 +726,7 @@ function updateEnemyCard(cur,max){
   const fill=document.getElementById('enemyHpFill');
   const pct=Math.max(0,Math.min(100,cur/max*100));
   fill.style.width=pct+'%';
-  document.getElementById('enemyHpText').textContent=`${Math.max(0,Math.trunc(cur))} / ${max}`;
+  document.getElementById('enemyHpText').textContent=`${Math.max(0,Math.floor(cur))} / ${max}`;
 }
 function hideEnemyCard(){ document.getElementById('enemyCard').hidden=true; }
 
@@ -750,33 +752,33 @@ async function combatTurn(ep,ctx){
   if (aborted(ep)) return;
   if (G.warrior){
     G.ZDYHP += damage*WARRIOR_BLOODSUCK;
-    await L(`你触发了回血效果，血量暂时回复至 ${Math.trunc(G.ZDYHP)} 点。`,ctx.pauseSec,'good');
+    await L(`你触发了回血效果，血量暂时回复至 ${Math.floor(G.ZDYHP)} 点。`,ctx.pauseSec,'good');
     if (aborted(ep)) return;
   }
   const dodged=chance(G.CRT);
   if (dodged){
     spawnFloatNumber(document.getElementById('hud-hpbar'),'闪避','dodge');
-    await L(`你闪避了${ctx.nameDisplay}对你造成的伤害,血量还剩下 ${Math.trunc(G.ZDYHP)} 点。`,ctx.pauseSec,'hl');
+    await L(`你闪避了${ctx.nameDisplay}对你造成的伤害,血量还剩下 ${Math.floor(G.ZDYHP)} 点。`,ctx.pauseSec,'hl');
     if (aborted(ep)) return;
     if (ctx.crtDecay){
       const dec=uniform(0.08,0.12);
       G.CRT-=dec;
-      await L(`糟糕！“它”的能力使你失去了 ${Math.trunc(dec*100)} %的闪避率！`,ctx.pauseSec,'bad');
+      await L(`糟糕！“它”的能力使你失去了 ${Math.floor(dec*100)} %的闪避率！`,ctx.pauseSec,'bad');
       if (aborted(ep)) return;
-      await L(`你还剩下 ${Math.trunc(G.CRT*100)} %的闪避率。`,ctx.pauseSec);
+      await L(`你还剩下 ${Math.floor(G.CRT*100)} %的闪避率。`,ctx.pauseSec);
       if (aborted(ep)) return;
     }
   } else {
     const harm=ctx.enemyAtk+randint(ctx.dmgMin,ctx.dmgMax);
     G.ZDYHP-=harm;
-    await L(`${ctx.nameDisplay}对你造成了 ${harm} 点伤害，你的血量还剩 ${Math.trunc(G.ZDYHP)} 点。`,ctx.pauseSec,'bad');
+    await L(`${ctx.nameDisplay}对你造成了 ${harm} 点伤害，你的血量还剩 ${Math.floor(G.ZDYHP)} 点。`,ctx.pauseSec,'bad');
     if (aborted(ep)) return;
     if (ctx.crtDecay){
       const dec=uniform(0.03,0.08);
       G.CRT-=dec;
-      await L(`糟糕！“它”的伤害使你失去了 ${Math.trunc(dec*100)} %的闪避率！`,ctx.pauseSec,'bad');
+      await L(`糟糕！“它”的伤害使你失去了 ${Math.floor(dec*100)} %的闪避率！`,ctx.pauseSec,'bad');
       if (aborted(ep)) return;
-      await L(`你还剩下 ${Math.trunc(G.CRT*100)} %的闪避率。`,ctx.pauseSec);
+      await L(`你还剩下 ${Math.floor(G.CRT*100)} %的闪避率。`,ctx.pauseSec);
       if (aborted(ep)) return;
     }
   }
@@ -790,7 +792,7 @@ function generateEquip(){
 }
 function equipBlockText(idx,name,item){
   const prefix = idx==null ? '' : `槽位${idx}：`;
-  return `${prefix}${name}\nATK: + ${item.atk}\nHP: + ${item.hp}\nBJ： + ${Math.trunc(item.bj*100)} %\nBS： + ${Math.trunc(item.bs*100)} %\nCRT： + ${Math.trunc(item.crt*100)} %`;
+  return `${prefix}${name}\nATK: + ${item.atk}\nHP: + ${item.hp}\nBJ： + ${Math.floor(item.bj*100)} %\nBS： + ${Math.floor(item.bs*100)} %\nCRT： + ${Math.floor(item.crt*100)} %`;
 }
 
 /* 装备默认按序自动入槽：有空槽自动装入编号最小的空槽；三槽全满才进入替换选择 */
@@ -851,11 +853,11 @@ async function equipDropFlow(ep){
   await L('再看看它们的面板……',tm.t0);
   if (aborted(ep)) return;
   const hasEmpty=[1,2,3].some(i=>G['ZB'+i]===0);
-  await L(`1.${name1}\nATK: + ${item1.atk}\nHP: + ${item1.hp}\nBJ： + ${Math.trunc(item1.bj*100)} %\nBS： + ${Math.trunc(item1.bs*100)} %\nCRT： + ${Math.trunc(item1.crt*100)} %`,tm.t0);
+  await L(`1.${name1}\nATK: + ${item1.atk}\nHP: + ${item1.hp}\nBJ： + ${Math.floor(item1.bj*100)} %\nBS： + ${Math.floor(item1.bs*100)} %\nCRT： + ${Math.floor(item1.crt*100)} %`,tm.t0);
   if (hasEmpty) appendHTMLBlock(equipPreviewHTML(item1));
   else appendHTMLBlock(fullSlotsPreviewHTML(item1));
   if (aborted(ep)) return;
-  await L(`2.${name2}\nATK: + ${item2.atk}\nHP: + ${item2.hp}\nBJ： + ${Math.trunc(item2.bj*100)} %\nBS： + ${Math.trunc(item2.bs*100)} %\nCRT： + ${Math.trunc(item2.crt*100)} %`,0);
+  await L(`2.${name2}\nATK: + ${item2.atk}\nHP: + ${item2.hp}\nBJ： + ${Math.floor(item2.bj*100)} %\nBS： + ${Math.floor(item2.bs*100)} %\nCRT： + ${Math.floor(item2.crt*100)} %`,0);
   if (hasEmpty) appendHTMLBlock(equipPreviewHTML(item2));
   else appendHTMLBlock(fullSlotsPreviewHTML(item2));
   await L(`要装备${name1}还是装备${name2}，又或者是不装备呢？`,0);
@@ -886,12 +888,12 @@ async function winRound(ep,DRM){
   if (G.hero){
     G.BJ += uniform(0.05,0.11);
     G.BS *= 1.28;
-    await L(`触发了勇者的祝福！暴击率提升至 ${Math.trunc(G.BJ*100)} %，暴击伤害提升至 ${Math.trunc(G.BS*100)} %！`,tm.t0);
+    await L(`触发了勇者的祝福！暴击率提升至 ${Math.floor(G.BJ*100)} %，暴击伤害提升至 ${Math.floor(G.BS*100)} %！`,tm.t0);
     if (aborted(ep)) return;
   }
   if (G.hermit){
     G.CRT += uniform(0.04,0.07);
-    await L(`触发了隐士的祝福！闪避率提升至 ${Math.trunc(G.CRT*100)} %！`,tm.t0);
+    await L(`触发了隐士的祝福！闪避率提升至 ${Math.floor(G.CRT*100)} %！`,tm.t0);
     if (aborted(ep)) return;
   }
   G.HP += G.HPZJ;
@@ -939,12 +941,12 @@ async function mainRounds(ep){
 
     if (G.angel){
       const dap=angelPower();
-      await L(`天使的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,tm.t0);
+      await L(`天使的祝福生效了！你获得了 ${Math.floor(dap*100)} %的增伤！`,tm.t0);
       if (aborted(ep)) return;
     }
     if (G.hermit && G.CRT>1){
       const dap=hermitPower();
-      await L(`隐者的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,tm.t0);
+      await L(`隐者的祝福生效了！你获得了 ${Math.floor(dap*100)} %的增伤！`,tm.t0);
       if (aborted(ep)) return;
     }
 
@@ -958,8 +960,8 @@ async function mainRounds(ep){
         enemyAtk:DRATK, dmgMin:-3, dmgMax:3, pauseSec:tm.t0, crtDecay:false
       });
     }
-    G.combat=false;
     if (aborted(ep)) return;
+    G.combat=false;
     hideEnemyCard();
 
     if (DRHP<=0 && G.ZDYHP>0){
@@ -1043,11 +1045,11 @@ async function princeBattle(ep){
 
   if (G.angel){
     const dap=angelPower();
-    await L(`天使的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,TIME_LAST);
+    await L(`天使的祝福生效了！你获得了 ${Math.floor(dap*100)} %的增伤！`,TIME_LAST);
   }
   if (G.hermit && G.CRT>1){
     const dap=hermitPower();
-    await L(`隐者的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,TIME_LAST);
+    await L(`隐者的祝福生效了！你获得了 ${Math.floor(dap*100)} %的增伤！`,TIME_LAST);
   }
   if (aborted(ep)) return;
 
@@ -1058,8 +1060,8 @@ async function princeBattle(ep){
   while (!aborted(ep) && HPPrince>0 && G.ZDYHP>0){
     await combatTurn(ep,{nameDisplay,hpPhrase:'血量还剩',getHP:()=>HPPrince,setHP:v=>{HPPrince=v;},enemyMaxHP:100000,enemyAtk:1500,dmgMin:-10,dmgMax:20,pauseSec:TIME_LAST,crtDecay:false});
   }
-  G.combat=false;
   if (aborted(ep)) return;
+  G.combat=false;
   hideEnemyCard();
 
   if (HPPrince<=0 && G.ZDYHP>0){
@@ -1099,31 +1101,31 @@ async function itBattle(ep){
   G.BJ *= randint(2,4);
   G.BS *= randint(3,5);
   G.CRT *= 2;
+  G.combat=true;
   updateHUD();
 
-  await L(`你的战斗力提升至 ${G.ATK} ，\n血量提升至 ${G.ZDYHP} ,\n暴击率提升至 ${Math.trunc(G.BJ*100)} %，\n暴击伤害提升至 ${Math.trunc(G.BS*100)} %\n闪避率提升至 ${Math.trunc(G.CRT*100)} %！`,TIME_LAST);
+  await L(`你的战斗力提升至 ${G.ATK} ，\n血量提升至 ${G.ZDYHP} ,\n暴击率提升至 ${Math.floor(G.BJ*100)} %，\n暴击伤害提升至 ${Math.floor(G.BS*100)} %\n闪避率提升至 ${Math.floor(G.CRT*100)} %！`,TIME_LAST);
   await L('开始战斗！',TIME_LAST);
   if (aborted(ep)) return;
 
   if (G.angel){
     const dap=angelPower();
-    await L(`天使的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,TIME_LAST);
+    await L(`天使的祝福生效了！你获得了 ${Math.floor(dap*100)} %的增伤！`,TIME_LAST);
   }
   if (G.hermit && G.CRT>1){
     const dap=hermitPower();
-    await L(`隐者的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,TIME_LAST);
+    await L(`隐者的祝福生效了！你获得了 ${Math.floor(dap*100)} %的增伤！`,TIME_LAST);
   }
   if (aborted(ep)) return;
 
   let HPIt=200000;
   const nameDisplay='“它”';
   showEnemyCard('它',HPIt,200000,3000);
-  G.combat=true;
   while (!aborted(ep) && HPIt>0 && G.ZDYHP>0){
     await combatTurn(ep,{nameDisplay,getHP:()=>HPIt,setHP:v=>{HPIt=v;},enemyMaxHP:200000,enemyAtk:3000,dmgMin:-10,dmgMax:30,pauseSec:TIME_LAST,crtDecay:true});
   }
-  G.combat=false;
   if (aborted(ep)) return;
+  G.combat=false;
   hideEnemyCard();
 
   if (HPIt<=0 && G.ZDYHP>0){
@@ -1164,6 +1166,51 @@ async function endGame(ep,label){
   choicesEl.appendChild(btn2);
 }
 
+/* ---------- 教程台词（原文，introAndPlay 首次教学与设置面板「重看教程」共用同一份，避免漂移） ---------- */
+const TUTORIAL_BODY=[
+  {text:'很好，这里是你的初始面板，可以体现你当前的战斗机能。'},
+  {text:'ATK: 10\nHP: 20\nBJ: 5 %\nBS: 50 %\nCRT: 10 %'},
+  {text:'这些数据从上至下依次是你的攻击力、血量、暴击率、暴击伤害以及闪避率。'},
+  {text:'攻击力是指你发动一次攻击对敌方造成的伤害值。每战胜一个敌人，攻击力也会随之上涨。'},
+  {text:'血量则是你能够承受的伤害上限，当敌人对你造成的伤害大于当前血量时，你的征途就到此为止了。'},
+  {text:'暴击率指暴击的概率，当你暴击后，你的伤害就会在攻击力的基础上再增加[攻击力]乘[暴击伤害]的数值。'},
+  {text:'打个比方，如果你的攻击力是10，暴击伤害是50%，当你暴击后，你就可以造成10+10×50%=15的伤害。'},
+  {text:'而最后的闪避率，则是当敌人对你发起攻击时，你能够避免这次伤害的概率。'},
+  {text:'如果你听懂了，就随便输点什么来继续吧。',pause:0,prompt:true},
+  {text:'在遇到魔王之前，你会遇到一些……不那么友好的拦路者。'},
+  {text:'加上魔王，你应该总共要面对20个敌人。'},
+  {text:'每打败一个敌人，你都能获得一个崭新的装备！'},
+  {text:'每个装备的属性都有差别，等我给你找一件看看哈……'},
+  {text:'对，就是这个，你看看！',pause:0.5},
+  {text:'至尊皇家无敌大宝剑\nATK: +999\nHP: +999\nBJ: +999 %\nBS: +999 %\nCRT: +999 %'},
+  {text:'哼哼，怎么样，这个装备不错吧？'},
+  {text:'如果你装备上它，你将会成为这片大陆上的最强！'},
+  {text:'但这可是我的传家宝，才不会给你用。'},
+  {text:'如果遇见不错的装备，你可以把它穿在身上。'},
+  {text:'但是你穿戴的装备总数不能超过3件，所以，如果遇到更好的装备，你要进行一些抉择。'},
+  {text:'另外，装备的属性不全是好的，比如说这个……'},
+  {text:'暴击伤害特化戒指\nATK: +0\nHP: +0\nBJ: -999 %\nBS: +200 %\nCRT: +0 %'},
+  {text:'看见了吗，虽然它能给你加200暴击伤害，但你的暴击率会变为负数，约等于没用！'},
+  {text:'要不要穿上它，就得靠你自己决定喽。'},
+  {text:'另外，每战胜一个敌人，你的战斗力和血量都会提升。'},
+  {text:'运用你的能力，战胜前方的敌人吧！'},
+  {text:'听懂了的话，就随便输点什么来开始吧。',pause:0,prompt:true},
+];
+/* interactive=true 时在 prompt 行后插入「继续」等待（首次教学用）；重看教程 interactive=false，只播放不等待输入 */
+async function playTutorial(pauseSec,interactive,checkAbort){
+  for (const item of TUTORIAL_BODY){
+    const text=item.text;
+    const p=item.pause!==undefined?item.pause:pauseSec;
+    await L(text,p);
+    if (checkAbort && checkAbort()) return true;
+    if (item.prompt && interactive){
+      await choose([{label:'继续',value:1}]);
+      if (checkAbort && checkAbort()) return true;
+    }
+  }
+  return false;
+}
+
 /* ---------- 开局 / 教程 / 祝福选择 ---------- */
 async function introAndPlay(ep){
   if (aborted(ep)) return;
@@ -1201,38 +1248,7 @@ async function introAndPlay(ep){
     if (a2===1){
       await L('看来你已经是个熟练的战士，那我们就直接出发吧。',tm0.t0);
     } else {
-      await L('很好，这里是你的初始面板，可以体现你当前的战斗机能。',tm0.t0);
-      await L(`ATK: ${G.ATK}\nHP: ${G.HP}\nBJ: ${Math.trunc(G.BJ*100)} %\nBS: ${Math.trunc(G.BS*100)} %\nCRT: ${Math.trunc(G.CRT*100)} %`,tm0.t0);
-      await L('这些数据从上至下依次是你的攻击力、血量、暴击率、暴击伤害以及闪避率。',tm0.t0);
-      await L('攻击力是指你发动一次攻击对敌方造成的伤害值。每战胜一个敌人，攻击力也会随之上涨。',tm0.t0);
-      await L('血量则是你能够承受的伤害上限，当敌人对你造成的伤害大于当前血量时，你的征途就到此为止了。',tm0.t0);
-      await L('暴击率指暴击的概率，当你暴击后，你的伤害就会在攻击力的基础上再增加[攻击力]乘[暴击伤害]的数值。',tm0.t0);
-      await L('打个比方，如果你的攻击力是10，暴击伤害是50%，当你暴击后，你就可以造成10+10×50%=15的伤害。',tm0.t0);
-      await L('而最后的闪避率，则是当敌人对你发起攻击时，你能够避免这次伤害的概率。',tm0.t0);
-      await L('如果你听懂了，就随便输点什么来继续吧。',0);
-      await choose([{label:'继续',value:1}]);
-      if (aborted(ep)) return;
-
-      await L('在遇到魔王之前，你会遇到一些……不那么友好的拦路者。',tm0.t0);
-      await L('加上魔王，你应该总共要面对20个敌人。',tm0.t0);
-      await L('每打败一个敌人，你都能获得一个崭新的装备！',tm0.t0);
-      await L('每个装备的属性都有差别，等我给你找一件看看哈……',tm0.t0);
-      await L('对，就是这个，你看看！',0.5);
-      await L('至尊皇家无敌大宝剑\nATK: +999\nHP: +999\nBJ: +999 %\nBS: +999 %\nCRT: +999 %',tm0.t0);
-      await L('哼哼，怎么样，这个装备不错吧？',tm0.t0);
-      await L('如果你装备上它，你将会成为这片大陆上的最强！',tm0.t0);
-      await L('但这可是我的传家宝，才不会给你用。',tm0.t0);
-      await L('如果遇见不错的装备，你可以把它穿在身上。',tm0.t0);
-      await L('但是你穿戴的装备总数不能超过3件，所以，如果遇到更好的装备，你要进行一些抉择。',tm0.t0);
-      await L('另外，装备的属性不全是好的，比如说这个……',tm0.t0);
-      await L('暴击伤害特化戒指\nATK: +0\nHP: +0\nBJ: -999 %\nBS: +200 %\nCRT: +0 %',tm0.t0);
-      await L('看见了吗，虽然它能给你加200暴击伤害，但你的暴击率会变为负数，约等于没用！',tm0.t0);
-      await L('要不要穿上它，就得靠你自己决定喽。',tm0.t0);
-      await L('另外，每战胜一个敌人，你的战斗力和血量都会提升。',tm0.t0);
-      await L('运用你的能力，战胜前方的敌人吧！',tm0.t0);
-      await L('听懂了的话，就随便输点什么来开始吧。',0);
-      await choose([{label:'继续',value:1}]);
-      if (aborted(ep)) return;
+      if (await playTutorial(tm0.t0,true,()=>aborted(ep))) return;
     }
   }
 
@@ -1277,36 +1293,17 @@ async function replayTutorial(){
     hideAllOverlays();
     const tm=timeMap();
     await L('（重看教程）',tm.t0,'dim'); if (tAborted()) return;
-    await L('这里是你的初始面板参考，可以体现你当前的战斗机能。',tm.t0); if (tAborted()) return;
-    await L('ATK: 10\nHP: 20\nBJ: 5 %\nBS: 50 %\nCRT: 10 %',tm.t0); if (tAborted()) return;
-    await L('这些数据从上至下依次是你的攻击力、血量、暴击率、暴击伤害以及闪避率。',tm.t0); if (tAborted()) return;
-    await L('攻击力是指你发动一次攻击对敌方造成的伤害值。每战胜一个敌人，攻击力也会随之上涨。',tm.t0); if (tAborted()) return;
-    await L('血量则是你能够承受的伤害上限，当敌人对你造成的伤害大于当前血量时，你的征途就到此为止了。',tm.t0); if (tAborted()) return;
-    await L('暴击率指暴击的概率，当你暴击后，你的伤害就会在攻击力的基础上再增加[攻击力]乘[暴击伤害]的数值。',tm.t0); if (tAborted()) return;
-    await L('打个比方，如果你的攻击力是10，暴击伤害是50%，当你暴击后，你就可以造成10+10×50%=15的伤害。',tm.t0); if (tAborted()) return;
-    await L('而最后的闪避率，则是当敌人对你发起攻击时，你能够避免这次伤害的概率。',tm.t0); if (tAborted()) return;
-    await L('在遇到魔王之前，你会遇到一些……不那么友好的拦路者。',tm.t0); if (tAborted()) return;
-    await L('加上魔王，你应该总共要面对20个敌人。',tm.t0); if (tAborted()) return;
-    await L('每打败一个敌人，你都能获得一个崭新的装备！',tm.t0); if (tAborted()) return;
-    await L('每个装备的属性都有差别，等我给你找一件看看哈……',tm.t0); if (tAborted()) return;
-    await L('对，就是这个，你看看！',0.5); if (tAborted()) return;
-    await L('至尊皇家无敌大宝剑\nATK: +999\nHP: +999\nBJ: +999 %\nBS: +999 %\nCRT: +999 %',tm.t0); if (tAborted()) return;
-    await L('哼哼，怎么样，这个装备不错吧？',tm.t0); if (tAborted()) return;
-    await L('如果你装备上它，你将会成为这片大陆上的最强！',tm.t0); if (tAborted()) return;
-    await L('但这可是我的传家宝，才不会给你用。',tm.t0); if (tAborted()) return;
-    await L('如果遇见不错的装备，你可以把它穿在身上。',tm.t0); if (tAborted()) return;
-    await L('但是你穿戴的装备总数不能超过3件，所以，如果遇到更好的装备，你要进行一些抉择。',tm.t0); if (tAborted()) return;
-    await L('另外，装备的属性不全是好的，比如说这个……',tm.t0); if (tAborted()) return;
-    await L('暴击伤害特化戒指\nATK: +0\nHP: +0\nBJ: -999 %\nBS: +200 %\nCRT: +0 %',tm.t0); if (tAborted()) return;
-    await L('看见了吗，虽然它能给你加200暴击伤害，但你的暴击率会变为负数，约等于没用！',tm.t0); if (tAborted()) return;
-    await L('要不要穿上它，就得靠你自己决定喽。',tm.t0); if (tAborted()) return;
-    await L('另外，每战胜一个敌人，你的战斗力和血量都会提升。',tm.t0); if (tAborted()) return;
-    await L('运用你的能力，战胜前方的敌人吧！',tm.t0); if (tAborted()) return;
-    await L('（教程回顾结束）',tm.t0,'dim');
+    if (await playTutorial(tm.t0,false,tAborted)) return;
+    await L('（教程回顾结束）',0,'dim'); if (tAborted()) return;
+    choicesEl.innerHTML='';
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.textContent='返回标题';
+    btn.onclick=()=>{ choicesEl.innerHTML=''; if (!gameActive) showWelcome(); };
+    choicesEl.appendChild(btn);
   } finally {
     tutorialReplaying=false;
   }
-  if (!gameActive) showWelcome();
 }
 
 /* ---------- 版本变更内容 ---------- */
@@ -1332,6 +1329,7 @@ const CHANGELOG_WEB=[
   '存档与设置相关确认操作统一为页内像素风弹窗',
   '修复原版魔王战前无装备时崩溃的问题',
   '结局与隐藏内容与原版一致（共 9 个结局）',
+  '4.0 存档因数值不兼容已随本次更新清理，无法迁移',
 ];
 
 /* ---------- 本地存档 ---------- */
@@ -1357,6 +1355,7 @@ function applySpeed(v){
 
 function snapshotState(){
   return {
+    v:5,
     ATK:G.ATK, ATKZJ:G.ATKZJ, HP:G.HP, HPZJ:G.HPZJ,
     BJ:G.BJ, BS:G.BS, CRT:G.CRT,
     ZB1:G.ZB1, ZB2:G.ZB2, ZB3:G.ZB3,
@@ -1379,7 +1378,7 @@ function readSave(slot){
     const raw=localStorage.getItem(saveKey(slot));
     if (!raw) return null;
     const d=JSON.parse(raw);
-    if (!d || typeof d!=='object') return null;
+    if (!d || typeof d!=='object' || d.v!==5) return null;
     for (const k of SAVE_REQUIRED_NUM) if (!Number.isFinite(d[k])) return null;
     for (const k of SAVE_REQUIRED_BOOL) if (typeof d[k]!=='boolean') return null;
     if (!Number.isInteger(d.WAR) || d.WAR<0 || d.WAR>20) return null;
@@ -1418,8 +1417,10 @@ function applySnapshot(d){
   resetState();
   Object.assign(G,d);
   G.ZDYHP=G.HP;
+  /* 存档里的 fast 字段仅作历史信息，速度以玩家会话内的全局偏好为准，不被存档覆盖 */
+  const sp=loadSpeedPref();
+  if (sp) G.fast=(sp==='fast');
   roundStartSnap=snapshotState();
-  /* 只恢复速度设置与单选框，不覆盖玩家的全局速度偏好 */
   const r=document.querySelector(`input[name="speedOpt"][value="${G.fast?'fast':'normal'}"]`);
   if (r) r.checked=true;
 }
@@ -1435,12 +1436,14 @@ const confirmOverlay=document.getElementById('confirmOverlay');
 function hideAllOverlays(){
   welcomeOverlay.hidden=true; settingsOverlay.hidden=true;
   saveOverlay.hidden=true; changelogOverlay.hidden=true;
+  if (confirmResolve) closeConfirm(false);
 }
 
 /* 页内像素风确认弹窗：替代原生 confirm，遮罩+确认/取消+Esc */
 const confirmMsgEl=document.getElementById('confirmMsg');
 let confirmResolve=null;
 function pixelConfirm(msg){
+  if (confirmResolve) closeConfirm(false);
   return new Promise(resolve=>{
     confirmResolve=resolve;
     confirmMsgEl.textContent=msg;
@@ -1465,6 +1468,9 @@ function showWelcome(){
 function showSettings(){
   hideAllOverlays();
   document.getElementById('settingsGameActions').hidden=!gameActive;
+  const tBtn=document.getElementById('btnReplayTutorial');
+  tBtn.disabled=gameActive;
+  tBtn.title=gameActive?'对局进行中无法重看教程':'';
   settingsOverlay.hidden=false;
 }
 let saveMenuMode='menu'; // 'menu'：欢迎界面进入，仅读取/删除；'game'：游戏中进入，额外可保存
@@ -1579,6 +1585,8 @@ document.getElementById('btnReturnTitle').onclick=async ()=>{
   fastForward=null;
   gameActive=false;
   resetState();
+  const sp=loadSpeedPref();
+  if (sp) applySpeed(sp);
   termEl.innerHTML='';
   choicesEl.innerHTML='';
   hideEnemyCard();
@@ -1589,8 +1597,8 @@ document.getElementById('btnReturnTitle').onclick=async ()=>{
 };
 document.querySelectorAll('input[name="speedOpt"]').forEach(r=>{
   r.addEventListener('change',()=>{
-    if (!r.checked) return;
-    /* 玩家在设置面板明确选择速度即视为显式表态，标题界面与游戏中都落盘 */
+    if (!r.checked || !gameActive) return;
+    /* 标题界面（未开局）不落盘，避免玩家只是点了下设置就跳过首次极速版询问 */
     G.fast=(r.value==='fast');
     saveSpeedPref(r.value);
   });
