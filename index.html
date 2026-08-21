@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
 <title>卡桑德里传说</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <style>
@@ -333,7 +335,8 @@ function updateHUD(){
     const s=G['slot'+i];
     if (G['ZB'+i]===1 && s){
       el.classList.add('filled');
-      el.innerHTML=`<div class="slot-name">${s.name}</div><div class="slot-stats">ATK+${s.atk} HP+${s.hp} BJ+${Math.trunc(s.bj*100)}% BS+${Math.trunc(s.bs*100)}% CRT+${Math.trunc(s.crt*100)}%</div>`;
+      const sg=v=>(v<0?'':'+')+v;
+      el.innerHTML=`<div class="slot-name">${s.name}</div><div class="slot-stats">ATK${sg(s.atk)} HP${sg(s.hp)} BJ${sg(Math.trunc(s.bj*100))}% BS${sg(Math.trunc(s.bs*100))}% CRT${sg(Math.trunc(s.crt*100))}%</div>`;
     } else {
       el.classList.remove('filled');
       el.innerHTML=`<div class="slot-empty">空槽位 ${i}</div>`;
@@ -458,7 +461,7 @@ async function winRound(DRM){
     await L('触发了战士的祝福！',tm.t0);
   }
   if (G.angel){
-    G.HP = Math.round(G.HP*1.2);
+    G.HP = bankerRound(G.HP*1.2);
     await L('触发了天使的祝福！',tm.t0);
   }
   if (G.hero){
@@ -542,18 +545,18 @@ async function bossNode(){
   await L('你终于来到了魔王的面前。',tm.t0);
   await L('魔王只是冷漠地看着你。',0);
 
-  let raw=await promptNumber('请输入1开始战斗！请勿输入其他数字！');
-  let val=validIntOrNaN(raw);
+  await L('（请输入1开始战斗！请勿输入其他数字！）',0);
+  let raw,val;
+  do { raw=await promptNumber('请输入数字'); val=validIntOrNaN(raw); } while (Number.isNaN(val));
   let Q2=0,Q3=0;
 
   if (val===1){
     Q2=1;
   } else {
+    await L('（请不要输入1以外的数字！）',0);
     let chanceCount=0;
     while (chanceCount<5 && Q2===0){
-      raw=await promptNumber('请不要输入1以外的数字！');
-      val=validIntOrNaN(raw);
-      if (Number.isNaN(val)) continue;
+      do { raw=await promptNumber('请输入数字'); val=validIntOrNaN(raw); } while (Number.isNaN(val));
       if (val===1){
         await L('这才像话。',0);
         Q2=1;
