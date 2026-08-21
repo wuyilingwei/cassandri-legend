@@ -121,9 +121,11 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 .hpbar .fill{height:100%;background:var(--good);transition:width .2s steps(8);position:relative;}
 .hpbar .fill.warn{background:var(--accent);}
 .hpbar .fill.danger{background:var(--danger);}
+.hpbar .fill.overflow{background:var(--crit);box-shadow:inset 0 0 0 2px var(--bg-deep);}
 .hpbar::after{content:'';position:absolute;inset:0;pointer-events:none;
   background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.35) 0 2px,transparent 2px 8px);}
 .hp-text{font-size:11px;color:var(--dim);text-align:right;margin-bottom:6px;}
+.hp-text.overflow,#hudm-hptext.overflow{color:var(--crit);}
 @keyframes flashUp{0%,100%{color:var(--text);}40%{color:var(--good);}}
 @keyframes flashDown{0%,100%{color:var(--text);}40%{color:var(--danger);}}
 .flash-up{animation:flashUp .5s steps(4);}
@@ -419,6 +421,7 @@ let runEpoch=0;
 function aborted(ep){ return ep!==runEpoch; }
 let G={};
 function resetState(){
+  roundStartSnap=null;
   G={
     ATK:10, ATKZJ:3, HP:20, ZDYHP:20, HPZJ:5,
     BJ:0.05, BS:0.5, CRT:0.1,
@@ -428,7 +431,7 @@ function resetState(){
     DRATKXX:1, DRATKSX:5, DRHPXX:20, DRHPSX:30,
     low1:5, high1:12, low2:20, high2:42,
     warrior:false, angel:false, hero:false, hermit:false,
-    fast:false,
+    fast:false, combat:false,
   };
 }
 function timeMap(){ return G.fast ? {t0:0.1,t1:0.1,t2:0.2} : {t0:2,t1:1,t2:3}; }
@@ -452,9 +455,13 @@ const scrollLatestBtn=document.getElementById('scrollLatestBtn');
 let fastForward=null;
 let skipAnim=false;
 
-document.getElementById('skipAnimToggle').addEventListener('change',e=>{ skipAnim=e.target.checked; });
+document.getElementById('skipAnimToggle').addEventListener('change',e=>{
+  skipAnim=e.target.checked;
+  try{ localStorage.setItem('csdl4:skipAnim',skipAnim?'1':'0'); }catch(err){}
+});
 document.getElementById('crtToggle').addEventListener('change',e=>{
   document.getElementById('app').classList.toggle('crt-on',e.target.checked);
+  try{ localStorage.setItem('csdl4:crt',e.target.checked?'1':'0'); }catch(err){}
 });
 termEl.addEventListener('click',()=>{ if (fastForward){ const f=fastForward; fastForward=null; f(); } });
 document.addEventListener('keydown',e=>{
@@ -475,6 +482,11 @@ scrollLatestBtn.addEventListener('click',()=>{
   autoStick=true; termEl.scrollTop=termEl.scrollHeight; scrollLatestBtn.hidden=true;
 });
 function scrollBottom(){ if (autoStick) termEl.scrollTop=termEl.scrollHeight; }
+/* 日志行数上限：超出时从最旧的行开始裁剪，避免长局战斗（如魔王/它）后 reflow 越来越重 */
+const TERM_MAX_LINES=400;
+function trimTerminal(){
+  while (termEl.childElementCount>TERM_MAX_LINES) termEl.removeChild(termEl.firstChild);
+}
 
 /* 面板变更预览：纯派生显示，不写入静态文本，直接追加块，不做打字动效 */
 function appendHTMLBlock(html){
@@ -482,6 +494,7 @@ function appendHTMLBlock(html){
   el.className='line preview';
   el.innerHTML=html;
   termEl.appendChild(el);
+  trimTerminal();
   scrollBottom();
 }
 function fmtDelta(cur,next,isPercent){
@@ -502,12 +515,19 @@ function replacePreviewHTML(old,item){
 
 /* 伤害/回血飘字，纯展示 */
 function spawnFloatNumber(containerEl,text,cls){
-  if (!containerEl) return;
+  if (!containerEl || containerEl.offsetParent===null) return;
   const span=document.createElement('span');
   span.className='dmg-float '+(cls||'');
   span.textContent=text;
   containerEl.appendChild(span);
-  span.addEventListener('animationend',()=>span.remove());
+  const remove=()=>{ if (span.isConnected) span.remove(); };
+  span.addEventListener('animationend',remove);
+  setTimeout(remove,900);
+}
+/* 数值飘字格式化：绝对值小于1时保留一位小数，避免显示为0 */
+function fmtFloatDelta(delta){
+  const sign=delta>0?'+':'';
+  return Math.abs(delta)<1 ? sign+delta.toFixed(1) : sign+Math.round(delta);
 }
 function flashEl(el,dir){
   if (!el) return;
@@ -530,6 +550,7 @@ function typeLine(text,cls){
   const el=document.createElement('div');
   el.className='line'+(cls?(' '+cls):'');
   termEl.appendChild(el);
+  trimTerminal();
   scrollBottom();
   const charDelay = skipAnim ? 0 : (G.fast ? 7 : 18);
   if (charDelay===0){ el.textContent=text; scrollBottom(); return Promise.resolve(); }
@@ -540,7 +561,8 @@ function typeLine(text,cls){
       if (done) return;
       i++;
       el.textContent=text.slice(0,i);
-      scrollBottom();
+      /* 每 4 字或收尾才触发滚动的 reflow，长文本打字时降低卡顿 */
+      if (i%4===0 || i>=text.length) scrollBottom();
       if (i>=text.length){ done=true; clearInterval(iv); fastForward=null; res(); }
     },charDelay);
   });
@@ -576,7 +598,8 @@ function panelText(){
   return `ATK: ${G.ATK}\nHP: ${G.HP}\nBJ: ${Math.trunc(G.BJ*100)} %\nBS: ${Math.trunc(G.BS*100)} %\nCRT: ${Math.trunc(G.CRT*100)} %`;
 }
 function hpBarClass(cur,max){
-  if (max<=0) return '';
+  if (max<=0) return 'danger';
+  if (cur>max) return 'overflow';
   const pct=cur/max;
   return pct<0.25?'danger':(pct<0.5?'warn':'');
 }
@@ -584,35 +607,44 @@ let prevHUD={ATK:null,ZDYHP:null,BJ:null,BS:null,CRT:null};
 function updateHUD(){
   const atkEl=document.getElementById('hud-atk'), bjEl=document.getElementById('hud-bj'),
         bsEl=document.getElementById('hud-bs'), crtEl=document.getElementById('hud-crt');
-  if (prevHUD.ATK!==null && G.ATK!==prevHUD.ATK) flashEl(atkEl,G.ATK-prevHUD.ATK);
-  if (prevHUD.BJ!==null && G.BJ!==prevHUD.BJ) flashEl(bjEl,G.BJ-prevHUD.BJ);
-  if (prevHUD.BS!==null && G.BS!==prevHUD.BS) flashEl(bsEl,G.BS-prevHUD.BS);
-  if (prevHUD.CRT!==null && G.CRT!==prevHUD.CRT) flashEl(crtEl,G.CRT-prevHUD.CRT);
+  const mAtk=document.getElementById('hudm-atk'), mBj=document.getElementById('hudm-bj'),
+        mBs=document.getElementById('hudm-bs'), mCrt=document.getElementById('hudm-crt'),
+        mHpText=document.getElementById('hudm-hptext'), mHpFill=document.getElementById('hudm-hpfill');
+  if (prevHUD.ATK!==null && G.ATK!==prevHUD.ATK){ flashEl(atkEl,G.ATK-prevHUD.ATK); flashEl(mAtk,G.ATK-prevHUD.ATK); }
+  if (prevHUD.BJ!==null && G.BJ!==prevHUD.BJ){ flashEl(bjEl,G.BJ-prevHUD.BJ); flashEl(mBj,G.BJ-prevHUD.BJ); }
+  if (prevHUD.BS!==null && G.BS!==prevHUD.BS){ flashEl(bsEl,G.BS-prevHUD.BS); flashEl(mBs,G.BS-prevHUD.BS); }
+  if (prevHUD.CRT!==null && G.CRT!==prevHUD.CRT){ flashEl(crtEl,G.CRT-prevHUD.CRT); flashEl(mCrt,G.CRT-prevHUD.CRT); }
   atkEl.textContent=G.ATK;
   bjEl.textContent=Math.trunc(G.BJ*100)+' %';
   bsEl.textContent=Math.trunc(G.BS*100)+' %';
   crtEl.textContent=Math.trunc(G.CRT*100)+' %';
-  document.getElementById('hud-hp').textContent=`${Math.trunc(G.ZDYHP)} / ${G.HP}`;
+  /* 非战斗态（装备/结算界面）按 G.HP 满血渲染，避免与已过期的 G.ZDYHP 比较产生假溢出/假残血 */
+  const dispCur = G.combat ? G.ZDYHP : G.HP;
+  const hpTextEl=document.getElementById('hud-hp');
+  const overflowAmt=dispCur>G.HP ? Math.trunc(dispCur-G.HP) : 0;
+  hpTextEl.textContent=`${Math.trunc(dispCur)} / ${G.HP}`+(overflowAmt>0?` (+${overflowAmt})`:'');
+  hpTextEl.classList.toggle('overflow',overflowAmt>0);
   document.getElementById('hud-war').textContent = G.WAR>0 ? Math.min(G.WAR,20) : '-';
 
   const hpFill=document.getElementById('hud-hpfill');
-  const hpPct=G.HP>0 ? Math.max(0,Math.min(100,G.ZDYHP/G.HP*100)) : 0;
+  const hpPct=G.HP<=0 ? 0 : Math.max(0,Math.min(100,dispCur/G.HP*100));
   hpFill.style.width=hpPct+'%';
-  hpFill.className='fill '+hpBarClass(G.ZDYHP,G.HP);
+  hpFill.className='fill '+hpBarClass(dispCur,G.HP);
   if (prevHUD.ZDYHP!==null && G.ZDYHP!==prevHUD.ZDYHP){
     const delta=G.ZDYHP-prevHUD.ZDYHP;
-    flashEl(document.getElementById('hud-hp'),delta);
-    spawnFloatNumber(document.getElementById('hud-hpbar'), (delta>0?'+':'')+Math.trunc(delta), delta>0?'heal':'dmg');
+    const dtxt=fmtFloatDelta(delta), dcls=delta>0?'heal':'dmg';
+    flashEl(hpTextEl,delta);
+    flashEl(mHpText,delta);
+    spawnFloatNumber(document.getElementById('hud-hpbar'), dtxt, dcls);
+    spawnFloatNumber(document.getElementById('hudm-hpbar'), dtxt, dcls);
   }
 
-  const mAtk=document.getElementById('hudm-atk'), mBj=document.getElementById('hudm-bj'),
-        mBs=document.getElementById('hudm-bs'), mCrt=document.getElementById('hudm-crt'),
-        mHpText=document.getElementById('hudm-hptext'), mHpFill=document.getElementById('hudm-hpfill');
   mAtk.textContent=G.ATK; mBj.textContent=Math.trunc(G.BJ*100)+'%'; mBs.textContent=Math.trunc(G.BS*100)+'%';
   mCrt.textContent=Math.trunc(G.CRT*100)+'%';
-  mHpText.textContent=`${Math.trunc(G.ZDYHP)}/${G.HP}`;
+  mHpText.textContent=`${Math.trunc(dispCur)}/${G.HP}`+(overflowAmt>0?` (+${overflowAmt})`:'');
+  mHpText.classList.toggle('overflow',overflowAmt>0);
   mHpFill.style.width=hpPct+'%';
-  mHpFill.className='fill '+hpBarClass(G.ZDYHP,G.HP);
+  mHpFill.className='fill '+hpBarClass(dispCur,G.HP);
 
   prevHUD={ATK:G.ATK,ZDYHP:G.ZDYHP,BJ:G.BJ,BS:G.BS,CRT:G.CRT};
 
@@ -680,31 +712,40 @@ async function combatTurn(ep,ctx){
     spawnFloatNumber(document.getElementById('enemyHpBar'),'-'+damage,'dmg');
     await L(`你造成了 ${damage} 点伤害，${ctx.nameDisplay}${hpPhrase} ${ctx.getHP()} 点！`,ctx.pauseSec);
   }
+  if (aborted(ep)) return;
   if (G.warrior){
     G.ZDYHP += damage*WARRIOR_BLOODSUCK;
     await L(`你触发了回血效果，血量暂时回复至 ${Math.trunc(G.ZDYHP)} 点。`,ctx.pauseSec,'good');
+    if (aborted(ep)) return;
   }
   const dodged=chance(G.CRT);
   if (dodged){
     spawnFloatNumber(document.getElementById('hud-hpbar'),'闪避','dodge');
     await L(`你闪避了${ctx.nameDisplay}对你造成的伤害,血量还剩下 ${Math.trunc(G.ZDYHP)} 点。`,ctx.pauseSec,'hl');
+    if (aborted(ep)) return;
     if (ctx.crtDecay){
       const dec=uniform(0.08,0.12);
       G.CRT-=dec;
       await L(`糟糕！“它”的能力使你失去了 ${Math.trunc(dec*100)} %的闪避率！`,ctx.pauseSec,'bad');
+      if (aborted(ep)) return;
       await L(`你还剩下 ${Math.trunc(G.CRT*100)} %的闪避率。`,ctx.pauseSec);
+      if (aborted(ep)) return;
     }
   } else {
     const harm=ctx.enemyAtk+randint(ctx.dmgMin,ctx.dmgMax);
     G.ZDYHP-=harm;
     await L(`${ctx.nameDisplay}对你造成了 ${harm} 点伤害，你的血量还剩 ${Math.trunc(G.ZDYHP)} 点。`,ctx.pauseSec,'bad');
+    if (aborted(ep)) return;
     if (ctx.crtDecay){
       const dec=uniform(0.03,0.08);
       G.CRT-=dec;
       await L(`糟糕！“它”的伤害使你失去了 ${Math.trunc(dec*100)} %的闪避率！`,ctx.pauseSec,'bad');
+      if (aborted(ep)) return;
       await L(`你还剩下 ${Math.trunc(G.CRT*100)} %的闪避率。`,ctx.pauseSec);
+      if (aborted(ep)) return;
     }
   }
+  if (aborted(ep)) return;
   updateHUD();
 }
 
@@ -798,21 +839,24 @@ async function winRound(ep,DRM){
   if (G.warrior){
     G.ATK = bankerRound(G.ATK*1.3);
     await L('触发了战士的祝福！',tm.t0);
+    if (aborted(ep)) return;
   }
   if (G.angel){
     G.HP = bankerRound(G.HP*1.2);
     await L('触发了天使的祝福！',tm.t0);
+    if (aborted(ep)) return;
   }
   if (G.hero){
     G.BJ += uniform(0.05,0.08);
     G.BS *= 1.2;
     await L(`触发了勇者的祝福！暴击率提升至 ${Math.trunc(G.BJ*100)} %，暴击伤害提升至 ${Math.trunc(G.BS*100)} %！`,tm.t0);
+    if (aborted(ep)) return;
   }
   if (G.hermit){
     G.CRT += uniform(0.03,0.06);
     await L(`触发了隐士的祝福！闪避率提升至 ${Math.trunc(G.CRT*100)} %！`,tm.t0);
+    if (aborted(ep)) return;
   }
-  if (aborted(ep)) return;
   G.HP += G.HPZJ;
   G.ZDYHP = G.HP;
   updateHUD();
@@ -862,12 +906,14 @@ async function mainRounds(ep){
     const nameDisplay=`【${DRM}】`;
     const DRHPMax=DRHP;
     showEnemyCard(DRM,DRHP,DRHPMax,DRATK);
+    G.combat=true;
     while (!aborted(ep) && G.ZDYHP>0 && DRHP>0){
       await combatTurn(ep,{
         nameDisplay, getHP:()=>DRHP, setHP:v=>{DRHP=v;}, enemyMaxHP:DRHPMax,
         enemyAtk:DRATK, dmgMin:-3, dmgMax:3, pauseSec:tm.t0, crtDecay:false
       });
     }
+    G.combat=false;
     if (aborted(ep)) return;
     hideEnemyCard();
 
@@ -966,9 +1012,11 @@ async function princeBattle(ep){
   let HPPrince=100000;
   const nameDisplay='魔王';
   showEnemyCard('魔王',HPPrince,100000,1500);
+  G.combat=true;
   while (!aborted(ep) && HPPrince>0 && G.ZDYHP>0){
     await combatTurn(ep,{nameDisplay,hpPhrase:'血量还剩',getHP:()=>HPPrince,setHP:v=>{HPPrince=v;},enemyMaxHP:100000,enemyAtk:1500,dmgMin:-10,dmgMax:20,pauseSec:TIME_LAST,crtDecay:false});
   }
+  G.combat=false;
   if (aborted(ep)) return;
   hideEnemyCard();
 
@@ -1028,9 +1076,11 @@ async function itBattle(ep){
   let HPIt=200000;
   const nameDisplay='“它”';
   showEnemyCard('它',HPIt,200000,3000);
+  G.combat=true;
   while (!aborted(ep) && HPIt>0 && G.ZDYHP>0){
     await combatTurn(ep,{nameDisplay,getHP:()=>HPIt,setHP:v=>{HPIt=v;},enemyMaxHP:200000,enemyAtk:3000,dmgMin:-10,dmgMax:30,pauseSec:TIME_LAST,crtDecay:true});
   }
+  G.combat=false;
   if (aborted(ep)) return;
   hideEnemyCard();
 
@@ -1054,6 +1104,7 @@ async function itBattle(ep){
 
 /* ---------- 结局与重开 ---------- */
 async function endGame(ep,label){
+  if (aborted(ep)) return;
   if (label) await L(label,0,'end');
   await sleep(1);
   if (aborted(ep)) return;
@@ -1214,7 +1265,7 @@ function snapshotState(){
 function writeSave(slot,data){ try{ localStorage.setItem(saveKey(slot),JSON.stringify(data)); }catch(e){} }
 /* parse失败/字段缺失一律按空槽处理，不抛错 */
 const SAVE_REQUIRED_NUM=['ATK','ATKZJ','HP','HPZJ','BJ','BS','CRT','ZB1','ZB2','ZB3','WAR',
-  'DRATKXX','DRATKSX','DRHPXX','DRHPSX','low1','high1','low2','high2'];
+  'DRATKXX','DRATKSX','DRHPXX','DRHPSX','low1','high1','low2','high2','savedAt'];
 const SAVE_REQUIRED_BOOL=['warrior','angel','hero','hermit','fast'];
 function readSave(slot){
   try{
@@ -1248,7 +1299,9 @@ function applySnapshot(d){
   Object.assign(G,d);
   G.ZDYHP=G.HP;
   roundStartSnap=snapshotState();
-  applySpeed(G.fast?'fast':'normal');
+  /* 只恢复速度设置与单选框，不覆盖玩家的全局速度偏好 */
+  const r=document.querySelector(`input[name="speedOpt"][value="${G.fast?'fast':'normal'}"]`);
+  if (r) r.checked=true;
 }
 
 /* ---------- 覆盖层（欢迎/设置/存档/更新内容） ---------- */
@@ -1292,10 +1345,10 @@ function renderSaveSlot(slot,label){
   wrap.appendChild(meta);
   const ops=document.createElement('div');
   ops.className='ops';
-  if (saveMenuMode==='game' && slot!=='auto'){
+  if (saveMenuMode==='game' && slot!=='auto' && roundStartSnap){
     const b=document.createElement('button');
     b.className='choice-btn'; b.textContent='保存';
-    b.onclick=()=>{ writeSave(slot,roundStartSnap||snapshotState()); renderSaveList(); };
+    b.onclick=()=>{ writeSave(slot,roundStartSnap); renderSaveList(); };
     ops.appendChild(b);
   }
   if (d){
@@ -1330,6 +1383,7 @@ async function loadSlot(slot){
   if (!d) return;
   runEpoch++;
   const ep=runEpoch;
+  fastForward=null;
   hideAllOverlays();
   termEl.innerHTML='';
   choicesEl.innerHTML='';
@@ -1374,18 +1428,23 @@ document.getElementById('btnSettingsSave').onclick=()=>{ overlayReturnTo='settin
 document.getElementById('btnReturnTitle').onclick=()=>{
   if (!confirm('返回标题将暂停当前进度（自动存档已保留），确定？')) return;
   runEpoch++;
+  fastForward=null;
   gameActive=false;
+  resetState();
+  termEl.innerHTML='';
   choicesEl.innerHTML='';
   hideEnemyCard();
   prevHUD={ATK:null,ZDYHP:null,BJ:null,BS:null,CRT:null};
   autoStick=true; scrollLatestBtn.hidden=true;
+  updateHUD();
   showWelcome();
 };
 document.querySelectorAll('input[name="speedOpt"]').forEach(r=>{
   r.addEventListener('change',()=>{
     if (!r.checked) return;
     G.fast=(r.value==='fast');
-    saveSpeedPref(r.value);
+    /* 标题界面（未开局）不落盘，避免玩家只是点了下设置就跳过首次极速版询问 */
+    if (gameActive) saveSpeedPref(r.value);
   });
 });
 
@@ -1393,8 +1452,10 @@ document.querySelectorAll('input[name="speedOpt"]').forEach(r=>{
 function startNewGame(){
   runEpoch++;
   const ep=runEpoch;
+  fastForward=null;
   hideAllOverlays();
   resetState();
+  deleteSave('auto');
   termEl.innerHTML='';
   choicesEl.innerHTML='';
   hideEnemyCard();
@@ -1412,6 +1473,13 @@ function initApp(){
   const sp=loadSpeedPref();
   const speedRadio=document.querySelector(`input[name="speedOpt"][value="${sp==='fast'?'fast':'normal'}"]`);
   if (speedRadio) speedRadio.checked=true;
+  try{
+    skipAnim = localStorage.getItem('csdl4:skipAnim')==='1';
+    document.getElementById('skipAnimToggle').checked=skipAnim;
+    const crtOn = localStorage.getItem('csdl4:crt')!=='0';
+    document.getElementById('crtToggle').checked=crtOn;
+    document.getElementById('app').classList.toggle('crt-on',crtOn);
+  }catch(err){}
   showWelcome();
 }
 initApp();
