@@ -1,4 +1,5 @@
 <title>卡桑德里传说</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <style>
 :root{
   --bg:#0b0d10;
@@ -14,14 +15,14 @@
   --crit:#e8c25a;
 }
 *{box-sizing:border-box;}
+html,body{height:100%;}
 body{
   margin:0;
   background:var(--bg);
   color:var(--text);
   font-family:'Cascadia Mono','Consolas','Noto Sans Mono CJK SC','Microsoft YaHei',monospace,sans-serif;
-  min-height:100vh;
 }
-#app{display:flex;flex-direction:column;min-height:100vh;}
+#app{display:flex;flex-direction:column;height:100vh;}
 header{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:10px 16px;border-bottom:1px solid var(--border);background:var(--panel);
@@ -62,7 +63,7 @@ header .sub{font-size:11px;color:var(--dim);margin-left:8px;}
 .num-input-wrap{display:flex;gap:8px;align-items:center;}
 .num-input{
   background:var(--panel2);border:1px solid var(--border);color:var(--text);
-  padding:9px 12px;border-radius:6px;font-family:inherit;font-size:13px;width:140px;
+  padding:9px 12px;border-radius:6px;font-family:inherit;font-size:16px;width:140px;
 }
 .num-input:focus{outline:none;border-color:var(--accent2);}
 #hud{
@@ -156,6 +157,13 @@ const DRZL=['史莱姆','哥布林','巨人','宝箱怪','矮人','兽人','精�
 
 /* ---------- 随机数 ---------- */
 function randint(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
+/* 银行家舍入，等价于 Python int(format(x,'.0f')) */
+function bankerRound(x){
+  const f=Math.floor(x), d=x-f;
+  if (d<0.5) return f;
+  if (d>0.5) return f+1;
+  return (f%2===0)?f:f+1;
+}
 function uniform(a,b){ return a+Math.random()*(b-a); }
 function chance(p){ return Math.random()<=p; }
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
@@ -278,6 +286,13 @@ function choose(options){
   });
 }
 
+/* 仅接受纯整数字符串，空串/小数/非数字一律无效 */
+function validIntOrNaN(raw){
+  const s=(raw||'').trim();
+  if (!/^-?\d+$/.test(s)) return NaN;
+  return parseInt(s,10);
+}
+
 function promptNumber(placeholder){
   return new Promise(resolve=>{
     choicesEl.innerHTML='';
@@ -328,16 +343,17 @@ function updateHUD(){
 
 /* ---------- 战斗交锋（玩家先手，含"死后反击"保留行为） ---------- */
 async function combatTurn(ctx){
+  const hpPhrase = ctx.hpPhrase || '的血量还剩';
   const isCrit=chance(G.BJ);
   let damage;
   if (isCrit){
     damage=critDamage();
     ctx.setHP(ctx.getHP()-damage);
-    await L(`暴击了！你造成了 ${damage} 点伤害，${ctx.nameDisplay}的血量还剩 ${ctx.getHP()} 点！`,ctx.pauseSec,'crit');
+    await L(`暴击了！你造成了 ${damage} 点伤害，${ctx.nameDisplay}${hpPhrase} ${ctx.getHP()} 点！`,ctx.pauseSec,'crit');
   } else {
     damage=normalDamage();
     ctx.setHP(ctx.getHP()-damage);
-    await L(`你造成了 ${damage} 点伤害，${ctx.nameDisplay}的血量还剩 ${ctx.getHP()} 点！`,ctx.pauseSec);
+    await L(`你造成了 ${damage} 点伤害，${ctx.nameDisplay}${hpPhrase} ${ctx.getHP()} 点！`,ctx.pauseSec);
   }
   if (G.warrior){
     G.ZDYHP += damage*WARRIOR_BLOODSUCK;
@@ -438,7 +454,7 @@ async function winRound(DRM){
   const tm=timeMap();
   G.ATK += G.ATKZJ;
   if (G.warrior){
-    G.ATK = Math.round(G.ATK*1.3);
+    G.ATK = bankerRound(G.ATK*1.3);
     await L('触发了战士的祝福！',tm.t0);
   }
   if (G.angel){
@@ -527,7 +543,7 @@ async function bossNode(){
   await L('魔王只是冷漠地看着你。',0);
 
   let raw=await promptNumber('请输入1开始战斗！请勿输入其他数字！');
-  let val=parseInt(raw,10);
+  let val=validIntOrNaN(raw);
   let Q2=0,Q3=0;
 
   if (val===1){
@@ -536,7 +552,8 @@ async function bossNode(){
     let chanceCount=0;
     while (chanceCount<5 && Q2===0){
       raw=await promptNumber('请不要输入1以外的数字！');
-      val=parseInt(raw,10);
+      val=validIntOrNaN(raw);
+      if (Number.isNaN(val)) continue;
       if (val===1){
         await L('这才像话。',0);
         Q2=1;
@@ -595,7 +612,7 @@ async function princeBattle(){
   let HPPrince=100000;
   const nameDisplay='魔王';
   while (HPPrince>0 && G.ZDYHP>0){
-    await combatTurn({nameDisplay,getHP:()=>HPPrince,setHP:v=>{HPPrince=v;},enemyAtk:1500,dmgMin:-10,dmgMax:20,pauseSec:TIME_LAST,crtDecay:false});
+    await combatTurn({nameDisplay,hpPhrase:'血量还剩',getHP:()=>HPPrince,setHP:v=>{HPPrince=v;},enemyAtk:1500,dmgMin:-10,dmgMax:20,pauseSec:TIME_LAST,crtDecay:false});
   }
 
   if (HPPrince<=0 && G.ZDYHP>0){
@@ -661,13 +678,13 @@ async function itBattle(){
   } else {
     await L('你以为你能够战胜我？',TIME_LAST,'bad');
     await L('作为惩罚，这个结局没有结局，嘻嘻。',TIME_LAST);
-    return endGame('这个结局没有结局');
+    return endGame(null);
   }
 }
 
 /* ---------- 结局与重开 ---------- */
 async function endGame(label){
-  await L(label,0,'end');
+  if (label) await L(label,0,'end');
   await sleep(1);
   choicesEl.innerHTML='';
   const btn=document.createElement('button');
