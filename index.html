@@ -46,6 +46,7 @@ header{
   padding:8px 12px;border-bottom:3px solid var(--border);background:var(--panel);
   flex-wrap:wrap;
   box-shadow:0 3px 0 var(--bg-deep);
+  position:relative;z-index:101;
 }
 header h1{font-size:16px;margin:0;letter-spacing:1px;color:var(--accent2);font-weight:400;text-shadow:2px 2px 0 var(--bg-deep);}
 header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
@@ -413,6 +414,9 @@ const TIME_SHORT=0.1; // 装备槽预览固定短停顿
 const WARRIOR_BLOODSUCK=0.06;
 
 /* ---------- 游戏状态 ---------- */
+/* 运行代：每次新开局/读档/返回标题递增，旧协程在每个可恢复点核对，代不符即静默终止，防止并发写同一个 G */
+let runEpoch=0;
+function aborted(ep){ return ep!==runEpoch; }
 let G={};
 function resetState(){
   G={
@@ -454,8 +458,11 @@ document.getElementById('crtToggle').addEventListener('change',e=>{
 });
 termEl.addEventListener('click',()=>{ if (fastForward){ const f=fastForward; fastForward=null; f(); } });
 document.addEventListener('keydown',e=>{
-  if (e.key==='Enter' && document.activeElement && document.activeElement.tagName==='INPUT') return;
-  if (e.key==='Enter'){ if (fastForward){ const f=fastForward; fastForward=null; f(); } }
+  if (e.key!=='Enter') return;
+  if (document.activeElement && document.activeElement.tagName==='INPUT') return;
+  if (!gameActive) return;
+  if (!welcomeOverlay.hidden || !settingsOverlay.hidden || !saveOverlay.hidden || !changelogOverlay.hidden) return;
+  if (fastForward){ const f=fastForward; fastForward=null; f(); }
 });
 
 /* 固定高度日志：新消息自动滚底，用户上滚时暂停 */
@@ -589,7 +596,7 @@ function updateHUD(){
   document.getElementById('hud-war').textContent = G.WAR>0 ? Math.min(G.WAR,20) : '-';
 
   const hpFill=document.getElementById('hud-hpfill');
-  const hpPct=Math.max(0,Math.min(100,G.ZDYHP/G.HP*100));
+  const hpPct=G.HP>0 ? Math.max(0,Math.min(100,G.ZDYHP/G.HP*100)) : 0;
   hpFill.style.width=hpPct+'%';
   hpFill.className='fill '+hpBarClass(G.ZDYHP,G.HP);
   if (prevHUD.ZDYHP!==null && G.ZDYHP!==prevHUD.ZDYHP){
@@ -615,7 +622,13 @@ function updateHUD(){
     if (G['ZB'+i]===1 && s){
       el.classList.add('filled');
       const sg=v=>(v<0?'':'+')+v;
-      el.innerHTML=`<div class="slot-name">${s.name}</div><div class="slot-stats">ATK${sg(s.atk)} HP${sg(s.hp)} BJ${sg(Math.trunc(s.bj*100))}% BS${sg(Math.trunc(s.bs*100))}% CRT${sg(Math.trunc(s.crt*100))}%</div>`;
+      el.innerHTML='';
+      const nameDiv=document.createElement('div');
+      nameDiv.className='slot-name'; nameDiv.textContent=s.name;
+      const statDiv=document.createElement('div');
+      statDiv.className='slot-stats';
+      statDiv.textContent=`ATK${sg(s.atk)} HP${sg(s.hp)} BJ${sg(Math.trunc(s.bj*100))}% BS${sg(Math.trunc(s.bs*100))}% CRT${sg(Math.trunc(s.crt*100))}%`;
+      el.appendChild(nameDiv); el.appendChild(statDiv);
     } else {
       el.classList.remove('filled');
       el.innerHTML=`<div class="slot-empty">空槽位 ${i}</div>`;
@@ -649,7 +662,8 @@ function updateEnemyCard(cur,max){
 function hideEnemyCard(){ document.getElementById('enemyCard').hidden=true; }
 
 /* ---------- 战斗交锋（玩家先手，含"死后反击"保留行为） ---------- */
-async function combatTurn(ctx){
+async function combatTurn(ep,ctx){
+  if (aborted(ep)) return;
   const hpPhrase = ctx.hpPhrase || '的血量还剩';
   const isCrit=chance(G.BJ);
   let damage;
@@ -704,7 +718,8 @@ function equipBlockText(idx,name,item){
 }
 
 /* 装备默认按序自动入槽：有空槽自动装入编号最小的空槽；三槽全满才进入替换选择 */
-async function equipSlotFlow(name,item){
+async function equipSlotFlow(ep,name,item){
+  if (aborted(ep)) return;
   const tm=timeMap();
   const emptyIdx=[1,2,3].find(i=>G['ZB'+i]===0);
   if (emptyIdx){
@@ -713,20 +728,26 @@ async function equipSlotFlow(name,item){
     G.ATK+=item.atk; G.HP+=item.hp; G.BJ+=item.bj; G.BS+=item.bs; G.CRT+=item.crt;
     updateHUD();
     await L(`已装入槽位 ${emptyIdx}。装备成功！请查看你现在的面板。`,tm.t0);
+    if (aborted(ep)) return;
     await L(panelText(),tm.t0);
+    if (aborted(ep)) return;
     await continuePrompt();
     return;
   }
   await L('三个槽位都已装满，先看看现在的装备……',tm.t0);
+  if (aborted(ep)) return;
   for (let i=1;i<=3;i++){
     const s=G['slot'+i];
     await L(equipBlockText(i,s.name,s),TIME_SHORT);
+    if (aborted(ep)) return;
     appendHTMLBlock(replacePreviewHTML(s,item));
   }
   await L('要替换哪个槽位上的装备？放弃则新装备丢失。',0);
+  if (aborted(ep)) return;
   const a5=await choose([
     {label:'1 替换槽位1',value:1},{label:'2 替换槽位2',value:2},{label:'3 替换槽位3',value:3},{label:'4 放弃',value:4}
   ]);
+  if (aborted(ep)) return;
   if (a5===4) return; // 放弃，新装备丢失
   const idx=a5;
   const old=G['slot'+idx];
@@ -735,34 +756,43 @@ async function equipSlotFlow(name,item){
   G.ATK+=item.atk; G.HP+=item.hp; G.BJ+=item.bj; G.BS+=item.bs; G.CRT+=item.crt;
   updateHUD();
   await L('装备成功！请查看你现在的面板。',tm.t0);
+  if (aborted(ep)) return;
   await L(panelText(),tm.t0);
+  if (aborted(ep)) return;
   await continuePrompt();
 }
 
-async function equipDropFlow(){
+async function equipDropFlow(ep){
+  if (aborted(ep)) return;
   const tm=timeMap();
   await L('让我看看它身上藏着什么好东西……',uniform(tm.t1,tm.t2));
+  if (aborted(ep)) return;
   const name1=pick(ZBXRC)+pick(ZBZL);
   const item1=generateEquip();
   const name2=pick(ZBXRC)+pick(ZBZL);
   const item2=generateEquip();
   await L(`找到了！是“${name1}”和“${name2}”！`,tm.t0);
   await L('再看看它们的面板……',tm.t0);
+  if (aborted(ep)) return;
   const hasEmpty=[1,2,3].some(i=>G['ZB'+i]===0);
   await L(`1.${name1}\nATK: + ${item1.atk}\nHP: + ${item1.hp}\nBJ： + ${Math.trunc(item1.bj*100)} %\nBS： + ${Math.trunc(item1.bs*100)} %\nCRT： + ${Math.trunc(item1.crt*100)} %`,tm.t0);
   if (hasEmpty) appendHTMLBlock(equipPreviewHTML(item1));
+  if (aborted(ep)) return;
   await L(`2.${name2}\nATK: + ${item2.atk}\nHP: + ${item2.hp}\nBJ： + ${Math.trunc(item2.bj*100)} %\nBS： + ${Math.trunc(item2.bs*100)} %\nCRT： + ${Math.trunc(item2.crt*100)} %`,0);
   if (hasEmpty) appendHTMLBlock(equipPreviewHTML(item2));
   await L(`要装备${name1}还是装备${name2}，又或者是不装备呢？`,0);
+  if (aborted(ep)) return;
   const a4=await choose([
     {label:`1 装备${name1}`,value:1},{label:`2 装备${name2}`,value:2},{label:'3 不装备',value:3}
   ]);
-  if (a4===1) await equipSlotFlow(name1,item1);
-  else if (a4===2) await equipSlotFlow(name2,item2);
+  if (aborted(ep)) return;
+  if (a4===1) await equipSlotFlow(ep,name1,item1);
+  else if (a4===2) await equipSlotFlow(ep,name2,item2);
 }
 
 /* ---------- 主线：前19回合 ---------- */
-async function winRound(DRM){
+async function winRound(ep,DRM){
+  if (aborted(ep)) return;
   const tm=timeMap();
   G.ATK += G.ATKZJ;
   if (G.warrior){
@@ -782,31 +812,34 @@ async function winRound(DRM){
     G.CRT += uniform(0.03,0.06);
     await L(`触发了隐士的祝福！闪避率提升至 ${Math.trunc(G.CRT*100)} %！`,tm.t0);
   }
+  if (aborted(ep)) return;
   G.HP += G.HPZJ;
   G.ZDYHP = G.HP;
   updateHUD();
   await L(`你战胜了【${DRM}】！你的攻击力提升至 ${G.ATK} ,血量回复并提升至 ${G.ZDYHP} 。`,tm.t0,'good');
+  if (aborted(ep)) return;
 
   G.DRATKXX += G.low1; G.DRATKSX += G.high1;
   G.DRHPXX += G.low2; G.DRHPSX += G.high2;
   G.ATKZJ += 2; G.HPZJ += 2;
   if (G.WAR>=10){ G.low1+=20; G.high1+=40; G.low2+=180; G.high2+=300; }
 
-  await equipDropFlow();
+  await equipDropFlow(ep);
 }
 
-async function mainRounds(){
-  while (G.WAR<20){
+async function mainRounds(ep){
+  while (!aborted(ep) && G.WAR<20){
     const tm=timeMap();
     G.ZDYHP=G.HP;
     updateHUD();
-    autoSave();
+    captureRoundStart();
     const DRM=pick(DRXRC)+pick(DRZL);
 
     await L(`现在是第 ${G.WAR} 回合`,tm.t0);
     await L('正在行进中……',uniform(tm.t1,tm.t2),'dim');
     await L(`遇到了敌人【${DRM}】！`,tm.t0);
     await L(`正在分析【${DRM}】的面板……`,uniform(tm.t1,tm.t2),'dim');
+    if (aborted(ep)) return;
 
     let DRATK=randint(G.DRATKXX,G.DRATKSX);
     let DRHP=randint(G.DRHPXX,G.DRHPSX);
@@ -824,40 +857,48 @@ async function mainRounds(){
       const dap=hermitPower();
       await L(`隐者的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,tm.t0);
     }
+    if (aborted(ep)) return;
 
     const nameDisplay=`【${DRM}】`;
     const DRHPMax=DRHP;
     showEnemyCard(DRM,DRHP,DRHPMax,DRATK);
-    while (G.ZDYHP>0 && DRHP>0){
-      await combatTurn({
+    while (!aborted(ep) && G.ZDYHP>0 && DRHP>0){
+      await combatTurn(ep,{
         nameDisplay, getHP:()=>DRHP, setHP:v=>{DRHP=v;}, enemyMaxHP:DRHPMax,
         enemyAtk:DRATK, dmgMin:-3, dmgMax:3, pauseSec:tm.t0, crtDecay:false
       });
     }
+    if (aborted(ep)) return;
     hideEnemyCard();
 
     if (DRHP<=0 && G.ZDYHP>0){
-      await winRound(DRM);
+      await winRound(ep,DRM);
     } else if (DRHP<=0 && G.ZDYHP<=0){
       await L(`你和【${DRM}】同归于尽了。`,tm.t0,'bad');
-      return endGame('Bad End 2:同归于尽');
+      if (aborted(ep)) return;
+      return endGame(ep,'Bad End 2:同归于尽');
     } else {
       await L(`你被【${DRM}】打死了。`,tm.t0,'bad');
       await L('（轻叹）看来，是时候寻找下一位勇者了……',tm.t0);
-      return endGame('Bad End 3:宿命');
+      if (aborted(ep)) return;
+      return endGame(ep,'Bad End 3:宿命');
     }
+    if (aborted(ep)) return;
     G.WAR += 1;
   }
-  return bossNode();
+  if (aborted(ep)) return;
+  return bossNode(ep);
 }
 
 /* ---------- 第20回合：魔王 / 隐藏路线 ---------- */
-async function bossNode(){
+async function bossNode(ep){
+  if (aborted(ep)) return;
   G.WAR=20;
-  autoSave();
+  captureRoundStart();
   const tm=timeMap();
   await L('你终于来到了魔王的面前。',tm.t0);
   await L('魔王只是冷漠地看着你。',0);
+  if (aborted(ep)) return;
 
   const occupied=[1,2,3].filter(i=>G['ZB'+i]===1);
   if (occupied.length===0){
@@ -872,29 +913,37 @@ async function bossNode(){
     await L('这是你现在的面板。',TIME_LAST);
     await L(panelText(),TIME_LAST);
   }
+  if (aborted(ep)) return;
   await L('事已至此，只能继续战斗了……',TIME_LAST);
+  if (aborted(ep)) return;
 
   let refuseCount=0;
-  while (true){
+  while (!aborted(ep)){
     const sel=await choose([
       {label:'迎战魔王',value:1},
       {label:'拒绝迎战',value:0,danger:true}
     ]);
+    if (aborted(ep)) return;
     if (sel===1) break;
     refuseCount++;
+    await L('请专注战斗。',0);
+    if (aborted(ep)) return;
     if (refuseCount>=3){
       await L('……你为什么不肯听我的话？',tm.t0);
       await L('你到底察觉了什么？',tm.t0);
       await L('好吧，既然如此，那便上来，与我决斗！',0);
+      if (aborted(ep)) return;
       await choose([{label:'1 继续',value:1}]);
-      return itBattle();
+      if (aborted(ep)) return;
+      return itBattle(ep);
     }
-    await L('请专注战斗。',0);
   }
-  return princeBattle();
+  if (aborted(ep)) return;
+  return princeBattle(ep);
 }
 
-async function princeBattle(){
+async function princeBattle(ep){
+  if (aborted(ep)) return;
   G.ZDYHP=G.HP;
   updateHUD();
 
@@ -902,6 +951,7 @@ async function princeBattle(){
   await L('正在检测魔王的面板……',uniform(tm.t1,tm.t2),'dim');
   await L('魔王的攻击力是 1500 ，血量是 100000 。',TIME_LAST);
   await L('现在，决战开始！',TIME_LAST);
+  if (aborted(ep)) return;
 
   if (G.angel){
     const dap=angelPower();
@@ -911,13 +961,15 @@ async function princeBattle(){
     const dap=hermitPower();
     await L(`隐者的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,TIME_LAST);
   }
+  if (aborted(ep)) return;
 
   let HPPrince=100000;
   const nameDisplay='魔王';
   showEnemyCard('魔王',HPPrince,100000,1500);
-  while (HPPrince>0 && G.ZDYHP>0){
-    await combatTurn({nameDisplay,hpPhrase:'血量还剩',getHP:()=>HPPrince,setHP:v=>{HPPrince=v;},enemyMaxHP:100000,enemyAtk:1500,dmgMin:-10,dmgMax:20,pauseSec:TIME_LAST,crtDecay:false});
+  while (!aborted(ep) && HPPrince>0 && G.ZDYHP>0){
+    await combatTurn(ep,{nameDisplay,hpPhrase:'血量还剩',getHP:()=>HPPrince,setHP:v=>{HPPrince=v;},enemyMaxHP:100000,enemyAtk:1500,dmgMin:-10,dmgMax:20,pauseSec:TIME_LAST,crtDecay:false});
   }
+  if (aborted(ep)) return;
   hideEnemyCard();
 
   if (HPPrince<=0 && G.ZDYHP>0){
@@ -928,24 +980,29 @@ async function princeBattle(){
     await L('不知道你还记不记得我的那把剑……',TIME_LAST);
     await L('我想，你现在证明了自己。',TIME_LAST);
     await L('证明了你有资格成为它的养料。',TIME_LAST);
-    return endGame('True End 1:浴血之剑');
+    if (aborted(ep)) return;
+    return endGame(ep,'True End 1:浴血之剑');
   } else if (HPPrince<=0 && G.ZDYHP<=0){
     await L('……和魔王一起战死了啊。',TIME_LAST,'bad');
     await L('真是可惜……',TIME_LAST);
-    return endGame('Bad End 4:再落一子');
+    if (aborted(ep)) return;
+    return endGame(ep,'Bad End 4:再落一子');
   } else {
     await L('果然还不够强。',TIME_LAST,'bad');
     await L('是时候召唤下一位勇者了……',TIME_LAST);
-    return endGame('Bad End 5:重启');
+    if (aborted(ep)) return;
+    return endGame(ep,'Bad End 5:重启');
   }
 }
 
-async function itBattle(){
+async function itBattle(ep){
+  if (aborted(ep)) return;
   G.ZDYHP=G.HP;
   const tm=timeMap();
   await L('正在检测“它”的面板……',uniform(tm.t1,tm.t2),'dim');
   await L('“它”的攻击力是 3000 ，血量是200000 。',TIME_LAST);
   await L('突然，你获得了魔王力量的加持！',TIME_LAST);
+  if (aborted(ep)) return;
 
   G.ATK *= randint(5,10);
   G.ZDYHP *= randint(5,10);
@@ -956,6 +1013,7 @@ async function itBattle(){
 
   await L(`你的战斗力提升至 ${G.ATK} ，\n血量提升至 ${G.ZDYHP} ,\n暴击率提升至 ${Math.trunc(G.BJ*100)} %，\n暴击伤害提升至 ${Math.trunc(G.BS*100)} %\n闪避率提升至 ${Math.trunc(G.CRT*100)} %！`,TIME_LAST);
   await L('开始战斗！',TIME_LAST);
+  if (aborted(ep)) return;
 
   if (G.angel){
     const dap=angelPower();
@@ -965,34 +1023,40 @@ async function itBattle(){
     const dap=hermitPower();
     await L(`隐者的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,TIME_LAST);
   }
+  if (aborted(ep)) return;
 
   let HPIt=200000;
   const nameDisplay='“它”';
   showEnemyCard('它',HPIt,200000,3000);
-  while (HPIt>0 && G.ZDYHP>0){
-    await combatTurn({nameDisplay,getHP:()=>HPIt,setHP:v=>{HPIt=v;},enemyMaxHP:200000,enemyAtk:3000,dmgMin:-10,dmgMax:30,pauseSec:TIME_LAST,crtDecay:true});
+  while (!aborted(ep) && HPIt>0 && G.ZDYHP>0){
+    await combatTurn(ep,{nameDisplay,getHP:()=>HPIt,setHP:v=>{HPIt=v;},enemyMaxHP:200000,enemyAtk:3000,dmgMin:-10,dmgMax:30,pauseSec:TIME_LAST,crtDecay:true});
   }
+  if (aborted(ep)) return;
   hideEnemyCard();
 
   if (HPIt<=0 && G.ZDYHP>0){
     await L('你战胜了“它”。',TIME_LAST,'good');
     await L('现在，我终于可以拿回接管权了。',TIME_LAST);
     await L('也请你回到自己的世界吧。',TIME_LAST);
-    return endGame('True End 2:回家');
+    if (aborted(ep)) return;
+    return endGame(ep,'True End 2:回家');
   } else if (HPIt<=0 && G.ZDYHP<=0){
     await L('&*%!@^%(*&!@)#)*!(@&#^&)!@#&……',TIME_LAST,'bad');
-    return endGame('Bad End 6:乱码？？？');
+    if (aborted(ep)) return;
+    return endGame(ep,'Bad End 6:乱码？？？');
   } else {
     await L('你以为你能够战胜我？',TIME_LAST,'bad');
     await L('作为惩罚，这个结局没有结局，嘻嘻。',TIME_LAST);
-    return endGame(null);
+    if (aborted(ep)) return;
+    return endGame(ep,null);
   }
 }
 
 /* ---------- 结局与重开 ---------- */
-async function endGame(label){
+async function endGame(ep,label){
   if (label) await L(label,0,'end');
   await sleep(1);
+  if (aborted(ep)) return;
   gameActive=false;
   choicesEl.innerHTML='';
   const btn=document.createElement('button');
@@ -1008,15 +1072,15 @@ async function endGame(label){
 }
 
 /* ---------- 开局 / 教程 / 祝福选择 ---------- */
-async function introAndPlay(){
+async function introAndPlay(ep){
+  if (aborted(ep)) return;
   const storedSpeed=loadSpeedPref();
   if (storedSpeed){
     G.fast=(storedSpeed==='fast');
   } else {
     await L('是否体验极速版？注：首次游玩建议选择否，使用普通速度版。',0);
     const a0=await choose([{label:'1 是（极速版）',value:'1'},{label:'2 否（普通速度）',value:'2'}]);
-    G.fast = (a0==='1');
-    saveSpeedPref(G.fast?'fast':'normal');
+    applySpeed(a0==='1'?'fast':'normal');
   }
   const tm0=timeMap();
 
@@ -1024,17 +1088,20 @@ async function introAndPlay(){
   await L('你已经准备好踏上征服魔王的旅途了吗？',tm0.t0);
   await L('输入数字“1”，表示你已经准备好了！',0);
   const a1=await choose([{label:'1 准备好了',value:1},{label:'拒绝',value:0}]);
+  if (aborted(ep)) return;
 
   if (a1!==1){
     await L('看来你并没有踏上征途的觉悟！',tm0.t0);
     await L('（小声）或许我们应该找一位更听话的勇者……',tm0.t0);
-    return endGame('Bad End 1:倔强');
+    if (aborted(ep)) return;
+    return endGame(ep,'Bad End 1:倔强');
   }
 
   await L('很好，接下来由我来教你如何战斗。',tm0.t0);
   await L('当然，也许你已经学会了战斗的方法，也可以输入数字“1”来跳过它。',tm0.t0);
   await L('不需要跳过的话，随便输点儿什么都行？',0);
   const a2=await choose([{label:'1 跳过教程',value:1},{label:'2 不跳过，听讲解',value:2}]);
+  if (aborted(ep)) return;
 
   if (a2===1){
     await L('看来你已经是个熟练的战士，那我们就直接出发吧。',tm0.t0);
@@ -1049,6 +1116,7 @@ async function introAndPlay(){
     await L('而最后的闪避率，则是当敌人对你发起攻击时，你能够避免这次伤害的概率。',tm0.t0);
     await L('如果你听懂了，就随便输点什么来继续吧。',0);
     await choose([{label:'继续',value:1}]);
+    if (aborted(ep)) return;
 
     await L('在遇到魔王之前，你会遇到一些……不那么友好的拦路者。',tm0.t0);
     await L('加上魔王，你应该总共要面对20个敌人。',tm0.t0);
@@ -1069,6 +1137,7 @@ async function introAndPlay(){
     await L('运用你的能力，战胜前方的敌人吧！',tm0.t0);
     await L('听懂了的话，就随便输点什么来开始吧。',0);
     await choose([{label:'继续',value:1}]);
+    if (aborted(ep)) return;
   }
 
   await L('首先，请选择你特化的方向。',tm0.t0);
@@ -1081,6 +1150,7 @@ async function introAndPlay(){
     {label:'1 战士的祝福',value:'1'},{label:'2 天使的祝福',value:'2'},
     {label:'3 勇者的祝福',value:'3'},{label:'4 隐者的祝福',value:'4'}
   ]);
+  if (aborted(ep)) return;
 
   if (a8==='1'){ G.warrior=true; G.ATK+=20; G.HP+=20; }
   else if (a8==='2'){ G.angel=true; G.HP+=30; G.CRT+=0.05; }
@@ -1092,9 +1162,10 @@ async function introAndPlay(){
   await L(panelText(),tm0.t0);
   await L('准备好了的话，就随便输入点什么吧。',0);
   await choose([{label:'继续',value:1}]);
+  if (aborted(ep)) return;
 
   G.WAR=1;
-  return mainRounds();
+  return mainRounds(ep);
 }
 
 /* ---------- 版本变更内容 ---------- */
@@ -1118,6 +1189,13 @@ function saveKey(slot){ return SAVE_PREFIX+'save:'+slot; }
 function speedKey(){ return SAVE_PREFIX+'speed'; }
 function loadSpeedPref(){ try{ return localStorage.getItem(speedKey()); }catch(e){ return null; } }
 function saveSpeedPref(v){ try{ localStorage.setItem(speedKey(),v); }catch(e){} }
+/* 统一设置 G.fast + 偏好存储 + 设置面板单选框，三处调用点保持同步 */
+function applySpeed(v){
+  G.fast=(v==='fast');
+  saveSpeedPref(v);
+  const r=document.querySelector(`input[name="speedOpt"][value="${v}"]`);
+  if (r) r.checked=true;
+}
 
 function snapshotState(){
   return {
@@ -1135,20 +1213,42 @@ function snapshotState(){
 }
 function writeSave(slot,data){ try{ localStorage.setItem(saveKey(slot),JSON.stringify(data)); }catch(e){} }
 /* parse失败/字段缺失一律按空槽处理，不抛错 */
+const SAVE_REQUIRED_NUM=['ATK','ATKZJ','HP','HPZJ','BJ','BS','CRT','ZB1','ZB2','ZB3','WAR',
+  'DRATKXX','DRATKSX','DRHPXX','DRHPSX','low1','high1','low2','high2'];
+const SAVE_REQUIRED_BOOL=['warrior','angel','hero','hermit','fast'];
 function readSave(slot){
   try{
     const raw=localStorage.getItem(saveKey(slot));
     if (!raw) return null;
     const d=JSON.parse(raw);
-    if (!d || typeof d.WAR!=='number' || typeof d.ATK!=='number') return null;
+    if (!d || typeof d!=='object') return null;
+    for (const k of SAVE_REQUIRED_NUM) if (typeof d[k]!=='number') return null;
+    for (const k of SAVE_REQUIRED_BOOL) if (typeof d[k]!=='boolean') return null;
+    for (let i=1;i<=3;i++){
+      const s=d['slot'+i];
+      if (d['ZB'+i]===1){
+        if (!s || typeof s.name!=='string' || s.name.length>40 ||
+            typeof s.atk!=='number' || typeof s.hp!=='number' ||
+            typeof s.bj!=='number' || typeof s.bs!=='number' || typeof s.crt!=='number') return null;
+      } else if (s!==null){
+        return null;
+      }
+    }
     return d;
   } catch(e){ return null; }
 }
 function deleteSave(slot){ try{ localStorage.removeItem(saveKey(slot)); }catch(e){} }
-function autoSave(){ writeSave('auto',snapshotState()); }
+let roundStartSnap=null;
+function captureRoundStart(){
+  roundStartSnap=snapshotState();
+  writeSave('auto',roundStartSnap);
+}
 function applySnapshot(d){
+  resetState();
   Object.assign(G,d);
   G.ZDYHP=G.HP;
+  roundStartSnap=snapshotState();
+  applySpeed(G.fast?'fast':'normal');
 }
 
 /* ---------- 覆盖层（欢迎/设置/存档/更新内容） ---------- */
@@ -1177,19 +1277,25 @@ function renderSaveSlot(slot,label){
   const d=readSave(slot);
   const wrap=document.createElement('div');
   wrap.className='save-slot';
+  const meta=document.createElement('div');
+  meta.className='meta';
   if (!d){
-    wrap.innerHTML=`<div class="meta"><b>${label}</b> · 空</div>`;
+    const b=document.createElement('b'); b.textContent=label;
+    meta.appendChild(b); meta.appendChild(document.createTextNode(' · 空'));
   } else {
     const bless=d.warrior?'战士':d.angel?'天使':d.hero?'勇者':d.hermit?'隐者':'-';
     const time=new Date(d.savedAt).toLocaleString();
-    wrap.innerHTML=`<div class="meta"><b>${label}</b> · 第 ${d.WAR} 回合 · ${bless} · ATK ${d.ATK} · HP ${d.HP} · ${time}</div>`;
+    const b=document.createElement('b'); b.textContent=label;
+    meta.appendChild(b);
+    meta.appendChild(document.createTextNode(` · 第 ${d.WAR} 回合 · ${bless} · ATK ${d.ATK} · HP ${d.HP} · ${time}`));
   }
+  wrap.appendChild(meta);
   const ops=document.createElement('div');
   ops.className='ops';
   if (saveMenuMode==='game' && slot!=='auto'){
     const b=document.createElement('button');
     b.className='choice-btn'; b.textContent='保存';
-    b.onclick=()=>{ writeSave(slot,snapshotState()); renderSaveList(); };
+    b.onclick=()=>{ writeSave(slot,roundStartSnap||snapshotState()); renderSaveList(); };
     ops.appendChild(b);
   }
   if (d){
@@ -1197,12 +1303,10 @@ function renderSaveSlot(slot,label){
     bl.className='choice-btn'; bl.textContent='读取';
     bl.onclick=()=>{ if (confirm('载入存档将覆盖当前进度，确定？')) loadSlot(slot); };
     ops.appendChild(bl);
-    if (slot!=='auto'){
-      const bd=document.createElement('button');
-      bd.className='choice-btn danger'; bd.textContent='删除';
-      bd.onclick=()=>{ if (confirm('确定删除该存档？')){ deleteSave(slot); renderSaveList(); } };
-      ops.appendChild(bd);
-    }
+    const bd=document.createElement('button');
+    bd.className='choice-btn danger'; bd.textContent='删除';
+    bd.onclick=()=>{ if (confirm('确定删除该存档？')){ deleteSave(slot); renderSaveList(); } };
+    ops.appendChild(bd);
   }
   wrap.appendChild(ops);
   return wrap;
@@ -1224,14 +1328,21 @@ function showSaveMenu(mode){
 async function loadSlot(slot){
   const d=readSave(slot);
   if (!d) return;
+  runEpoch++;
+  const ep=runEpoch;
   hideAllOverlays();
   termEl.innerHTML='';
+  choicesEl.innerHTML='';
+  hideEnemyCard();
+  prevHUD={ATK:null,ZDYHP:null,BJ:null,BS:null,CRT:null};
+  autoStick=true; scrollLatestBtn.hidden=true;
   applySnapshot(d);
   gameActive=true;
   updateHUD();
   await L(`已载入存档（第 ${d.WAR} 回合）。`,0);
-  if (G.WAR>=20) return bossNode();
-  return mainRounds();
+  if (aborted(ep)) return;
+  if (G.WAR>=20) return bossNode(ep);
+  return mainRounds(ep);
 }
 function showChangelog(){
   const web=document.getElementById('changelogWeb');
@@ -1243,20 +1354,31 @@ function showChangelog(){
 }
 
 /* ---------- 覆盖层事件绑定 ---------- */
+/* overlayReturnTo：记录进入存档面板前的来源，关闭时回到该来源而不是硬编码二选一 */
+let overlayReturnTo=null;
+function closeOverlayTo(target){
+  hideAllOverlays();
+  if (target==='settings'){ showSettings(); return; }
+  if (!gameActive) welcomeOverlay.hidden=false;
+}
 document.getElementById('btnNewGame').onclick=()=>{ startNewGame(); };
 document.getElementById('btnContinue').onclick=()=>{ if (!document.getElementById('btnContinue').disabled) loadSlot('auto'); };
-document.getElementById('btnSaveMenu').onclick=()=>showSaveMenu('menu');
+document.getElementById('btnSaveMenu').onclick=()=>{ overlayReturnTo=null; showSaveMenu('menu'); };
 document.getElementById('btnSettingsMenu').onclick=()=>showSettings();
 document.getElementById('btnChangelog').onclick=()=>showChangelog();
-document.getElementById('btnSaveClose').onclick=()=>{ hideAllOverlays(); if (!gameActive) welcomeOverlay.hidden=false; };
+document.getElementById('btnSaveClose').onclick=()=>closeOverlayTo(overlayReturnTo);
 document.getElementById('btnChangelogClose').onclick=()=>{ hideAllOverlays(); if (!gameActive) welcomeOverlay.hidden=false; };
 document.getElementById('settingsBtn').onclick=()=>showSettings();
 document.getElementById('btnSettingsClose').onclick=()=>{ hideAllOverlays(); if (!gameActive) welcomeOverlay.hidden=false; };
-document.getElementById('btnSettingsSave').onclick=()=>showSaveMenu('game');
+document.getElementById('btnSettingsSave').onclick=()=>{ overlayReturnTo='settings'; showSaveMenu('game'); };
 document.getElementById('btnReturnTitle').onclick=()=>{
   if (!confirm('返回标题将暂停当前进度（自动存档已保留），确定？')) return;
+  runEpoch++;
   gameActive=false;
   choicesEl.innerHTML='';
+  hideEnemyCard();
+  prevHUD={ATK:null,ZDYHP:null,BJ:null,BS:null,CRT:null};
+  autoStick=true; scrollLatestBtn.hidden=true;
   showWelcome();
 };
 document.querySelectorAll('input[name="speedOpt"]').forEach(r=>{
@@ -1269,14 +1391,20 @@ document.querySelectorAll('input[name="speedOpt"]').forEach(r=>{
 
 /* ---------- 启动 / 重开 ---------- */
 function startNewGame(){
+  runEpoch++;
+  const ep=runEpoch;
   hideAllOverlays();
   resetState();
   termEl.innerHTML='';
+  choicesEl.innerHTML='';
+  hideEnemyCard();
+  prevHUD={ATK:null,ZDYHP:null,BJ:null,BS:null,CRT:null};
+  autoStick=true; scrollLatestBtn.hidden=true;
   gameActive=true;
   const sp=loadSpeedPref();
-  if (sp){ G.fast=(sp==='fast'); document.querySelector(`input[name="speedOpt"][value="${sp}"]`).checked=true; }
+  if (sp) applySpeed(sp);
   updateHUD();
-  introAndPlay();
+  introAndPlay(ep);
 }
 function initApp(){
   resetState();
