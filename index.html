@@ -917,8 +917,11 @@ async function mainRounds(ep){
     const DRM=pick(DRXRC)+pick(DRZL);
 
     await L(`现在是第 ${G.WAR} 回合`,tm.t0);
+    if (aborted(ep)) return;
     await L('正在行进中……',uniform(tm.t1,tm.t2),'dim');
+    if (aborted(ep)) return;
     await L(`遇到了敌人【${DRM}】！`,tm.t0);
+    if (aborted(ep)) return;
     await L(`正在分析【${DRM}】的面板……`,uniform(tm.t1,tm.t2),'dim');
     if (aborted(ep)) return;
 
@@ -930,17 +933,20 @@ async function mainRounds(ep){
     if (G.WAR>=7 && G.hero) DRHP *= randint(3,5);
 
     await L(`【${DRM}】的攻击力为 ${DRATK} ，血量为 ${DRHP} 。`,tm.t0);
+    if (aborted(ep)) return;
     await L('现在，开始战斗！',tm.t0);
+    if (aborted(ep)) return;
 
     if (G.angel){
       const dap=angelPower();
       await L(`天使的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,tm.t0);
+      if (aborted(ep)) return;
     }
     if (G.hermit && G.CRT>1){
       const dap=hermitPower();
       await L(`隐者的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,tm.t0);
+      if (aborted(ep)) return;
     }
-    if (aborted(ep)) return;
 
     const nameDisplay=`【${DRM}】`;
     const DRHPMax=DRHP;
@@ -1013,11 +1019,11 @@ async function bossNode(ep){
     if (sel===1) break;
     refuseCount++;
     if (refuseCount>=3){
-      await L('……你就是不肯听话，是不是？',TIME_LAST);
+      await L('……你就是不肯听话，是不是？',0.6);
       if (aborted(ep)) return;
       return itBattle(ep);
     }
-    await L('请专注战斗。',TIME_LAST);
+    await L('请专注战斗。',0.6);
     if (aborted(ep)) return;
   }
   if (aborted(ep)) return;
@@ -1258,48 +1264,55 @@ async function introAndPlay(ep){
   return mainRounds(ep);
 }
 
-/* 设置面板「重看教程」：只读播放教程台词到日志，不读写 G，与对局协程互不干扰 */
+/* 设置面板「重看教程」：只读播放教程台词到日志，不读写 G；用独立 epoch 与对局协程隔离，对局中禁止进入 */
 let tutorialReplaying=false;
+let tutorialEpoch=0;
 async function replayTutorial(){
-  if (tutorialReplaying) return;
+  if (gameActive || tutorialReplaying) return;
   tutorialReplaying=true;
-  hideAllOverlays();
-  const tm=timeMap();
-  await L('（重看教程）',tm.t0,'dim');
-  await L('这里是你的初始面板参考，可以体现你当前的战斗机能。',tm.t0);
-  await L('ATK: 10\nHP: 20\nBJ: 5 %\nBS: 50 %\nCRT: 10 %',tm.t0);
-  await L('这些数据从上至下依次是你的攻击力、血量、暴击率、暴击伤害以及闪避率。',tm.t0);
-  await L('攻击力是指你发动一次攻击对敌方造成的伤害值。每战胜一个敌人，攻击力也会随之上涨。',tm.t0);
-  await L('血量则是你能够承受的伤害上限，当敌人对你造成的伤害大于当前血量时，你的征途就到此为止了。',tm.t0);
-  await L('暴击率指暴击的概率，当你暴击后，你的伤害就会在攻击力的基础上再增加[攻击力]乘[暴击伤害]的数值。',tm.t0);
-  await L('打个比方，如果你的攻击力是10，暴击伤害是50%，当你暴击后，你就可以造成10+10×50%=15的伤害。',tm.t0);
-  await L('而最后的闪避率，则是当敌人对你发起攻击时，你能够避免这次伤害的概率。',tm.t0);
-  await L('在遇到魔王之前，你会遇到一些……不那么友好的拦路者。',tm.t0);
-  await L('加上魔王，你应该总共要面对20个敌人。',tm.t0);
-  await L('每打败一个敌人，你都能获得一个崭新的装备！',tm.t0);
-  await L('每个装备的属性都有差别，等我给你找一件看看哈……',tm.t0);
-  await L('对，就是这个，你看看！',0.5);
-  await L('至尊皇家无敌大宝剑\nATK: +999\nHP: +999\nBJ: +999 %\nBS: +999 %\nCRT: +999 %',tm.t0);
-  await L('哼哼，怎么样，这个装备不错吧？',tm.t0);
-  await L('如果你装备上它，你将会成为这片大陆上的最强！',tm.t0);
-  await L('但这可是我的传家宝，才不会给你用。',tm.t0);
-  await L('如果遇见不错的装备，你可以把它穿在身上。',tm.t0);
-  await L('但是你穿戴的装备总数不能超过3件，所以，如果遇到更好的装备，你要进行一些抉择。',tm.t0);
-  await L('另外，装备的属性不全是好的，比如说这个……',tm.t0);
-  await L('暴击伤害特化戒指\nATK: +0\nHP: +0\nBJ: -999 %\nBS: +200 %\nCRT: +0 %',tm.t0);
-  await L('看见了吗，虽然它能给你加200暴击伤害，但你的暴击率会变为负数，约等于没用！',tm.t0);
-  await L('要不要穿上它，就得靠你自己决定喽。',tm.t0);
-  await L('另外，每战胜一个敌人，你的战斗力和血量都会提升。',tm.t0);
-  await L('运用你的能力，战胜前方的敌人吧！',tm.t0);
-  await L('（教程回顾结束）',tm.t0,'dim');
-  tutorialReplaying=false;
+  tutorialEpoch++;
+  const ep=tutorialEpoch;
+  const tAborted=()=>ep!==tutorialEpoch || gameActive;
+  try{
+    hideAllOverlays();
+    const tm=timeMap();
+    await L('（重看教程）',tm.t0,'dim'); if (tAborted()) return;
+    await L('这里是你的初始面板参考，可以体现你当前的战斗机能。',tm.t0); if (tAborted()) return;
+    await L('ATK: 10\nHP: 20\nBJ: 5 %\nBS: 50 %\nCRT: 10 %',tm.t0); if (tAborted()) return;
+    await L('这些数据从上至下依次是你的攻击力、血量、暴击率、暴击伤害以及闪避率。',tm.t0); if (tAborted()) return;
+    await L('攻击力是指你发动一次攻击对敌方造成的伤害值。每战胜一个敌人，攻击力也会随之上涨。',tm.t0); if (tAborted()) return;
+    await L('血量则是你能够承受的伤害上限，当敌人对你造成的伤害大于当前血量时，你的征途就到此为止了。',tm.t0); if (tAborted()) return;
+    await L('暴击率指暴击的概率，当你暴击后，你的伤害就会在攻击力的基础上再增加[攻击力]乘[暴击伤害]的数值。',tm.t0); if (tAborted()) return;
+    await L('打个比方，如果你的攻击力是10，暴击伤害是50%，当你暴击后，你就可以造成10+10×50%=15的伤害。',tm.t0); if (tAborted()) return;
+    await L('而最后的闪避率，则是当敌人对你发起攻击时，你能够避免这次伤害的概率。',tm.t0); if (tAborted()) return;
+    await L('在遇到魔王之前，你会遇到一些……不那么友好的拦路者。',tm.t0); if (tAborted()) return;
+    await L('加上魔王，你应该总共要面对20个敌人。',tm.t0); if (tAborted()) return;
+    await L('每打败一个敌人，你都能获得一个崭新的装备！',tm.t0); if (tAborted()) return;
+    await L('每个装备的属性都有差别，等我给你找一件看看哈……',tm.t0); if (tAborted()) return;
+    await L('对，就是这个，你看看！',0.5); if (tAborted()) return;
+    await L('至尊皇家无敌大宝剑\nATK: +999\nHP: +999\nBJ: +999 %\nBS: +999 %\nCRT: +999 %',tm.t0); if (tAborted()) return;
+    await L('哼哼，怎么样，这个装备不错吧？',tm.t0); if (tAborted()) return;
+    await L('如果你装备上它，你将会成为这片大陆上的最强！',tm.t0); if (tAborted()) return;
+    await L('但这可是我的传家宝，才不会给你用。',tm.t0); if (tAborted()) return;
+    await L('如果遇见不错的装备，你可以把它穿在身上。',tm.t0); if (tAborted()) return;
+    await L('但是你穿戴的装备总数不能超过3件，所以，如果遇到更好的装备，你要进行一些抉择。',tm.t0); if (tAborted()) return;
+    await L('另外，装备的属性不全是好的，比如说这个……',tm.t0); if (tAborted()) return;
+    await L('暴击伤害特化戒指\nATK: +0\nHP: +0\nBJ: -999 %\nBS: +200 %\nCRT: +0 %',tm.t0); if (tAborted()) return;
+    await L('看见了吗，虽然它能给你加200暴击伤害，但你的暴击率会变为负数，约等于没用！',tm.t0); if (tAborted()) return;
+    await L('要不要穿上它，就得靠你自己决定喽。',tm.t0); if (tAborted()) return;
+    await L('另外，每战胜一个敌人，你的战斗力和血量都会提升。',tm.t0); if (tAborted()) return;
+    await L('运用你的能力，战胜前方的敌人吧！',tm.t0); if (tAborted()) return;
+    await L('（教程回顾结束）',tm.t0,'dim');
+  } finally {
+    tutorialReplaying=false;
+  }
   if (!gameActive) showWelcome();
 }
 
 /* ---------- 版本变更内容 ---------- */
 const CHANGELOG_V5=[
   '数值平衡扩充：战士吸血 6%→8%、每胜攻击力×1.22；天使每胜血量×1.24、每20点血量增伤3%→4%',
-  '勇者初始攻击力+20→+25、暴击率+10%→12%、暴击伤害+30%→40%，每胜暴击率随机增幅3–8%→5–11%、暴击伤害×1.2→×1.28',
+  '勇者初始攻击力+20→+25、暴击率+10%→12%、暴击伤害+30%→40%，每胜暴击率随机增幅5–8%→5–11%、暴击伤害×1.2→×1.28',
   '隐者每胜闪避率随机增幅3–6%→4–7%，溢出闪避每10%增伤5%→6%',
   '普通敌人攻击力与血量新增 ±35% 随机浮动（魔王与隐藏路线敌人数值不变）',
   '装备与怪物词表大幅扩充',
@@ -1318,17 +1331,18 @@ const CHANGELOG_WEB=[
   '教程仅首次询问，此后新开局直接进入祝福选择',
   '存档与设置相关确认操作统一为页内像素风弹窗',
   '修复原版魔王战前无装备时崩溃的问题',
-  '游戏机制与台词与 3.0 一致（含全部结局与隐藏内容）',
+  '结局与隐藏内容与原版一致（共 9 个结局）',
 ];
 
 /* ---------- 本地存档 ---------- */
-/* 偏好键：速度/动画/CRT/教程状态，跨版本沿用同一命名空间；存档快照键：随数值版本升级，避免旧档跨版本污染 */
+/* 偏好键：速度/动画/CRT，跨版本沿用同一命名空间（键名与旧版本一致，老用户偏好不丢）；
+   存档快照键与教程状态键：随数值版本升级，与存档同前缀，避免旧档跨版本污染 */
 const PREF_PREFIX='csdl4:';
 const SAVE_PREFIX='csdl5:';
 function prefKey(name){ return PREF_PREFIX+name; }
 function saveKey(slot){ return SAVE_PREFIX+'save:'+slot; }
 function speedKey(){ return prefKey('speed'); }
-function tutorialKey(){ return prefKey('tutorialSeen'); }
+function tutorialKey(){ return SAVE_PREFIX+'tutorialSeen'; }
 function loadSpeedPref(){ try{ return localStorage.getItem(speedKey()); }catch(e){ return null; } }
 function saveSpeedPref(v){ try{ localStorage.setItem(speedKey(),v); }catch(e){} }
 function loadTutorialPref(){ try{ return localStorage.getItem(tutorialKey()); }catch(e){ return null; } }
@@ -1366,14 +1380,15 @@ function readSave(slot){
     if (!raw) return null;
     const d=JSON.parse(raw);
     if (!d || typeof d!=='object') return null;
-    for (const k of SAVE_REQUIRED_NUM) if (typeof d[k]!=='number') return null;
+    for (const k of SAVE_REQUIRED_NUM) if (!Number.isFinite(d[k])) return null;
     for (const k of SAVE_REQUIRED_BOOL) if (typeof d[k]!=='boolean') return null;
+    if (!Number.isInteger(d.WAR) || d.WAR<0 || d.WAR>20) return null;
     for (let i=1;i<=3;i++){
       const s=d['slot'+i];
       if (d['ZB'+i]===1){
         if (!s || typeof s.name!=='string' || s.name.length>40 ||
-            typeof s.atk!=='number' || typeof s.hp!=='number' ||
-            typeof s.bj!=='number' || typeof s.bs!=='number' || typeof s.crt!=='number') return null;
+            !Number.isFinite(s.atk) || !Number.isFinite(s.hp) ||
+            !Number.isFinite(s.bj) || !Number.isFinite(s.bs) || !Number.isFinite(s.crt)) return null;
       } else if (s!==null){
         return null;
       }
@@ -1382,6 +1397,18 @@ function readSave(slot){
   } catch(e){ return null; }
 }
 function deleteSave(slot){ try{ localStorage.removeItem(saveKey(slot)); }catch(e){} }
+/* 一次性清理 4.0 时代的旧版存档（版本号已升级，数值不兼容，避免残留占用） */
+function cleanupLegacySaves(){
+  try{
+    const legacyPrefix='csdl4:save:';
+    const toRemove=[];
+    for (let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if (k && k.startsWith(legacyPrefix)) toRemove.push(k);
+    }
+    toRemove.forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+}
 let roundStartSnap=null;
 function captureRoundStart(){
   roundStartSnap=snapshotState();
@@ -1545,7 +1572,7 @@ document.getElementById('btnChangelogClose').onclick=()=>{ hideAllOverlays(); if
 document.getElementById('settingsBtn').onclick=()=>showSettings();
 document.getElementById('btnSettingsClose').onclick=()=>{ hideAllOverlays(); if (!gameActive) welcomeOverlay.hidden=false; };
 document.getElementById('btnSettingsSave').onclick=()=>{ overlayReturnTo='settings'; showSaveMenu('game'); };
-document.getElementById('btnReplayTutorial').onclick=()=>replayTutorial();
+document.getElementById('btnReplayTutorial').onclick=()=>replayTutorial().catch(err=>console.error(err));
 document.getElementById('btnReturnTitle').onclick=async ()=>{
   if (!(await pixelConfirm('返回标题将暂停当前进度（自动存档已保留），确定？'))) return;
   runEpoch++;
@@ -1563,9 +1590,9 @@ document.getElementById('btnReturnTitle').onclick=async ()=>{
 document.querySelectorAll('input[name="speedOpt"]').forEach(r=>{
   r.addEventListener('change',()=>{
     if (!r.checked) return;
+    /* 玩家在设置面板明确选择速度即视为显式表态，标题界面与游戏中都落盘 */
     G.fast=(r.value==='fast');
-    /* 标题界面（未开局）不落盘，避免玩家只是点了下设置就跳过首次极速版询问 */
-    if (gameActive) saveSpeedPref(r.value);
+    saveSpeedPref(r.value);
   });
 });
 
@@ -1589,9 +1616,11 @@ function startNewGame(){
   introAndPlay(ep).catch(e=>{ console.error(e); L('发生了意外错误，请重新开始。',0,'bad'); });
 }
 function initApp(){
+  cleanupLegacySaves();
   resetState();
   updateHUD();
   const sp=loadSpeedPref();
+  G.fast=(sp==='fast');
   const speedRadio=document.querySelector(`input[name="speedOpt"][value="${sp==='fast'?'fast':'normal'}"]`);
   if (speedRadio) speedRadio.checked=true;
   try{
