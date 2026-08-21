@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<title>卡桑德里传说</title>
+<title>卡桑德里传说 4.0</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Crect width='8' height='8' fill='%230a0c0a'/%3E%3Crect x='3' y='1' width='2' height='1' fill='%2339ff8f'/%3E%3Crect x='2' y='2' width='4' height='1' fill='%2339ff8f'/%3E%3Crect x='1' y='3' width='6' height='2' fill='%2339ff8f'/%3E%3Crect x='2' y='5' width='1' height='1' fill='%2339ff8f'/%3E%3Crect x='5' y='5' width='1' height='1' fill='%2339ff8f'/%3E%3Crect x='1' y='6' width='1' height='1' fill='%23ffb454'/%3E%3Crect x='6' y='6' width='1' height='1' fill='%23ffb454'/%3E%3C/svg%3E">
 <style>
@@ -47,15 +47,15 @@ header{
   padding:8px 12px;border-bottom:3px solid var(--border);background:var(--panel);
   flex-wrap:wrap;
   box-shadow:0 3px 0 var(--bg-deep);
+  position:relative;z-index:101;
   outline:2px solid var(--border-lit);outline-offset:-6px;
 }
-header h1{font-size:24px;margin:0;letter-spacing:1px;color:var(--accent2);font-weight:400;text-shadow:2px 2px 0 var(--bg-deep);}
+header h1{font-size:16px;margin:0;letter-spacing:1px;color:var(--accent2);font-weight:400;text-shadow:2px 2px 0 var(--bg-deep);}
 header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 .toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);}
 .toggle input{accent-color:var(--accent2);image-rendering:pixelated;width:14px;height:14px;}
 #layout{display:flex;flex:1;min-height:0;}
 #terminal-wrap{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;position:relative;border-right:3px solid var(--border);outline:2px solid var(--border-lit);outline-offset:-6px;}
-#terminal-viewport{flex:1;display:flex;flex-direction:column;min-height:0;position:relative;}
 #term-titlebar{
   display:flex;align-items:center;gap:8px;padding:4px 10px;background:var(--panel2);
   border-bottom:2px solid var(--border);font-size:12px;color:var(--dim);letter-spacing:1px;flex-shrink:0;
@@ -68,7 +68,7 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 .turn-dot.cur{background:var(--accent);}
 #terminal{
   flex:1;overflow-y:auto;padding:16px 18px 8px 18px;min-height:0;
-  line-height:1.7;font-size:12px;cursor:pointer;
+  line-height:1.7;font-size:14px;cursor:pointer;
   scrollbar-color:var(--border-lit) var(--bg-deep);scrollbar-width:auto;
 }
 #terminal::-webkit-scrollbar{width:14px;}
@@ -81,14 +81,14 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 }
 #terminal .line.preview{
   border-left:4px dashed var(--border);padding:4px 10px;margin:-4px 0 12px 0;
-  background:transparent;font-size:12px;color:var(--dim);
+  background:transparent;font-size:12.5px;color:var(--dim);
 }
 #terminal .line.dim{color:var(--dim);font-style:italic;}
 #terminal .line.hl{color:var(--accent2);}
 #terminal .line.crit{color:var(--crit);}
 #terminal .line.bad{color:var(--danger);}
 #terminal .line.good{color:var(--good);}
-#terminal .line.end{color:var(--accent);font-weight:400;font-size:24px;margin-top:10px;}
+#terminal .line.end{color:var(--accent);font-weight:400;font-size:16px;margin-top:10px;}
 .delta-up{color:var(--good);}
 .delta-down{color:var(--danger);}
 .delta-same{color:var(--dim);}
@@ -104,17 +104,11 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 }
 .choice-btn{
   background:var(--panel2);color:var(--text);border:2px solid var(--border-lit);
-  padding:8px 14px;cursor:pointer;font-family:inherit;font-size:12px;
+  padding:8px 14px;cursor:pointer;font-family:inherit;font-size:13px;
   box-shadow:3px 3px 0 var(--bg-deep);
 }
 .choice-btn:hover{background:#1e2a1a;color:var(--accent2);}
 .choice-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--bg-deep);background:var(--accent2);color:var(--bg-deep);}
-.num-input-wrap{display:flex;gap:8px;align-items:center;}
-.num-input{
-  background:var(--panel2);border:2px solid var(--border-lit);color:var(--text);
-  padding:8px 12px;font-family:inherit;font-size:24px;width:140px;
-}
-.num-input:focus{outline:none;border-color:var(--accent2);}
 #hud{
   width:288px;flex-shrink:0;background:var(--panel);
   padding:12px;overflow-y:auto;
@@ -132,13 +126,13 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 .hpbar .fill.overflow{background:var(--crit);box-shadow:inset 0 0 0 2px var(--bg-deep);}
 .hpbar::after{content:'';position:absolute;inset:0;pointer-events:none;
   background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.35) 0 2px,transparent 2px 8px);}
-.hp-text{font-size:12px;color:var(--dim);text-align:right;margin-bottom:6px;}
+.hp-text{font-size:11px;color:var(--dim);text-align:right;margin-bottom:6px;}
 .hp-text.overflow,#hudm-hptext.overflow{color:var(--crit);}
 @keyframes flashUp{0%,100%{color:var(--text);}40%{color:var(--good);}}
 @keyframes flashDown{0%,100%{color:var(--text);}40%{color:var(--danger);}}
 .flash-up{animation:flashUp .5s steps(4);}
 .flash-down{animation:flashDown .5s steps(4);}
-.stat-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--border);}
+.stat-row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;border-bottom:1px solid var(--border);}
 .stat-row-hp{display:block;}
 .stat-row .k{color:var(--dim);}
 .stat-row .v{color:var(--text);font-weight:400;}
@@ -148,16 +142,16 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
   animation:dmgFloat .8s steps(6) forwards;z-index:5;
 }
 .dmg-float.dmg{color:var(--danger);}
-.dmg-float.crit{color:var(--crit);font-size:24px;}
+.dmg-float.crit{color:var(--crit);font-size:15px;}
 .dmg-float.heal{color:var(--good);}
 .dmg-float.dodge{color:var(--accent2);}
 .enemy-card{margin:0 0 14px 0;border:2px solid var(--border-lit);background:var(--panel2);padding:8px 10px;}
 .enemy-card[hidden]{display:none;}
-.enemy-name{color:var(--danger);font-size:12px;margin-bottom:4px;}
-.enemy-atk-line{font-size:12px;color:var(--dim);margin-bottom:2px;}
+.enemy-name{color:var(--danger);font-size:13px;margin-bottom:4px;}
+.enemy-atk-line{font-size:11px;color:var(--dim);margin-bottom:2px;}
 .equip-slots{margin-top:10px;display:flex;flex-direction:column;gap:8px;}
 .slot{
-  border:2px dashed var(--border);padding:7px 9px;min-height:44px;font-size:12px;
+  border:2px dashed var(--border);padding:7px 9px;min-height:44px;font-size:11.5px;
 }
 .slot.filled{border-style:solid;border-color:var(--accent);background:var(--panel2);}
 .slot-name{color:var(--accent);font-weight:400;margin-bottom:3px;}
@@ -165,6 +159,48 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 .slot-stats{color:var(--dim);line-height:1.5;}
 #equipDetails summary{font-size:12px;color:var(--dim);letter-spacing:2px;margin:16px 0 8px 0;text-transform:uppercase;cursor:pointer;list-style:none;}
 #equipDetails summary::-webkit-details-marker{display:none;}
+.icon-btn{
+  background:var(--panel2);color:var(--accent2);border:2px solid var(--border-lit);
+  width:32px;height:32px;font-size:16px;cursor:pointer;box-shadow:3px 3px 0 var(--bg-deep);
+}
+.icon-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--bg-deep);}
+.choice-btn.danger{border-color:var(--danger);color:var(--danger);}
+.choice-btn.danger:hover{background:#3a1414;color:var(--danger);}
+.choice-btn.danger:active{background:var(--danger);color:var(--bg-deep);}
+.overlay{
+  position:fixed;inset:0;background:rgba(4,6,4,.82);z-index:100;
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+.overlay[hidden]{display:none;}
+.overlay-panel{
+  background:var(--panel);border:3px solid var(--border-lit);box-shadow:6px 6px 0 var(--bg-deep);
+  max-width:520px;width:100%;max-height:86vh;overflow-y:auto;padding:20px 22px;
+}
+.overlay-panel h2{color:var(--accent2);font-size:16px;margin:0 0 14px 0;letter-spacing:1px;font-weight:400;}
+.overlay-panel h3{color:var(--dim);font-size:12px;margin:16px 0 8px 0;letter-spacing:2px;text-transform:uppercase;font-weight:400;}
+.overlay-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.overlay-row:last-child{border-bottom:none;}
+.overlay-actions{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;}
+.overlay-actions[hidden]{display:none;}
+.title-title{font-size:22px;color:var(--accent2);text-shadow:3px 3px 0 var(--bg-deep);margin:0 0 4px 0;letter-spacing:2px;}
+.title-ver{color:var(--dim);font-size:12px;margin:0 0 22px 0;letter-spacing:1px;}
+.title-menu{display:flex;flex-direction:column;gap:10px;}
+.title-menu .choice-btn{width:100%;text-align:left;}
+.title-menu .choice-btn:disabled{opacity:.4;cursor:not-allowed;}
+.title-menu .choice-btn:disabled:hover{background:var(--panel2);color:var(--text);}
+.save-slot{border:2px solid var(--border-lit);background:var(--panel2);padding:8px 10px;margin-bottom:8px;}
+.save-slot .meta{font-size:11.5px;color:var(--dim);margin-bottom:6px;line-height:1.6;}
+.save-slot .meta b{color:var(--accent);font-weight:400;}
+.save-slot .empty{font-size:12px;color:var(--dim);padding:6px 0;}
+.save-slot .ops{display:flex;gap:6px;flex-wrap:wrap;}
+.save-slot .ops .choice-btn{padding:5px 10px;font-size:12px;}
+.changelog-list{margin:0;padding-left:18px;font-size:13px;line-height:1.9;color:var(--text);}
+.changelog-list li::marker{color:var(--accent2);}
+.settings-field{padding:10px 0;border-bottom:1px solid var(--border);}
+.settings-field .label{font-size:12px;color:var(--dim);letter-spacing:1px;margin-bottom:8px;}
+.radio-row{display:flex;gap:14px;}
+.radio-row label{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;}
+.radio-row input{accent-color:var(--accent2);}
 @media (max-width:820px){
   #layout{flex-direction:column;}
   #hud{
@@ -174,7 +210,7 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
   #hud h2{display:none;}
   #hud .war-badge{display:none;}
   #hud>.stat-row{display:none;}
-  #hudMobileBar{display:flex;gap:10px;align-items:center;font-size:12px;flex-wrap:wrap;}
+  #hudMobileBar{display:flex;gap:10px;align-items:center;font-size:11px;flex-wrap:wrap;}
   #hudMobileBar .hpbar{flex:1 1 100px;min-width:80px;margin:0;}
   #hudMobileBar b{color:var(--accent2);font-weight:400;}
   .equip-slots{margin-top:6px;}
@@ -185,7 +221,7 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
   #equipDetails[open] summary::before{content:'▾ ';}
   .enemy-card{margin:6px 0 0 0;}
   #terminal-wrap{order:2;}
-  header h1{font-size:12px;}
+  header h1{font-size:14px;}
 }
 @media (min-width:821px){
   #hudMobileBar{display:none;}
@@ -194,10 +230,9 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 
 <div id="app" class="crt-on">
   <header>
-    <div><h1>卡桑德里传说</h1><span class="sub">静态网页版</span></div>
-    <div style="display:flex;gap:14px;">
-      <label class="toggle"><input type="checkbox" id="skipAnimToggle"> 跳过打字动画</label>
-      <label class="toggle"><input type="checkbox" id="crtToggle" checked> CRT 扫描线</label>
+    <div><h1>卡桑德里传说</h1><span class="sub">静态网页版 · 4.0</span></div>
+    <div style="display:flex;gap:10px;">
+      <button id="settingsBtn" class="icon-btn" title="设置">⚙</button>
     </div>
   </header>
   <div id="layout">
@@ -207,10 +242,8 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
         <span>TERMINAL // 卡桑德里传说</span>
         <div id="turnProgress"></div>
       </div>
-      <div id="terminal-viewport">
-        <div id="terminal"></div>
-        <button id="scrollLatestBtn" hidden>↓ 回到最新</button>
-      </div>
+      <div id="terminal"></div>
+      <button id="scrollLatestBtn" hidden>↓ 回到最新</button>
       <div id="choices"></div>
     </div>
     <aside id="hud">
@@ -247,6 +280,69 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
         </div>
       </details>
     </aside>
+  </div>
+
+  <div id="welcomeOverlay" class="overlay">
+    <div class="overlay-panel">
+      <div class="title-title">卡桑德里传说</div>
+      <div class="title-ver">4.0 · 静态网页版</div>
+      <div class="title-menu">
+        <button class="choice-btn" id="btnNewGame">新的征途</button>
+        <button class="choice-btn" id="btnContinue">继续</button>
+        <button class="choice-btn" id="btnSaveMenu">存档</button>
+        <button class="choice-btn" id="btnSettingsMenu">设置</button>
+        <button class="choice-btn" id="btnChangelog">更新内容</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsOverlay" class="overlay" hidden>
+    <div class="overlay-panel">
+      <h2>设置</h2>
+      <div class="settings-field">
+        <div class="label">文字速度</div>
+        <div class="radio-row">
+          <label><input type="radio" name="speedOpt" value="normal"> 普通</label>
+          <label><input type="radio" name="speedOpt" value="fast"> 极速</label>
+        </div>
+      </div>
+      <div class="settings-field">
+        <label class="toggle"><input type="checkbox" id="skipAnimToggle"> 跳过打字动画</label>
+      </div>
+      <div class="settings-field">
+        <label class="toggle"><input type="checkbox" id="crtToggle" checked> CRT 扫描线</label>
+      </div>
+      <div class="overlay-actions" id="settingsGameActions" hidden>
+        <button class="choice-btn" id="btnSettingsSave">保存到槽位</button>
+        <button class="choice-btn danger" id="btnReturnTitle">返回标题</button>
+      </div>
+      <div class="overlay-actions">
+        <button class="choice-btn" id="btnSettingsClose">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="saveOverlay" class="overlay" hidden>
+    <div class="overlay-panel">
+      <h2>存档</h2>
+      <div id="saveSlotList"></div>
+      <div class="overlay-actions">
+        <button class="choice-btn" id="btnSaveClose">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="changelogOverlay" class="overlay" hidden>
+    <div class="overlay-panel">
+      <h2>更新内容 · 4.0</h2>
+      <h3>网页版</h3>
+      <ol class="changelog-list" id="changelogWeb"></ol>
+      <h3>玩法变更</h3>
+      <ol class="changelog-list" id="changelogPlay"></ol>
+      <div class="overlay-actions">
+        <button class="choice-btn" id="btnChangelogClose">关闭</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -314,7 +410,7 @@ function atkWeight(){ return weightedInt([[0,21,200],[21,41,3],[41,61,2],[61,81,
 function hpWeight(){ return weightedInt([[-30,-19,2],[-19,0,3],[0,21,300],[21,61,20],[61,81,3],[81,100,2]]); }
 function bjWeight(){ return weightedInt([[-20,-9,10],[-9,0,20],[0,11,200],[11,50,5]])/100; }
 function bsWeight(){ return weightedInt([[-30,-9,5],[-9,0,10],[0,21,200],[21,60,10]])/100; }
-function crtWeight(){ return weightedInt([[-5,-0,10],[-0,0,50],[0,11,80],[11,31,5],[31,40,2]])/100; }
+function crtWeight(){ return weightedInt([[-5,0,10],[0,1,50],[0,11,80],[11,31,5],[31,40,2]])/100; }
 
 /* ---------- 常量 ---------- */
 const TIME_LAST=2;    // 魔王/它 之战固定节奏，不随速度模式变化
@@ -322,8 +418,12 @@ const TIME_SHORT=0.1; // 装备槽预览固定短停顿
 const WARRIOR_BLOODSUCK=0.06;
 
 /* ---------- 游戏状态 ---------- */
+/* 运行代：每次新开局/读档/返回标题递增，旧协程在每个可恢复点核对，代不符即静默终止，防止并发写同一个 G */
+let runEpoch=0;
+function aborted(ep){ return ep!==runEpoch; }
 let G={};
 function resetState(){
+  roundStartSnap=null;
   G={
     ATK:10, ATKZJ:3, HP:20, ZDYHP:20, HPZJ:5,
     BJ:0.05, BS:0.5, CRT:0.1,
@@ -335,7 +435,6 @@ function resetState(){
     warrior:false, angel:false, hero:false, hermit:false,
     fast:false, combat:false,
   };
-  prevHUD={ATK:null,ZDYHP:null,BJ:null,BS:null,CRT:null};
 }
 function timeMap(){ return G.fast ? {t0:0.1,t1:0.1,t2:0.2} : {t0:2,t1:1,t2:3}; }
 
@@ -358,14 +457,21 @@ const scrollLatestBtn=document.getElementById('scrollLatestBtn');
 let fastForward=null;
 let skipAnim=false;
 
-document.getElementById('skipAnimToggle').addEventListener('change',e=>{ skipAnim=e.target.checked; });
+document.getElementById('skipAnimToggle').addEventListener('change',e=>{
+  skipAnim=e.target.checked;
+  try{ localStorage.setItem('csdl4:skipAnim',skipAnim?'1':'0'); }catch(err){}
+});
 document.getElementById('crtToggle').addEventListener('change',e=>{
   document.getElementById('app').classList.toggle('crt-on',e.target.checked);
+  try{ localStorage.setItem('csdl4:crt',e.target.checked?'1':'0'); }catch(err){}
 });
 termEl.addEventListener('click',()=>{ if (fastForward){ const f=fastForward; fastForward=null; f(); } });
 document.addEventListener('keydown',e=>{
-  if (e.key==='Enter' && document.activeElement && document.activeElement.tagName==='INPUT') return;
-  if (e.key==='Enter'){ if (fastForward){ const f=fastForward; fastForward=null; f(); } }
+  if (e.key!=='Enter') return;
+  if (document.activeElement && document.activeElement.tagName==='INPUT') return;
+  if (!gameActive) return;
+  if (!welcomeOverlay.hidden || !settingsOverlay.hidden || !saveOverlay.hidden || !changelogOverlay.hidden) return;
+  if (fastForward){ const f=fastForward; fastForward=null; f(); }
 });
 
 /* 固定高度日志：新消息自动滚底，用户上滚时暂停 */
@@ -424,7 +530,7 @@ function spawnFloatNumber(containerEl,text,cls){
   span.addEventListener('animationend',remove);
   setTimeout(remove,900);
 }
-/* 数值飘字格式化：整数四舍五入，绝对值小于1时保留一位小数避免显示为0 */
+/* 数值飘字格式化：绝对值小于1时保留一位小数，避免显示为0 */
 function fmtFloatDelta(delta){
   const sign=delta>0?'+':'';
   return Math.abs(delta)<1 ? sign+delta.toFixed(1) : sign+Math.round(delta);
@@ -480,37 +586,11 @@ function choose(options){
     choicesEl.innerHTML='';
     options.forEach(opt=>{
       const btn=document.createElement('button');
-      btn.className='choice-btn';
+      btn.className='choice-btn'+(opt.danger?' danger':'');
       btn.textContent=opt.label;
       btn.onclick=()=>{ choicesEl.innerHTML=''; resolve(opt.value); };
       choicesEl.appendChild(btn);
     });
-  });
-}
-
-/* 仅接受纯整数字符串，空串/小数/非数字一律无效 */
-function validIntOrNaN(raw){
-  const s=(raw||'').trim();
-  if (!/^-?\d+$/.test(s)) return NaN;
-  return parseInt(s,10);
-}
-
-function promptNumber(placeholder){
-  return new Promise(resolve=>{
-    choicesEl.innerHTML='';
-    const wrap=document.createElement('div');
-    wrap.className='num-input-wrap';
-    const input=document.createElement('input');
-    input.type='number'; input.className='num-input';
-    input.placeholder=placeholder||'请输入数字';
-    const btn=document.createElement('button');
-    btn.className='choice-btn'; btn.textContent='确定';
-    const submit=()=>{ const v=input.value; choicesEl.innerHTML=''; resolve(v); };
-    btn.onclick=submit;
-    input.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); submit(); } });
-    wrap.appendChild(input); wrap.appendChild(btn);
-    choicesEl.appendChild(wrap);
-    setTimeout(()=>input.focus(),0);
   });
 }
 
@@ -580,14 +660,18 @@ function updateHUD(){
     if (G['ZB'+i]===1 && s){
       el.classList.add('filled');
       const sg=v=>(v<0?'':'+')+v;
-      el.innerHTML=`<div class="slot-name">${s.name}</div><div class="slot-stats">ATK${sg(s.atk)} HP${sg(s.hp)} BJ${sg(Math.trunc(s.bj*100))}% BS${sg(Math.trunc(s.bs*100))}% CRT${sg(Math.trunc(s.crt*100))}%</div>`;
+      el.innerHTML='';
+      const nameDiv=document.createElement('div');
+      nameDiv.className='slot-name'; nameDiv.textContent=s.name;
+      const statDiv=document.createElement('div');
+      statDiv.className='slot-stats';
+      statDiv.textContent=`ATK${sg(s.atk)} HP${sg(s.hp)} BJ${sg(Math.trunc(s.bj*100))}% BS${sg(Math.trunc(s.bs*100))}% CRT${sg(Math.trunc(s.crt*100))}%`;
+      el.appendChild(nameDiv); el.appendChild(statDiv);
     } else {
       el.classList.remove('filled');
       el.innerHTML=`<div class="slot-empty">空槽位 ${i}</div>`;
     }
   }
-  const filledCount=[1,2,3].filter(i=>G['ZB'+i]===1).length;
-  document.getElementById('equipDetails').querySelector('summary').textContent=`装备 ${filledCount}/3`;
 
   const tp=document.getElementById('turnProgress');
   tp.innerHTML='';
@@ -597,6 +681,9 @@ function updateHUD(){
     d.className='turn-dot'+(i<=curWar?' done':'')+(i===curWar?' cur':'');
     tp.appendChild(d);
   }
+
+  const filledCount=[1,2,3].filter(i=>G['ZB'+i]===1).length;
+  document.getElementById('equipDetails').querySelector('summary').textContent=`装备 ${filledCount}/3`;
 }
 
 /* ---------- 敌人卡（战斗中实时掉血展示） ---------- */
@@ -616,7 +703,8 @@ function updateEnemyCard(cur,max){
 function hideEnemyCard(){ document.getElementById('enemyCard').hidden=true; }
 
 /* ---------- 战斗交锋（玩家先手，含"死后反击"保留行为） ---------- */
-async function combatTurn(ctx){
+async function combatTurn(ep,ctx){
+  if (aborted(ep)) return;
   const hpPhrase = ctx.hpPhrase || '的血量还剩';
   const isCrit=chance(G.BJ);
   let damage;
@@ -633,33 +721,40 @@ async function combatTurn(ctx){
     spawnFloatNumber(document.getElementById('enemyHpBar'),'-'+damage,'dmg');
     await L(`你造成了 ${damage} 点伤害，${ctx.nameDisplay}${hpPhrase} ${ctx.getHP()} 点！`,ctx.pauseSec);
   }
+  if (aborted(ep)) return;
   if (G.warrior){
     G.ZDYHP += damage*WARRIOR_BLOODSUCK;
-    updateHUD();
     await L(`你触发了回血效果，血量暂时回复至 ${Math.trunc(G.ZDYHP)} 点。`,ctx.pauseSec,'good');
+    if (aborted(ep)) return;
   }
   const dodged=chance(G.CRT);
   if (dodged){
     spawnFloatNumber(document.getElementById('hud-hpbar'),'闪避','dodge');
     await L(`你闪避了${ctx.nameDisplay}对你造成的伤害,血量还剩下 ${Math.trunc(G.ZDYHP)} 点。`,ctx.pauseSec,'hl');
+    if (aborted(ep)) return;
     if (ctx.crtDecay){
       const dec=uniform(0.08,0.12);
       G.CRT-=dec;
       await L(`糟糕！“它”的能力使你失去了 ${Math.trunc(dec*100)} %的闪避率！`,ctx.pauseSec,'bad');
+      if (aborted(ep)) return;
       await L(`你还剩下 ${Math.trunc(G.CRT*100)} %的闪避率。`,ctx.pauseSec);
+      if (aborted(ep)) return;
     }
   } else {
     const harm=ctx.enemyAtk+randint(ctx.dmgMin,ctx.dmgMax);
     G.ZDYHP-=harm;
-    updateHUD();
     await L(`${ctx.nameDisplay}对你造成了 ${harm} 点伤害，你的血量还剩 ${Math.trunc(G.ZDYHP)} 点。`,ctx.pauseSec,'bad');
+    if (aborted(ep)) return;
     if (ctx.crtDecay){
       const dec=uniform(0.03,0.08);
       G.CRT-=dec;
       await L(`糟糕！“它”的伤害使你失去了 ${Math.trunc(dec*100)} %的闪避率！`,ctx.pauseSec,'bad');
+      if (aborted(ep)) return;
       await L(`你还剩下 ${Math.trunc(G.CRT*100)} %的闪避率。`,ctx.pauseSec);
+      if (aborted(ep)) return;
     }
   }
+  if (aborted(ep)) return;
   updateHUD();
 }
 
@@ -673,7 +768,8 @@ function equipBlockText(idx,name,item){
 }
 
 /* 装备默认按序自动入槽：有空槽自动装入编号最小的空槽；三槽全满才进入替换选择 */
-async function equipSlotFlow(name,item){
+async function equipSlotFlow(ep,name,item){
+  if (aborted(ep)) return;
   const tm=timeMap();
   const emptyIdx=[1,2,3].find(i=>G['ZB'+i]===0);
   if (emptyIdx){
@@ -682,20 +778,26 @@ async function equipSlotFlow(name,item){
     G.ATK+=item.atk; G.HP+=item.hp; G.BJ+=item.bj; G.BS+=item.bs; G.CRT+=item.crt;
     updateHUD();
     await L(`已装入槽位 ${emptyIdx}。装备成功！请查看你现在的面板。`,tm.t0);
+    if (aborted(ep)) return;
     await L(panelText(),tm.t0);
+    if (aborted(ep)) return;
     await continuePrompt();
     return;
   }
   await L('三个槽位都已装满，先看看现在的装备……',tm.t0);
+  if (aborted(ep)) return;
   for (let i=1;i<=3;i++){
     const s=G['slot'+i];
     await L(equipBlockText(i,s.name,s),TIME_SHORT);
+    if (aborted(ep)) return;
     appendHTMLBlock(replacePreviewHTML(s,item));
   }
   await L('要替换哪个槽位上的装备？放弃则新装备丢失。',0);
+  if (aborted(ep)) return;
   const a5=await choose([
     {label:'1 替换槽位1',value:1},{label:'2 替换槽位2',value:2},{label:'3 替换槽位3',value:3},{label:'4 放弃',value:4}
   ]);
+  if (aborted(ep)) return;
   if (a5===4) return; // 放弃，新装备丢失
   const idx=a5;
   const old=G['slot'+idx];
@@ -704,80 +806,95 @@ async function equipSlotFlow(name,item){
   G.ATK+=item.atk; G.HP+=item.hp; G.BJ+=item.bj; G.BS+=item.bs; G.CRT+=item.crt;
   updateHUD();
   await L('装备成功！请查看你现在的面板。',tm.t0);
+  if (aborted(ep)) return;
   await L(panelText(),tm.t0);
+  if (aborted(ep)) return;
   await continuePrompt();
 }
 
-async function equipDropFlow(){
+async function equipDropFlow(ep){
+  if (aborted(ep)) return;
   const tm=timeMap();
   await L('让我看看它身上藏着什么好东西……',uniform(tm.t1,tm.t2));
+  if (aborted(ep)) return;
   const name1=pick(ZBXRC)+pick(ZBZL);
   const item1=generateEquip();
   const name2=pick(ZBXRC)+pick(ZBZL);
   const item2=generateEquip();
   await L(`找到了！是“${name1}”和“${name2}”！`,tm.t0);
   await L('再看看它们的面板……',tm.t0);
+  if (aborted(ep)) return;
   const hasEmpty=[1,2,3].some(i=>G['ZB'+i]===0);
   await L(`1.${name1}\nATK: + ${item1.atk}\nHP: + ${item1.hp}\nBJ： + ${Math.trunc(item1.bj*100)} %\nBS： + ${Math.trunc(item1.bs*100)} %\nCRT： + ${Math.trunc(item1.crt*100)} %`,tm.t0);
   if (hasEmpty) appendHTMLBlock(equipPreviewHTML(item1));
   else appendHTMLBlock(fullSlotsPreviewHTML(item1));
+  if (aborted(ep)) return;
   await L(`2.${name2}\nATK: + ${item2.atk}\nHP: + ${item2.hp}\nBJ： + ${Math.trunc(item2.bj*100)} %\nBS： + ${Math.trunc(item2.bs*100)} %\nCRT： + ${Math.trunc(item2.crt*100)} %`,0);
   if (hasEmpty) appendHTMLBlock(equipPreviewHTML(item2));
   else appendHTMLBlock(fullSlotsPreviewHTML(item2));
   await L(`要装备${name1}还是装备${name2}，又或者是不装备呢？`,0);
+  if (aborted(ep)) return;
   const a4=await choose([
     {label:`1 装备${name1}`,value:1},{label:`2 装备${name2}`,value:2},{label:'3 不装备',value:3}
   ]);
-  if (a4===1) await equipSlotFlow(name1,item1);
-  else if (a4===2) await equipSlotFlow(name2,item2);
+  if (aborted(ep)) return;
+  if (a4===1) await equipSlotFlow(ep,name1,item1);
+  else if (a4===2) await equipSlotFlow(ep,name2,item2);
 }
 
 /* ---------- 主线：前19回合 ---------- */
-async function winRound(DRM){
+async function winRound(ep,DRM){
+  if (aborted(ep)) return;
   const tm=timeMap();
   G.ATK += G.ATKZJ;
   if (G.warrior){
     G.ATK = bankerRound(G.ATK*1.3);
     await L('触发了战士的祝福！',tm.t0);
+    if (aborted(ep)) return;
   }
   if (G.angel){
     G.HP = bankerRound(G.HP*1.2);
     await L('触发了天使的祝福！',tm.t0);
+    if (aborted(ep)) return;
   }
   if (G.hero){
     G.BJ += uniform(0.05,0.08);
     G.BS *= 1.2;
     await L(`触发了勇者的祝福！暴击率提升至 ${Math.trunc(G.BJ*100)} %，暴击伤害提升至 ${Math.trunc(G.BS*100)} %！`,tm.t0);
+    if (aborted(ep)) return;
   }
   if (G.hermit){
     G.CRT += uniform(0.03,0.06);
     await L(`触发了隐士的祝福！闪避率提升至 ${Math.trunc(G.CRT*100)} %！`,tm.t0);
+    if (aborted(ep)) return;
   }
   G.HP += G.HPZJ;
   G.ZDYHP = G.HP;
   updateHUD();
   await L(`你战胜了【${DRM}】！你的攻击力提升至 ${G.ATK} ,血量回复并提升至 ${G.ZDYHP} 。`,tm.t0,'good');
+  if (aborted(ep)) return;
 
   G.DRATKXX += G.low1; G.DRATKSX += G.high1;
   G.DRHPXX += G.low2; G.DRHPSX += G.high2;
   G.ATKZJ += 2; G.HPZJ += 2;
   if (G.WAR>=10){ G.low1+=20; G.high1+=40; G.low2+=180; G.high2+=300; }
 
-  await equipDropFlow();
+  await equipDropFlow(ep);
 }
 
-async function mainRounds(){
-  G.WAR=1;
-  while (G.WAR<20){
+async function mainRounds(ep){
+  while (!aborted(ep) && G.WAR<20){
     const tm=timeMap();
     G.ZDYHP=G.HP;
     updateHUD();
+    captureRoundStart();
     const DRM=pick(DRXRC)+pick(DRZL);
 
     await L(`现在是第 ${G.WAR} 回合`,tm.t0);
     await L('正在行进中……',uniform(tm.t1,tm.t2),'dim');
     await L(`遇到了敌人【${DRM}】！`,tm.t0);
     await L(`正在分析【${DRM}】的面板……`,uniform(tm.t1,tm.t2),'dim');
+    if (aborted(ep)) return;
 
     let DRATK=randint(G.DRATKXX,G.DRATKSX);
     let DRHP=randint(G.DRHPXX,G.DRHPSX);
@@ -795,83 +912,51 @@ async function mainRounds(){
       const dap=hermitPower();
       await L(`隐者的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,tm.t0);
     }
+    if (aborted(ep)) return;
 
     const nameDisplay=`【${DRM}】`;
     const DRHPMax=DRHP;
     showEnemyCard(DRM,DRHP,DRHPMax,DRATK);
     G.combat=true;
-    while (G.ZDYHP>0 && DRHP>0){
-      await combatTurn({
+    while (!aborted(ep) && G.ZDYHP>0 && DRHP>0){
+      await combatTurn(ep,{
         nameDisplay, getHP:()=>DRHP, setHP:v=>{DRHP=v;}, enemyMaxHP:DRHPMax,
         enemyAtk:DRATK, dmgMin:-3, dmgMax:3, pauseSec:tm.t0, crtDecay:false
       });
     }
     G.combat=false;
+    if (aborted(ep)) return;
     hideEnemyCard();
 
     if (DRHP<=0 && G.ZDYHP>0){
-      await winRound(DRM);
+      await winRound(ep,DRM);
     } else if (DRHP<=0 && G.ZDYHP<=0){
       await L(`你和【${DRM}】同归于尽了。`,tm.t0,'bad');
-      return endGame('Bad End 2:同归于尽');
+      if (aborted(ep)) return;
+      return endGame(ep,'Bad End 2:同归于尽');
     } else {
       await L(`你被【${DRM}】打死了。`,tm.t0,'bad');
       await L('（轻叹）看来，是时候寻找下一位勇者了……',tm.t0);
-      return endGame('Bad End 3:宿命');
+      if (aborted(ep)) return;
+      return endGame(ep,'Bad End 3:宿命');
     }
+    if (aborted(ep)) return;
     G.WAR += 1;
   }
-  return bossNode();
+  if (aborted(ep)) return;
+  return bossNode(ep);
 }
 
 /* ---------- 第20回合：魔王 / 隐藏路线 ---------- */
-async function bossNode(){
-  updateHUD();
+async function bossNode(ep){
+  if (aborted(ep)) return;
+  G.WAR=20;
+  captureRoundStart();
   const tm=timeMap();
   await L('你终于来到了魔王的面前。',tm.t0);
   await L('魔王只是冷漠地看着你。',0);
+  if (aborted(ep)) return;
 
-  await L('（请输入1开始战斗！请勿输入其他数字！）',0);
-  let raw,val;
-  do {
-    raw=await promptNumber('请输入数字');
-    val=validIntOrNaN(raw);
-    if (Number.isNaN(val)) await L('请输入一个整数。',0);
-  } while (Number.isNaN(val));
-  let Q2=0,Q3=0;
-
-  if (val===1){
-    Q2=1;
-  } else {
-    let chanceCount=0;
-    while (chanceCount<5 && Q2===0){
-      await L('（请不要输入1以外的数字！）',0);
-      do {
-        raw=await promptNumber('请输入数字');
-        val=validIntOrNaN(raw);
-        if (Number.isNaN(val)) await L('请输入一个整数。',0);
-      } while (Number.isNaN(val));
-      if (val===1){
-        await L('这才像话。',0);
-        Q2=1;
-      } else {
-        chanceCount++;
-      }
-    }
-    if (Q2===0){
-      await L('……你为什么不肯听我的话？',tm.t0);
-      await L('你到底察觉了什么？',tm.t0);
-      await L('好吧，既然如此，那便上来，与我决斗！',0);
-      await choose([{label:'1 继续',value:1}]);
-      Q3=1;
-    }
-  }
-
-  if (Q2===1) return princeBattle();
-  if (Q3===1) return itBattle();
-}
-
-async function princeBattle(){
   const occupied=[1,2,3].filter(i=>G['ZB'+i]===1);
   if (occupied.length===0){
     await L('不好！魔王的威压袭来，但你身上并没有能被夺走的装备。',TIME_LAST);
@@ -883,12 +968,40 @@ async function princeBattle(){
     updateHUD();
     await L(`不好！魔王的威压让你浑身颤抖，导致你的“【${s.name}】掉在了地上！”`,TIME_LAST,'bad');
   }
+  if (aborted(ep)) return;
   await L('这是你现在的面板。',TIME_LAST);
   await L(panelText(),TIME_LAST);
+  if (aborted(ep)) return;
   await L('事已至此，只能继续战斗了……',TIME_LAST);
-  await L('准备好了，就按下“1”吧。',TIME_LAST);
-  await choose([{label:'1 继续',value:1}]);
+  if (aborted(ep)) return;
 
+  let refuseCount=0;
+  while (!aborted(ep)){
+    const sel=await choose([
+      {label:'迎战魔王',value:1},
+      {label:'拒绝迎战',value:0,danger:true}
+    ]);
+    if (aborted(ep)) return;
+    if (sel===1) break;
+    refuseCount++;
+    await L('请专注战斗。',0);
+    if (aborted(ep)) return;
+    if (refuseCount>=3){
+      await L('……你为什么不肯听我的话？',tm.t0);
+      await L('你到底察觉了什么？',tm.t0);
+      await L('好吧，既然如此，那便上来，与我决斗！',0);
+      if (aborted(ep)) return;
+      await choose([{label:'1 继续',value:1}]);
+      if (aborted(ep)) return;
+      return itBattle(ep);
+    }
+  }
+  if (aborted(ep)) return;
+  return princeBattle(ep);
+}
+
+async function princeBattle(ep){
+  if (aborted(ep)) return;
   G.ZDYHP=G.HP;
   updateHUD();
 
@@ -896,6 +1009,7 @@ async function princeBattle(){
   await L('正在检测魔王的面板……',uniform(tm.t1,tm.t2),'dim');
   await L('魔王的攻击力是 1500 ，血量是 100000 。',TIME_LAST);
   await L('现在，决战开始！',TIME_LAST);
+  if (aborted(ep)) return;
 
   if (G.angel){
     const dap=angelPower();
@@ -905,15 +1019,17 @@ async function princeBattle(){
     const dap=hermitPower();
     await L(`隐者的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,TIME_LAST);
   }
+  if (aborted(ep)) return;
 
   let HPPrince=100000;
   const nameDisplay='魔王';
   showEnemyCard('魔王',HPPrince,100000,1500);
   G.combat=true;
-  while (HPPrince>0 && G.ZDYHP>0){
-    await combatTurn({nameDisplay,hpPhrase:'血量还剩',getHP:()=>HPPrince,setHP:v=>{HPPrince=v;},enemyMaxHP:100000,enemyAtk:1500,dmgMin:-10,dmgMax:20,pauseSec:TIME_LAST,crtDecay:false});
+  while (!aborted(ep) && HPPrince>0 && G.ZDYHP>0){
+    await combatTurn(ep,{nameDisplay,hpPhrase:'血量还剩',getHP:()=>HPPrince,setHP:v=>{HPPrince=v;},enemyMaxHP:100000,enemyAtk:1500,dmgMin:-10,dmgMax:20,pauseSec:TIME_LAST,crtDecay:false});
   }
   G.combat=false;
+  if (aborted(ep)) return;
   hideEnemyCard();
 
   if (HPPrince<=0 && G.ZDYHP>0){
@@ -924,24 +1040,29 @@ async function princeBattle(){
     await L('不知道你还记不记得我的那把剑……',TIME_LAST);
     await L('我想，你现在证明了自己。',TIME_LAST);
     await L('证明了你有资格成为它的养料。',TIME_LAST);
-    return endGame('True End 1:浴血之剑');
+    if (aborted(ep)) return;
+    return endGame(ep,'True End 1:浴血之剑');
   } else if (HPPrince<=0 && G.ZDYHP<=0){
     await L('……和魔王一起战死了啊。',TIME_LAST,'bad');
     await L('真是可惜……',TIME_LAST);
-    return endGame('Bad End 4:再落一子');
+    if (aborted(ep)) return;
+    return endGame(ep,'Bad End 4:再落一子');
   } else {
     await L('果然还不够强。',TIME_LAST,'bad');
     await L('是时候召唤下一位勇者了……',TIME_LAST);
-    return endGame('Bad End 5:重启');
+    if (aborted(ep)) return;
+    return endGame(ep,'Bad End 5:重启');
   }
 }
 
-async function itBattle(){
+async function itBattle(ep){
+  if (aborted(ep)) return;
   G.ZDYHP=G.HP;
   const tm=timeMap();
   await L('正在检测“它”的面板……',uniform(tm.t1,tm.t2),'dim');
   await L('“它”的攻击力是 3000 ，血量是200000 。',TIME_LAST);
   await L('突然，你获得了魔王力量的加持！',TIME_LAST);
+  if (aborted(ep)) return;
 
   G.ATK *= randint(5,10);
   G.ZDYHP *= randint(5,10);
@@ -952,6 +1073,7 @@ async function itBattle(){
 
   await L(`你的战斗力提升至 ${G.ATK} ，\n血量提升至 ${G.ZDYHP} ,\n暴击率提升至 ${Math.trunc(G.BJ*100)} %，\n暴击伤害提升至 ${Math.trunc(G.BS*100)} %\n闪避率提升至 ${Math.trunc(G.CRT*100)} %！`,TIME_LAST);
   await L('开始战斗！',TIME_LAST);
+  if (aborted(ep)) return;
 
   if (G.angel){
     const dap=angelPower();
@@ -961,66 +1083,88 @@ async function itBattle(){
     const dap=hermitPower();
     await L(`隐者的祝福生效了！你获得了 ${Math.trunc(dap*100)} %的增伤！`,TIME_LAST);
   }
+  if (aborted(ep)) return;
 
   let HPIt=200000;
   const nameDisplay='“它”';
-  showEnemyCard('“它”',HPIt,200000,3000);
+  showEnemyCard('它',HPIt,200000,3000);
   G.combat=true;
-  while (HPIt>0 && G.ZDYHP>0){
-    await combatTurn({nameDisplay,getHP:()=>HPIt,setHP:v=>{HPIt=v;},enemyMaxHP:200000,enemyAtk:3000,dmgMin:-10,dmgMax:30,pauseSec:TIME_LAST,crtDecay:true});
+  while (!aborted(ep) && HPIt>0 && G.ZDYHP>0){
+    await combatTurn(ep,{nameDisplay,getHP:()=>HPIt,setHP:v=>{HPIt=v;},enemyMaxHP:200000,enemyAtk:3000,dmgMin:-10,dmgMax:30,pauseSec:TIME_LAST,crtDecay:true});
   }
   G.combat=false;
+  if (aborted(ep)) return;
   hideEnemyCard();
 
   if (HPIt<=0 && G.ZDYHP>0){
     await L('你战胜了“它”。',TIME_LAST,'good');
     await L('现在，我终于可以拿回接管权了。',TIME_LAST);
     await L('也请你回到自己的世界吧。',TIME_LAST);
-    return endGame('True End 2:回家');
+    if (aborted(ep)) return;
+    return endGame(ep,'True End 2:回家');
   } else if (HPIt<=0 && G.ZDYHP<=0){
     await L('&*%!@^%(*&!@)#)*!(@&#^&)!@#&……',TIME_LAST,'bad');
-    return endGame('Bad End 6:乱码？？？');
+    if (aborted(ep)) return;
+    return endGame(ep,'Bad End 6:乱码？？？');
   } else {
     await L('你以为你能够战胜我？',TIME_LAST,'bad');
     await L('作为惩罚，这个结局没有结局，嘻嘻。',TIME_LAST);
-    return endGame(null);
+    if (aborted(ep)) return;
+    return endGame(ep,null);
   }
 }
 
 /* ---------- 结局与重开 ---------- */
-async function endGame(label){
+async function endGame(ep,label){
+  if (aborted(ep)) return;
   if (label) await L(label,0,'end');
   await sleep(1);
+  if (aborted(ep)) return;
+  gameActive=false;
   choicesEl.innerHTML='';
   const btn=document.createElement('button');
   btn.className='choice-btn';
   btn.textContent='重新开始';
-  btn.onclick=()=>{ choicesEl.innerHTML=''; termEl.innerHTML=''; boot(); };
+  btn.onclick=()=>{ choicesEl.innerHTML=''; startNewGame(); };
   choicesEl.appendChild(btn);
+  const btn2=document.createElement('button');
+  btn2.className='choice-btn';
+  btn2.textContent='返回标题';
+  btn2.onclick=()=>{ choicesEl.innerHTML=''; showWelcome(); };
+  choicesEl.appendChild(btn2);
 }
 
 /* ---------- 开局 / 教程 / 祝福选择 ---------- */
-async function introAndPlay(){
-  await L('是否体验极速版？注：首次游玩建议选择否，使用普通速度版。',0);
-  const a0=await choose([{label:'1 是（极速版）',value:'1'},{label:'2 否（普通速度）',value:'2'}]);
-  G.fast = (a0==='1');
+async function introAndPlay(ep){
+  if (aborted(ep)) return;
+  const storedSpeed=loadSpeedPref();
+  if (storedSpeed){
+    G.fast=(storedSpeed==='fast');
+  } else {
+    await L('是否体验极速版？注：首次游玩建议选择否，使用普通速度版。',0);
+    const a0=await choose([{label:'1 是（极速版）',value:'1'},{label:'2 否（普通速度）',value:'2'}]);
+    applySpeed(a0==='1'?'fast':'normal');
+  }
   const tm0=timeMap();
 
   await L('异世的勇者，我代表卡桑德里大陆欢迎你的到来。',tm0.t0);
   await L('你已经准备好踏上征服魔王的旅途了吗？',tm0.t0);
   await L('输入数字“1”，表示你已经准备好了！',0);
   const a1=await choose([{label:'1 准备好了',value:1},{label:'拒绝',value:0}]);
+  if (aborted(ep)) return;
 
   if (a1!==1){
     await L('看来你并没有踏上征途的觉悟！',tm0.t0);
     await L('（小声）或许我们应该找一位更听话的勇者……',tm0.t0);
-    return endGame('Bad End 1:倔强');
+    if (aborted(ep)) return;
+    return endGame(ep,'Bad End 1:倔强');
   }
 
   await L('很好，接下来由我来教你如何战斗。',tm0.t0);
   await L('当然，也许你已经学会了战斗的方法，也可以输入数字“1”来跳过它。',tm0.t0);
   await L('不需要跳过的话，随便输点儿什么都行？',0);
   const a2=await choose([{label:'1 跳过教程',value:1},{label:'2 不跳过，听讲解',value:2}]);
+  if (aborted(ep)) return;
 
   if (a2===1){
     await L('看来你已经是个熟练的战士，那我们就直接出发吧。',tm0.t0);
@@ -1035,6 +1179,7 @@ async function introAndPlay(){
     await L('而最后的闪避率，则是当敌人对你发起攻击时，你能够避免这次伤害的概率。',tm0.t0);
     await L('如果你听懂了，就随便输点什么来继续吧。',0);
     await choose([{label:'继续',value:1}]);
+    if (aborted(ep)) return;
 
     await L('在遇到魔王之前，你会遇到一些……不那么友好的拦路者。',tm0.t0);
     await L('加上魔王，你应该总共要面对20个敌人。',tm0.t0);
@@ -1055,6 +1200,7 @@ async function introAndPlay(){
     await L('运用你的能力，战胜前方的敌人吧！',tm0.t0);
     await L('听懂了的话，就随便输点什么来开始吧。',0);
     await choose([{label:'继续',value:1}]);
+    if (aborted(ep)) return;
   }
 
   await L('首先，请选择你特化的方向。',tm0.t0);
@@ -1067,6 +1213,7 @@ async function introAndPlay(){
     {label:'1 战士的祝福',value:'1'},{label:'2 天使的祝福',value:'2'},
     {label:'3 勇者的祝福',value:'3'},{label:'4 隐者的祝福',value:'4'}
   ]);
+  if (aborted(ep)) return;
 
   if (a8==='1'){ G.warrior=true; G.ATK+=20; G.HP+=20; }
   else if (a8==='2'){ G.angel=true; G.HP+=30; G.CRT+=0.05; }
@@ -1078,18 +1225,274 @@ async function introAndPlay(){
   await L(panelText(),tm0.t0);
   await L('准备好了的话，就随便输入点什么吧。',0);
   await choose([{label:'继续',value:1}]);
+  if (aborted(ep)) return;
 
-  return mainRounds();
+  G.WAR=1;
+  return mainRounds(ep);
 }
+
+/* ---------- 版本变更内容 ---------- */
+const CHANGELOG_WEB=[
+  '全面网页化，浏览器直接游玩，移动端适配',
+  '像素风界面重制：实时状态栏、固定高度消息面板、CRT 扫描线',
+  '装备默认按序自动入槽；装备面板变更预览',
+  '存档系统：自动存档 + 3 个手动 save 槽，SL 界面',
+  '设置面板（右上角）：速度 / 跳过动画 / 扫描线随时可调',
+  '修复原版魔王战前无装备时崩溃的问题',
+  '游戏机制与台词与 3.0 一致（含全部结局与隐藏内容）',
+];
+const CHANGELOG_PLAY=[
+  '隐藏路线触发方式重做：魔王威压掉装备后拒绝迎战累计 3 次触发',
+  '闪避（CRT）装备权重调整',
+];
+
+/* ---------- 本地存档 ---------- */
+const SAVE_PREFIX='csdl4:';
+function saveKey(slot){ return SAVE_PREFIX+'save:'+slot; }
+function speedKey(){ return SAVE_PREFIX+'speed'; }
+function loadSpeedPref(){ try{ return localStorage.getItem(speedKey()); }catch(e){ return null; } }
+function saveSpeedPref(v){ try{ localStorage.setItem(speedKey(),v); }catch(e){} }
+/* 统一设置 G.fast + 偏好存储 + 设置面板单选框，三处调用点保持同步 */
+function applySpeed(v){
+  G.fast=(v==='fast');
+  saveSpeedPref(v);
+  const r=document.querySelector(`input[name="speedOpt"][value="${v}"]`);
+  if (r) r.checked=true;
+}
+
+function snapshotState(){
+  return {
+    ATK:G.ATK, ATKZJ:G.ATKZJ, HP:G.HP, HPZJ:G.HPZJ,
+    BJ:G.BJ, BS:G.BS, CRT:G.CRT,
+    ZB1:G.ZB1, ZB2:G.ZB2, ZB3:G.ZB3,
+    slot1:G.slot1, slot2:G.slot2, slot3:G.slot3,
+    WAR:G.WAR,
+    DRATKXX:G.DRATKXX, DRATKSX:G.DRATKSX, DRHPXX:G.DRHPXX, DRHPSX:G.DRHPSX,
+    low1:G.low1, high1:G.high1, low2:G.low2, high2:G.high2,
+    warrior:G.warrior, angel:G.angel, hero:G.hero, hermit:G.hermit,
+    fast:G.fast,
+    savedAt:Date.now(),
+  };
+}
+function writeSave(slot,data){ try{ localStorage.setItem(saveKey(slot),JSON.stringify(data)); }catch(e){} }
+/* parse失败/字段缺失一律按空槽处理，不抛错 */
+const SAVE_REQUIRED_NUM=['ATK','ATKZJ','HP','HPZJ','BJ','BS','CRT','ZB1','ZB2','ZB3','WAR',
+  'DRATKXX','DRATKSX','DRHPXX','DRHPSX','low1','high1','low2','high2','savedAt'];
+const SAVE_REQUIRED_BOOL=['warrior','angel','hero','hermit','fast'];
+function readSave(slot){
+  try{
+    const raw=localStorage.getItem(saveKey(slot));
+    if (!raw) return null;
+    const d=JSON.parse(raw);
+    if (!d || typeof d!=='object') return null;
+    for (const k of SAVE_REQUIRED_NUM) if (typeof d[k]!=='number') return null;
+    for (const k of SAVE_REQUIRED_BOOL) if (typeof d[k]!=='boolean') return null;
+    for (let i=1;i<=3;i++){
+      const s=d['slot'+i];
+      if (d['ZB'+i]===1){
+        if (!s || typeof s.name!=='string' || s.name.length>40 ||
+            typeof s.atk!=='number' || typeof s.hp!=='number' ||
+            typeof s.bj!=='number' || typeof s.bs!=='number' || typeof s.crt!=='number') return null;
+      } else if (s!==null){
+        return null;
+      }
+    }
+    return d;
+  } catch(e){ return null; }
+}
+function deleteSave(slot){ try{ localStorage.removeItem(saveKey(slot)); }catch(e){} }
+let roundStartSnap=null;
+function captureRoundStart(){
+  roundStartSnap=snapshotState();
+  writeSave('auto',roundStartSnap);
+}
+function applySnapshot(d){
+  resetState();
+  Object.assign(G,d);
+  G.ZDYHP=G.HP;
+  roundStartSnap=snapshotState();
+  /* 只恢复速度设置与单选框，不覆盖玩家的全局速度偏好 */
+  const r=document.querySelector(`input[name="speedOpt"][value="${G.fast?'fast':'normal'}"]`);
+  if (r) r.checked=true;
+}
+
+/* ---------- 覆盖层（欢迎/设置/存档/更新内容） ---------- */
+let gameActive=false;
+const welcomeOverlay=document.getElementById('welcomeOverlay');
+const settingsOverlay=document.getElementById('settingsOverlay');
+const saveOverlay=document.getElementById('saveOverlay');
+const changelogOverlay=document.getElementById('changelogOverlay');
+
+function hideAllOverlays(){
+  welcomeOverlay.hidden=true; settingsOverlay.hidden=true;
+  saveOverlay.hidden=true; changelogOverlay.hidden=true;
+}
+function showWelcome(){
+  hideAllOverlays();
+  document.getElementById('btnContinue').disabled=!readSave('auto');
+  welcomeOverlay.hidden=false;
+}
+function showSettings(){
+  hideAllOverlays();
+  document.getElementById('settingsGameActions').hidden=!gameActive;
+  settingsOverlay.hidden=false;
+}
+let saveMenuMode='menu'; // 'menu'：欢迎界面进入，仅读取/删除；'game'：游戏中进入，额外可保存
+function renderSaveSlot(slot,label){
+  const d=readSave(slot);
+  const wrap=document.createElement('div');
+  wrap.className='save-slot';
+  const meta=document.createElement('div');
+  meta.className='meta';
+  if (!d){
+    const b=document.createElement('b'); b.textContent=label;
+    meta.appendChild(b); meta.appendChild(document.createTextNode(' · 空'));
+  } else {
+    const bless=d.warrior?'战士':d.angel?'天使':d.hero?'勇者':d.hermit?'隐者':'-';
+    const time=new Date(d.savedAt).toLocaleString();
+    const b=document.createElement('b'); b.textContent=label;
+    meta.appendChild(b);
+    meta.appendChild(document.createTextNode(` · 第 ${d.WAR} 回合 · ${bless} · ATK ${d.ATK} · HP ${d.HP} · ${time}`));
+  }
+  wrap.appendChild(meta);
+  const ops=document.createElement('div');
+  ops.className='ops';
+  if (saveMenuMode==='game' && slot!=='auto' && roundStartSnap){
+    const b=document.createElement('button');
+    b.className='choice-btn'; b.textContent='保存';
+    b.onclick=()=>{ writeSave(slot,roundStartSnap); renderSaveList(); };
+    ops.appendChild(b);
+  }
+  if (d){
+    const bl=document.createElement('button');
+    bl.className='choice-btn'; bl.textContent='读取';
+    bl.onclick=()=>{ if (confirm('载入存档将覆盖当前进度，确定？')) loadSlot(slot); };
+    ops.appendChild(bl);
+    const bd=document.createElement('button');
+    bd.className='choice-btn danger'; bd.textContent='删除';
+    bd.onclick=()=>{ if (confirm('确定删除该存档？')){ deleteSave(slot); renderSaveList(); } };
+    ops.appendChild(bd);
+  }
+  wrap.appendChild(ops);
+  return wrap;
+}
+function renderSaveList(){
+  const box=document.getElementById('saveSlotList');
+  box.innerHTML='';
+  box.appendChild(renderSaveSlot('auto','自动存档'));
+  box.appendChild(renderSaveSlot('1','存档槽 1'));
+  box.appendChild(renderSaveSlot('2','存档槽 2'));
+  box.appendChild(renderSaveSlot('3','存档槽 3'));
+}
+function showSaveMenu(mode){
+  saveMenuMode=mode;
+  renderSaveList();
+  hideAllOverlays();
+  saveOverlay.hidden=false;
+}
+async function loadSlot(slot){
+  const d=readSave(slot);
+  if (!d) return;
+  runEpoch++;
+  const ep=runEpoch;
+  fastForward=null;
+  hideAllOverlays();
+  termEl.innerHTML='';
+  choicesEl.innerHTML='';
+  hideEnemyCard();
+  prevHUD={ATK:null,ZDYHP:null,BJ:null,BS:null,CRT:null};
+  autoStick=true; scrollLatestBtn.hidden=true;
+  applySnapshot(d);
+  gameActive=true;
+  updateHUD();
+  await L(`已载入存档（第 ${d.WAR} 回合）。`,0);
+  if (aborted(ep)) return;
+  if (G.WAR>=20) return bossNode(ep);
+  return mainRounds(ep);
+}
+function showChangelog(){
+  const web=document.getElementById('changelogWeb');
+  const play=document.getElementById('changelogPlay');
+  web.innerHTML=CHANGELOG_WEB.map(t=>`<li>${t}</li>`).join('');
+  play.innerHTML=CHANGELOG_PLAY.map(t=>`<li>${t}</li>`).join('');
+  hideAllOverlays();
+  changelogOverlay.hidden=false;
+}
+
+/* ---------- 覆盖层事件绑定 ---------- */
+/* overlayReturnTo：记录进入存档面板前的来源，关闭时回到该来源而不是硬编码二选一 */
+let overlayReturnTo=null;
+function closeOverlayTo(target){
+  hideAllOverlays();
+  if (target==='settings'){ showSettings(); return; }
+  if (!gameActive) welcomeOverlay.hidden=false;
+}
+document.getElementById('btnNewGame').onclick=()=>{ startNewGame(); };
+document.getElementById('btnContinue').onclick=()=>{ if (!document.getElementById('btnContinue').disabled) loadSlot('auto'); };
+document.getElementById('btnSaveMenu').onclick=()=>{ overlayReturnTo=null; showSaveMenu('menu'); };
+document.getElementById('btnSettingsMenu').onclick=()=>showSettings();
+document.getElementById('btnChangelog').onclick=()=>showChangelog();
+document.getElementById('btnSaveClose').onclick=()=>closeOverlayTo(overlayReturnTo);
+document.getElementById('btnChangelogClose').onclick=()=>{ hideAllOverlays(); if (!gameActive) welcomeOverlay.hidden=false; };
+document.getElementById('settingsBtn').onclick=()=>showSettings();
+document.getElementById('btnSettingsClose').onclick=()=>{ hideAllOverlays(); if (!gameActive) welcomeOverlay.hidden=false; };
+document.getElementById('btnSettingsSave').onclick=()=>{ overlayReturnTo='settings'; showSaveMenu('game'); };
+document.getElementById('btnReturnTitle').onclick=()=>{
+  if (!confirm('返回标题将暂停当前进度（自动存档已保留），确定？')) return;
+  runEpoch++;
+  fastForward=null;
+  gameActive=false;
+  resetState();
+  termEl.innerHTML='';
+  choicesEl.innerHTML='';
+  hideEnemyCard();
+  prevHUD={ATK:null,ZDYHP:null,BJ:null,BS:null,CRT:null};
+  autoStick=true; scrollLatestBtn.hidden=true;
+  updateHUD();
+  showWelcome();
+};
+document.querySelectorAll('input[name="speedOpt"]').forEach(r=>{
+  r.addEventListener('change',()=>{
+    if (!r.checked) return;
+    G.fast=(r.value==='fast');
+    /* 标题界面（未开局）不落盘，避免玩家只是点了下设置就跳过首次极速版询问 */
+    if (gameActive) saveSpeedPref(r.value);
+  });
+});
 
 /* ---------- 启动 / 重开 ---------- */
-function boot(){
+function startNewGame(){
+  runEpoch++;
+  const ep=runEpoch;
+  fastForward=null;
+  hideAllOverlays();
   resetState();
-  autoStick=true; scrollLatestBtn.hidden=true; termEl.scrollTop=0;
+  deleteSave('auto');
+  termEl.innerHTML='';
+  choicesEl.innerHTML='';
   hideEnemyCard();
-  if (window.matchMedia('(max-width:820px)').matches) document.getElementById('equipDetails').removeAttribute('open');
+  prevHUD={ATK:null,ZDYHP:null,BJ:null,BS:null,CRT:null};
+  autoStick=true; scrollLatestBtn.hidden=true;
+  gameActive=true;
+  const sp=loadSpeedPref();
+  if (sp) applySpeed(sp);
   updateHUD();
-  introAndPlay().catch(e=>{ console.error(e); L('发生了意外错误，请重新开始。',0,'bad'); });
+  introAndPlay(ep).catch(e=>{ console.error(e); L('发生了意外错误，请重新开始。',0,'bad'); });
 }
-boot();
+function initApp(){
+  resetState();
+  updateHUD();
+  const sp=loadSpeedPref();
+  const speedRadio=document.querySelector(`input[name="speedOpt"][value="${sp==='fast'?'fast':'normal'}"]`);
+  if (speedRadio) speedRadio.checked=true;
+  try{
+    skipAnim = localStorage.getItem('csdl4:skipAnim')==='1';
+    document.getElementById('skipAnimToggle').checked=skipAnim;
+    const crtOn = localStorage.getItem('csdl4:crt')!=='0';
+    document.getElementById('crtToggle').checked=crtOn;
+    document.getElementById('app').classList.toggle('crt-on',crtOn);
+  }catch(err){}
+  showWelcome();
+}
+initApp();
 </script>
