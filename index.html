@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<title>卡桑德里传说</title>
+<title>卡桑德里传说 4.0</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <style>
 @font-face{
@@ -106,12 +106,6 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 }
 .choice-btn:hover{background:#1e2a1a;color:var(--accent2);}
 .choice-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--bg-deep);background:var(--accent2);color:var(--bg-deep);}
-.num-input-wrap{display:flex;gap:8px;align-items:center;}
-.num-input{
-  background:var(--panel2);border:2px solid var(--border-lit);color:var(--text);
-  padding:8px 12px;font-family:inherit;font-size:16px;width:140px;
-}
-.num-input:focus{outline:none;border-color:var(--accent2);}
 #hud{
   width:288px;flex-shrink:0;background:var(--panel);
   padding:12px;overflow-y:auto;
@@ -160,6 +154,48 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 .slot-stats{color:var(--dim);line-height:1.5;}
 #equipDetails summary{font-size:12px;color:var(--dim);letter-spacing:2px;margin:16px 0 8px 0;text-transform:uppercase;cursor:pointer;list-style:none;}
 #equipDetails summary::-webkit-details-marker{display:none;}
+.icon-btn{
+  background:var(--panel2);color:var(--accent2);border:2px solid var(--border-lit);
+  width:32px;height:32px;font-size:16px;cursor:pointer;box-shadow:3px 3px 0 var(--bg-deep);
+}
+.icon-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--bg-deep);}
+.choice-btn.danger{border-color:var(--danger);color:var(--danger);}
+.choice-btn.danger:hover{background:#3a1414;color:var(--danger);}
+.choice-btn.danger:active{background:var(--danger);color:var(--bg-deep);}
+.overlay{
+  position:fixed;inset:0;background:rgba(4,6,4,.82);z-index:100;
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+.overlay[hidden]{display:none;}
+.overlay-panel{
+  background:var(--panel);border:3px solid var(--border-lit);box-shadow:6px 6px 0 var(--bg-deep);
+  max-width:520px;width:100%;max-height:86vh;overflow-y:auto;padding:20px 22px;
+}
+.overlay-panel h2{color:var(--accent2);font-size:16px;margin:0 0 14px 0;letter-spacing:1px;font-weight:400;}
+.overlay-panel h3{color:var(--dim);font-size:12px;margin:16px 0 8px 0;letter-spacing:2px;text-transform:uppercase;font-weight:400;}
+.overlay-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.overlay-row:last-child{border-bottom:none;}
+.overlay-actions{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;}
+.overlay-actions[hidden]{display:none;}
+.title-title{font-size:22px;color:var(--accent2);text-shadow:3px 3px 0 var(--bg-deep);margin:0 0 4px 0;letter-spacing:2px;}
+.title-ver{color:var(--dim);font-size:12px;margin:0 0 22px 0;letter-spacing:1px;}
+.title-menu{display:flex;flex-direction:column;gap:10px;}
+.title-menu .choice-btn{width:100%;text-align:left;}
+.title-menu .choice-btn:disabled{opacity:.4;cursor:not-allowed;}
+.title-menu .choice-btn:disabled:hover{background:var(--panel2);color:var(--text);}
+.save-slot{border:2px solid var(--border-lit);background:var(--panel2);padding:8px 10px;margin-bottom:8px;}
+.save-slot .meta{font-size:11.5px;color:var(--dim);margin-bottom:6px;line-height:1.6;}
+.save-slot .meta b{color:var(--accent);font-weight:400;}
+.save-slot .empty{font-size:12px;color:var(--dim);padding:6px 0;}
+.save-slot .ops{display:flex;gap:6px;flex-wrap:wrap;}
+.save-slot .ops .choice-btn{padding:5px 10px;font-size:12px;}
+.changelog-list{margin:0;padding-left:18px;font-size:13px;line-height:1.9;color:var(--text);}
+.changelog-list li::marker{color:var(--accent2);}
+.settings-field{padding:10px 0;border-bottom:1px solid var(--border);}
+.settings-field .label{font-size:12px;color:var(--dim);letter-spacing:1px;margin-bottom:8px;}
+.radio-row{display:flex;gap:14px;}
+.radio-row label{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;}
+.radio-row input{accent-color:var(--accent2);}
 @media (max-width:820px){
   #layout{flex-direction:column;}
   #hud{
@@ -189,10 +225,9 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 
 <div id="app" class="crt-on">
   <header>
-    <div><h1>卡桑德里传说</h1><span class="sub">静态网页版</span></div>
-    <div style="display:flex;gap:14px;">
-      <label class="toggle"><input type="checkbox" id="skipAnimToggle"> 跳过打字动画</label>
-      <label class="toggle"><input type="checkbox" id="crtToggle" checked> CRT 扫描线</label>
+    <div><h1>卡桑德里传说</h1><span class="sub">静态网页版 · 4.0</span></div>
+    <div style="display:flex;gap:10px;">
+      <button id="settingsBtn" class="icon-btn" title="设置">⚙</button>
     </div>
   </header>
   <div id="layout">
@@ -240,6 +275,69 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
         </div>
       </details>
     </aside>
+  </div>
+
+  <div id="welcomeOverlay" class="overlay">
+    <div class="overlay-panel">
+      <div class="title-title">卡桑德里传说</div>
+      <div class="title-ver">4.0 · 静态网页版</div>
+      <div class="title-menu">
+        <button class="choice-btn" id="btnNewGame">新的征途</button>
+        <button class="choice-btn" id="btnContinue">继续</button>
+        <button class="choice-btn" id="btnSaveMenu">存档</button>
+        <button class="choice-btn" id="btnSettingsMenu">设置</button>
+        <button class="choice-btn" id="btnChangelog">更新内容</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsOverlay" class="overlay" hidden>
+    <div class="overlay-panel">
+      <h2>设置</h2>
+      <div class="settings-field">
+        <div class="label">文字速度</div>
+        <div class="radio-row">
+          <label><input type="radio" name="speedOpt" value="normal"> 普通</label>
+          <label><input type="radio" name="speedOpt" value="fast"> 极速</label>
+        </div>
+      </div>
+      <div class="settings-field">
+        <label class="toggle"><input type="checkbox" id="skipAnimToggle"> 跳过打字动画</label>
+      </div>
+      <div class="settings-field">
+        <label class="toggle"><input type="checkbox" id="crtToggle" checked> CRT 扫描线</label>
+      </div>
+      <div class="overlay-actions" id="settingsGameActions" hidden>
+        <button class="choice-btn" id="btnSettingsSave">保存到槽位</button>
+        <button class="choice-btn danger" id="btnReturnTitle">返回标题</button>
+      </div>
+      <div class="overlay-actions">
+        <button class="choice-btn" id="btnSettingsClose">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="saveOverlay" class="overlay" hidden>
+    <div class="overlay-panel">
+      <h2>存档</h2>
+      <div id="saveSlotList"></div>
+      <div class="overlay-actions">
+        <button class="choice-btn" id="btnSaveClose">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="changelogOverlay" class="overlay" hidden>
+    <div class="overlay-panel">
+      <h2>更新内容 · 4.0</h2>
+      <h3>网页版</h3>
+      <ol class="changelog-list" id="changelogWeb"></ol>
+      <h3>玩法变更</h3>
+      <ol class="changelog-list" id="changelogPlay"></ol>
+      <div class="overlay-actions">
+        <button class="choice-btn" id="btnChangelogClose">关闭</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -307,7 +405,7 @@ function atkWeight(){ return weightedInt([[0,21,200],[21,41,3],[41,61,2],[61,81,
 function hpWeight(){ return weightedInt([[-30,-19,2],[-19,0,3],[0,21,300],[21,61,20],[61,81,3],[81,100,2]]); }
 function bjWeight(){ return weightedInt([[-20,-9,10],[-9,0,20],[0,11,200],[11,50,5]])/100; }
 function bsWeight(){ return weightedInt([[-30,-9,5],[-9,0,10],[0,21,200],[21,60,10]])/100; }
-function crtWeight(){ return weightedInt([[-5,-0,10],[-0,0,50],[0,11,80],[11,31,5],[31,40,2]])/100; }
+function crtWeight(){ return weightedInt([[-5,0,10],[0,1,50],[0,11,80],[11,31,5],[31,40,2]])/100; }
 
 /* ---------- 常量 ---------- */
 const TIME_LAST=2;    // 魔王/它 之战固定节奏，不随速度模式变化
@@ -453,37 +551,11 @@ function choose(options){
     choicesEl.innerHTML='';
     options.forEach(opt=>{
       const btn=document.createElement('button');
-      btn.className='choice-btn';
+      btn.className='choice-btn'+(opt.danger?' danger':'');
       btn.textContent=opt.label;
       btn.onclick=()=>{ choicesEl.innerHTML=''; resolve(opt.value); };
       choicesEl.appendChild(btn);
     });
-  });
-}
-
-/* 仅接受纯整数字符串，空串/小数/非数字一律无效 */
-function validIntOrNaN(raw){
-  const s=(raw||'').trim();
-  if (!/^-?\d+$/.test(s)) return NaN;
-  return parseInt(s,10);
-}
-
-function promptNumber(placeholder){
-  return new Promise(resolve=>{
-    choicesEl.innerHTML='';
-    const wrap=document.createElement('div');
-    wrap.className='num-input-wrap';
-    const input=document.createElement('input');
-    input.type='number'; input.className='num-input';
-    input.placeholder=placeholder||'请输入数字';
-    const btn=document.createElement('button');
-    btn.className='choice-btn'; btn.textContent='确定';
-    const submit=()=>{ const v=input.value; choicesEl.innerHTML=''; resolve(v); };
-    btn.onclick=submit;
-    input.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); submit(); } });
-    wrap.appendChild(input); wrap.appendChild(btn);
-    choicesEl.appendChild(wrap);
-    setTimeout(()=>input.focus(),0);
   });
 }
 
@@ -724,11 +796,11 @@ async function winRound(DRM){
 }
 
 async function mainRounds(){
-  G.WAR=1;
   while (G.WAR<20){
     const tm=timeMap();
     G.ZDYHP=G.HP;
     updateHUD();
+    autoSave();
     const DRM=pick(DRXRC)+pick(DRZL);
 
     await L(`现在是第 ${G.WAR} 回合`,tm.t0);
@@ -781,43 +853,12 @@ async function mainRounds(){
 
 /* ---------- 第20回合：魔王 / 隐藏路线 ---------- */
 async function bossNode(){
+  G.WAR=20;
+  autoSave();
   const tm=timeMap();
   await L('你终于来到了魔王的面前。',tm.t0);
   await L('魔王只是冷漠地看着你。',0);
 
-  await L('（请输入1开始战斗！请勿输入其他数字！）',0);
-  let raw,val;
-  do { raw=await promptNumber('请输入数字'); val=validIntOrNaN(raw); } while (Number.isNaN(val));
-  let Q2=0,Q3=0;
-
-  if (val===1){
-    Q2=1;
-  } else {
-    await L('（请不要输入1以外的数字！）',0);
-    let chanceCount=0;
-    while (chanceCount<5 && Q2===0){
-      do { raw=await promptNumber('请输入数字'); val=validIntOrNaN(raw); } while (Number.isNaN(val));
-      if (val===1){
-        await L('这才像话。',0);
-        Q2=1;
-      } else {
-        chanceCount++;
-      }
-    }
-    if (Q2===0){
-      await L('……你为什么不肯听我的话？',tm.t0);
-      await L('你到底察觉了什么？',tm.t0);
-      await L('好吧，既然如此，那便上来，与我决斗！',0);
-      await choose([{label:'1 继续',value:1}]);
-      Q3=1;
-    }
-  }
-
-  if (Q2===1) return princeBattle();
-  if (Q3===1) return itBattle();
-}
-
-async function princeBattle(){
   const occupied=[1,2,3].filter(i=>G['ZB'+i]===1);
   if (occupied.length===0){
     await L('不好！魔王的威压袭来，但你身上并没有能被夺走的装备。',TIME_LAST);
@@ -832,9 +873,28 @@ async function princeBattle(){
     await L(panelText(),TIME_LAST);
   }
   await L('事已至此，只能继续战斗了……',TIME_LAST);
-  await L('准备好了，就按下“1”吧。',TIME_LAST);
-  await choose([{label:'1 继续',value:1}]);
 
+  let refuseCount=0;
+  while (true){
+    const sel=await choose([
+      {label:'迎战魔王',value:1},
+      {label:'拒绝迎战',value:0,danger:true}
+    ]);
+    if (sel===1) break;
+    refuseCount++;
+    if (refuseCount>=3){
+      await L('……你为什么不肯听我的话？',tm.t0);
+      await L('你到底察觉了什么？',tm.t0);
+      await L('好吧，既然如此，那便上来，与我决斗！',0);
+      await choose([{label:'1 继续',value:1}]);
+      return itBattle();
+    }
+    await L('请专注战斗。',0);
+  }
+  return princeBattle();
+}
+
+async function princeBattle(){
   G.ZDYHP=G.HP;
   updateHUD();
 
@@ -933,19 +993,31 @@ async function itBattle(){
 async function endGame(label){
   if (label) await L(label,0,'end');
   await sleep(1);
+  gameActive=false;
   choicesEl.innerHTML='';
   const btn=document.createElement('button');
   btn.className='choice-btn';
   btn.textContent='重新开始';
-  btn.onclick=()=>{ choicesEl.innerHTML=''; termEl.innerHTML=''; boot(); };
+  btn.onclick=()=>{ choicesEl.innerHTML=''; startNewGame(); };
   choicesEl.appendChild(btn);
+  const btn2=document.createElement('button');
+  btn2.className='choice-btn';
+  btn2.textContent='返回标题';
+  btn2.onclick=()=>{ choicesEl.innerHTML=''; showWelcome(); };
+  choicesEl.appendChild(btn2);
 }
 
 /* ---------- 开局 / 教程 / 祝福选择 ---------- */
 async function introAndPlay(){
-  await L('是否体验极速版？注：首次游玩建议选择否，使用普通速度版。',0);
-  const a0=await choose([{label:'1 是（极速版）',value:'1'},{label:'2 否（普通速度）',value:'2'}]);
-  G.fast = (a0==='1');
+  const storedSpeed=loadSpeedPref();
+  if (storedSpeed){
+    G.fast=(storedSpeed==='fast');
+  } else {
+    await L('是否体验极速版？注：首次游玩建议选择否，使用普通速度版。',0);
+    const a0=await choose([{label:'1 是（极速版）',value:'1'},{label:'2 否（普通速度）',value:'2'}]);
+    G.fast = (a0==='1');
+    saveSpeedPref(G.fast?'fast':'normal');
+  }
   const tm0=timeMap();
 
   await L('异世的勇者，我代表卡桑德里大陆欢迎你的到来。',tm0.t0);
@@ -1021,14 +1093,198 @@ async function introAndPlay(){
   await L('准备好了的话，就随便输入点什么吧。',0);
   await choose([{label:'继续',value:1}]);
 
+  G.WAR=1;
   return mainRounds();
 }
 
+/* ---------- 版本变更内容 ---------- */
+const CHANGELOG_WEB=[
+  '全面网页化，浏览器直接游玩，移动端适配',
+  '像素风界面重制：实时状态栏、固定高度消息面板、CRT 扫描线',
+  '装备默认按序自动入槽；装备面板变更预览',
+  '存档系统：自动存档 + 3 个手动 save 槽，SL 界面',
+  '设置面板（右上角）：速度 / 跳过动画 / 扫描线随时可调',
+  '修复原版魔王战前无装备时崩溃的问题',
+  '游戏机制与台词与 3.0 一致（含全部结局与隐藏内容）',
+];
+const CHANGELOG_PLAY=[
+  '隐藏路线触发方式重做：魔王威压掉装备后拒绝迎战累计 3 次触发',
+  '闪避（CRT）装备权重调整',
+];
+
+/* ---------- 本地存档 ---------- */
+const SAVE_PREFIX='csdl4:';
+function saveKey(slot){ return SAVE_PREFIX+'save:'+slot; }
+function speedKey(){ return SAVE_PREFIX+'speed'; }
+function loadSpeedPref(){ try{ return localStorage.getItem(speedKey()); }catch(e){ return null; } }
+function saveSpeedPref(v){ try{ localStorage.setItem(speedKey(),v); }catch(e){} }
+
+function snapshotState(){
+  return {
+    ATK:G.ATK, ATKZJ:G.ATKZJ, HP:G.HP, HPZJ:G.HPZJ,
+    BJ:G.BJ, BS:G.BS, CRT:G.CRT,
+    ZB1:G.ZB1, ZB2:G.ZB2, ZB3:G.ZB3,
+    slot1:G.slot1, slot2:G.slot2, slot3:G.slot3,
+    WAR:G.WAR,
+    DRATKXX:G.DRATKXX, DRATKSX:G.DRATKSX, DRHPXX:G.DRHPXX, DRHPSX:G.DRHPSX,
+    low1:G.low1, high1:G.high1, low2:G.low2, high2:G.high2,
+    warrior:G.warrior, angel:G.angel, hero:G.hero, hermit:G.hermit,
+    fast:G.fast,
+    savedAt:Date.now(),
+  };
+}
+function writeSave(slot,data){ try{ localStorage.setItem(saveKey(slot),JSON.stringify(data)); }catch(e){} }
+/* parse失败/字段缺失一律按空槽处理，不抛错 */
+function readSave(slot){
+  try{
+    const raw=localStorage.getItem(saveKey(slot));
+    if (!raw) return null;
+    const d=JSON.parse(raw);
+    if (!d || typeof d.WAR!=='number' || typeof d.ATK!=='number') return null;
+    return d;
+  } catch(e){ return null; }
+}
+function deleteSave(slot){ try{ localStorage.removeItem(saveKey(slot)); }catch(e){} }
+function autoSave(){ writeSave('auto',snapshotState()); }
+function applySnapshot(d){
+  Object.assign(G,d);
+  G.ZDYHP=G.HP;
+}
+
+/* ---------- 覆盖层（欢迎/设置/存档/更新内容） ---------- */
+let gameActive=false;
+const welcomeOverlay=document.getElementById('welcomeOverlay');
+const settingsOverlay=document.getElementById('settingsOverlay');
+const saveOverlay=document.getElementById('saveOverlay');
+const changelogOverlay=document.getElementById('changelogOverlay');
+
+function hideAllOverlays(){
+  welcomeOverlay.hidden=true; settingsOverlay.hidden=true;
+  saveOverlay.hidden=true; changelogOverlay.hidden=true;
+}
+function showWelcome(){
+  hideAllOverlays();
+  document.getElementById('btnContinue').disabled=!readSave('auto');
+  welcomeOverlay.hidden=false;
+}
+function showSettings(){
+  hideAllOverlays();
+  document.getElementById('settingsGameActions').hidden=!gameActive;
+  settingsOverlay.hidden=false;
+}
+let saveMenuMode='menu'; // 'menu'：欢迎界面进入，仅读取/删除；'game'：游戏中进入，额外可保存
+function renderSaveSlot(slot,label){
+  const d=readSave(slot);
+  const wrap=document.createElement('div');
+  wrap.className='save-slot';
+  if (!d){
+    wrap.innerHTML=`<div class="meta"><b>${label}</b> · 空</div>`;
+  } else {
+    const bless=d.warrior?'战士':d.angel?'天使':d.hero?'勇者':d.hermit?'隐者':'-';
+    const time=new Date(d.savedAt).toLocaleString();
+    wrap.innerHTML=`<div class="meta"><b>${label}</b> · 第 ${d.WAR} 回合 · ${bless} · ATK ${d.ATK} · HP ${d.HP} · ${time}</div>`;
+  }
+  const ops=document.createElement('div');
+  ops.className='ops';
+  if (saveMenuMode==='game' && slot!=='auto'){
+    const b=document.createElement('button');
+    b.className='choice-btn'; b.textContent='保存';
+    b.onclick=()=>{ writeSave(slot,snapshotState()); renderSaveList(); };
+    ops.appendChild(b);
+  }
+  if (d){
+    const bl=document.createElement('button');
+    bl.className='choice-btn'; bl.textContent='读取';
+    bl.onclick=()=>{ if (confirm('载入存档将覆盖当前进度，确定？')) loadSlot(slot); };
+    ops.appendChild(bl);
+    if (slot!=='auto'){
+      const bd=document.createElement('button');
+      bd.className='choice-btn danger'; bd.textContent='删除';
+      bd.onclick=()=>{ if (confirm('确定删除该存档？')){ deleteSave(slot); renderSaveList(); } };
+      ops.appendChild(bd);
+    }
+  }
+  wrap.appendChild(ops);
+  return wrap;
+}
+function renderSaveList(){
+  const box=document.getElementById('saveSlotList');
+  box.innerHTML='';
+  box.appendChild(renderSaveSlot('auto','自动存档'));
+  box.appendChild(renderSaveSlot('1','存档槽 1'));
+  box.appendChild(renderSaveSlot('2','存档槽 2'));
+  box.appendChild(renderSaveSlot('3','存档槽 3'));
+}
+function showSaveMenu(mode){
+  saveMenuMode=mode;
+  renderSaveList();
+  hideAllOverlays();
+  saveOverlay.hidden=false;
+}
+async function loadSlot(slot){
+  const d=readSave(slot);
+  if (!d) return;
+  hideAllOverlays();
+  termEl.innerHTML='';
+  applySnapshot(d);
+  gameActive=true;
+  updateHUD();
+  await L(`已载入存档（第 ${d.WAR} 回合）。`,0);
+  if (G.WAR>=20) return bossNode();
+  return mainRounds();
+}
+function showChangelog(){
+  const web=document.getElementById('changelogWeb');
+  const play=document.getElementById('changelogPlay');
+  web.innerHTML=CHANGELOG_WEB.map(t=>`<li>${t}</li>`).join('');
+  play.innerHTML=CHANGELOG_PLAY.map(t=>`<li>${t}</li>`).join('');
+  hideAllOverlays();
+  changelogOverlay.hidden=false;
+}
+
+/* ---------- 覆盖层事件绑定 ---------- */
+document.getElementById('btnNewGame').onclick=()=>{ startNewGame(); };
+document.getElementById('btnContinue').onclick=()=>{ if (!document.getElementById('btnContinue').disabled) loadSlot('auto'); };
+document.getElementById('btnSaveMenu').onclick=()=>showSaveMenu('menu');
+document.getElementById('btnSettingsMenu').onclick=()=>showSettings();
+document.getElementById('btnChangelog').onclick=()=>showChangelog();
+document.getElementById('btnSaveClose').onclick=()=>{ hideAllOverlays(); if (!gameActive) welcomeOverlay.hidden=false; };
+document.getElementById('btnChangelogClose').onclick=()=>{ hideAllOverlays(); if (!gameActive) welcomeOverlay.hidden=false; };
+document.getElementById('settingsBtn').onclick=()=>showSettings();
+document.getElementById('btnSettingsClose').onclick=()=>{ hideAllOverlays(); if (!gameActive) welcomeOverlay.hidden=false; };
+document.getElementById('btnSettingsSave').onclick=()=>showSaveMenu('game');
+document.getElementById('btnReturnTitle').onclick=()=>{
+  if (!confirm('返回标题将暂停当前进度（自动存档已保留），确定？')) return;
+  gameActive=false;
+  choicesEl.innerHTML='';
+  showWelcome();
+};
+document.querySelectorAll('input[name="speedOpt"]').forEach(r=>{
+  r.addEventListener('change',()=>{
+    if (!r.checked) return;
+    G.fast=(r.value==='fast');
+    saveSpeedPref(r.value);
+  });
+});
+
 /* ---------- 启动 / 重开 ---------- */
-function boot(){
+function startNewGame(){
+  hideAllOverlays();
   resetState();
+  termEl.innerHTML='';
+  gameActive=true;
+  const sp=loadSpeedPref();
+  if (sp){ G.fast=(sp==='fast'); document.querySelector(`input[name="speedOpt"][value="${sp}"]`).checked=true; }
   updateHUD();
   introAndPlay();
 }
-boot();
+function initApp(){
+  resetState();
+  updateHUD();
+  const sp=loadSpeedPref();
+  const speedRadio=document.querySelector(`input[name="speedOpt"][value="${sp==='fast'?'fast':'normal'}"]`);
+  if (speedRadio) speedRadio.checked=true;
+  showWelcome();
+}
+initApp();
 </script>
