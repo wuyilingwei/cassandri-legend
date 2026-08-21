@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <title>卡桑德里传说</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Crect width='8' height='8' fill='%230a0c0a'/%3E%3Crect x='3' y='1' width='2' height='1' fill='%2339ff8f'/%3E%3Crect x='2' y='2' width='4' height='1' fill='%2339ff8f'/%3E%3Crect x='1' y='3' width='6' height='2' fill='%2339ff8f'/%3E%3Crect x='2' y='5' width='1' height='1' fill='%2339ff8f'/%3E%3Crect x='5' y='5' width='1' height='1' fill='%2339ff8f'/%3E%3Crect x='1' y='6' width='1' height='1' fill='%23ffb454'/%3E%3Crect x='6' y='6' width='1' height='1' fill='%23ffb454'/%3E%3C/svg%3E">
 <style>
 @font-face{
   font-family:'FusionPixel';
@@ -111,7 +112,7 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 .num-input-wrap{display:flex;gap:8px;align-items:center;}
 .num-input{
   background:var(--panel2);border:2px solid var(--border-lit);color:var(--text);
-  padding:8px 12px;font-family:inherit;font-size:16px;width:140px;
+  padding:8px 12px;font-family:inherit;font-size:24px;width:140px;
 }
 .num-input:focus{outline:none;border-color:var(--accent2);}
 #hud{
@@ -128,7 +129,7 @@ header .sub{font-size:12px;color:var(--dim);margin-left:8px;}
 .hpbar .fill{height:100%;background:var(--good);transition:width .2s steps(8);position:relative;}
 .hpbar .fill.warn{background:var(--accent);}
 .hpbar .fill.danger{background:var(--danger);}
-.hpbar .fill.overflow{background:var(--crit);box-shadow:0 0 6px 1px var(--crit) inset;}
+.hpbar .fill.overflow{background:var(--crit);box-shadow:inset 0 0 0 2px var(--bg-deep);}
 .hpbar::after{content:'';position:absolute;inset:0;pointer-events:none;
   background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.35) 0 2px,transparent 2px 8px);}
 .hp-text{font-size:12px;color:var(--dim);text-align:right;margin-bottom:6px;}
@@ -332,7 +333,7 @@ function resetState(){
     DRATKXX:1, DRATKSX:5, DRHPXX:20, DRHPSX:30,
     low1:5, high1:12, low2:20, high2:42,
     warrior:false, angel:false, hero:false, hermit:false,
-    fast:false,
+    fast:false, combat:false,
   };
   prevHUD={ATK:null,ZDYHP:null,BJ:null,BS:null,CRT:null};
 }
@@ -377,6 +378,11 @@ scrollLatestBtn.addEventListener('click',()=>{
   autoStick=true; termEl.scrollTop=termEl.scrollHeight; scrollLatestBtn.hidden=true;
 });
 function scrollBottom(){ if (autoStick) termEl.scrollTop=termEl.scrollHeight; }
+/* 日志行数上限：超出时从最旧的行开始裁剪，避免长局战斗（如魔王/它）后 reflow 越来越重 */
+const TERM_MAX_LINES=400;
+function trimTerminal(){
+  while (termEl.childElementCount>TERM_MAX_LINES) termEl.removeChild(termEl.firstChild);
+}
 
 /* 面板变更预览：纯派生显示，不写入静态文本，直接追加块，不做打字动效 */
 function appendHTMLBlock(html){
@@ -384,13 +390,14 @@ function appendHTMLBlock(html){
   el.className='line preview';
   el.innerHTML=html;
   termEl.appendChild(el);
+  trimTerminal();
   scrollBottom();
 }
 function fmtDelta(cur,next,isPercent){
   const c=isPercent?Math.trunc(cur*100):cur;
   const n=isPercent?Math.trunc(next*100):next;
   const cls=n>c?'delta-up':(n<c?'delta-down':'delta-same');
-  const suf=isPercent?'%':'';
+  const suf=isPercent?' %':'';
   return `${c}${suf} → <span class="${cls}">${n}${suf}</span>`;
 }
 function equipPreviewHTML(item){
@@ -400,6 +407,10 @@ function equipPreviewHTML(item){
 function replacePreviewHTML(old,item){
   return `替换后：ATK ${fmtDelta(G.ATK,G.ATK-old.atk+item.atk)}　HP ${fmtDelta(G.HP,G.HP-old.hp+item.hp)}　`+
     `BJ ${fmtDelta(G.BJ,G.BJ-old.bj+item.bj,true)}　BS ${fmtDelta(G.BS,G.BS-old.bs+item.bs,true)}　CRT ${fmtDelta(G.CRT,G.CRT-old.crt+item.crt,true)}`;
+}
+/* 三槽已满时，抉择阶段仍给出每个槽位的替换预览摘要 */
+function fullSlotsPreviewHTML(item){
+  return [1,2,3].map(i=>`替换槽位${i}：`+replacePreviewHTML(G['slot'+i],item)).join('<br>');
 }
 
 /* 伤害/回血飘字，纯展示 */
@@ -439,6 +450,7 @@ function typeLine(text,cls){
   const el=document.createElement('div');
   el.className='line'+(cls?(' '+cls):'');
   termEl.appendChild(el);
+  trimTerminal();
   scrollBottom();
   const charDelay = skipAnim ? 0 : (G.fast ? 7 : 18);
   if (charDelay===0){ el.textContent=text; scrollBottom(); return Promise.resolve(); }
@@ -449,7 +461,8 @@ function typeLine(text,cls){
       if (done) return;
       i++;
       el.textContent=text.slice(0,i);
-      scrollBottom();
+      /* 每 4 字或收尾才触发滚动的 reflow，长文本打字时降低卡顿 */
+      if (i%4===0 || i>=text.length) scrollBottom();
       if (i>=text.length){ done=true; clearInterval(iv); fastForward=null; res(); }
     },charDelay);
   });
@@ -511,7 +524,7 @@ function panelText(){
   return `ATK: ${G.ATK}\nHP: ${G.HP}\nBJ: ${Math.trunc(G.BJ*100)} %\nBS: ${Math.trunc(G.BS*100)} %\nCRT: ${Math.trunc(G.CRT*100)} %`;
 }
 function hpBarClass(cur,max){
-  if (max<=0) return '';
+  if (max<=0) return 'danger';
   if (cur>max) return 'overflow';
   const pct=cur/max;
   return pct<0.25?'danger':(pct<0.5?'warn':'');
@@ -531,16 +544,18 @@ function updateHUD(){
   bjEl.textContent=Math.trunc(G.BJ*100)+' %';
   bsEl.textContent=Math.trunc(G.BS*100)+' %';
   crtEl.textContent=Math.trunc(G.CRT*100)+' %';
+  /* 非战斗态（装备/结算界面）按 G.HP 满血渲染，避免与已过期的 G.ZDYHP 比较产生假溢出/假残血 */
+  const dispCur = G.combat ? G.ZDYHP : G.HP;
   const hpTextEl=document.getElementById('hud-hp');
-  const overflowAmt=G.ZDYHP>G.HP ? Math.trunc(G.ZDYHP-G.HP) : 0;
-  hpTextEl.textContent=`${Math.trunc(G.ZDYHP)} / ${G.HP}`+(overflowAmt>0?` (+${overflowAmt})`:'');
+  const overflowAmt=dispCur>G.HP ? Math.trunc(dispCur-G.HP) : 0;
+  hpTextEl.textContent=`${Math.trunc(dispCur)} / ${G.HP}`+(overflowAmt>0?` (+${overflowAmt})`:'');
   hpTextEl.classList.toggle('overflow',overflowAmt>0);
   document.getElementById('hud-war').textContent = G.WAR>0 ? Math.min(G.WAR,20) : '-';
 
   const hpFill=document.getElementById('hud-hpfill');
-  const hpPct=Math.max(0,Math.min(100,G.ZDYHP/G.HP*100));
+  const hpPct=G.HP<=0 ? 0 : Math.max(0,Math.min(100,dispCur/G.HP*100));
   hpFill.style.width=hpPct+'%';
-  hpFill.className='fill '+hpBarClass(G.ZDYHP,G.HP);
+  hpFill.className='fill '+hpBarClass(dispCur,G.HP);
   if (prevHUD.ZDYHP!==null && G.ZDYHP!==prevHUD.ZDYHP){
     const delta=G.ZDYHP-prevHUD.ZDYHP;
     const dtxt=fmtFloatDelta(delta), dcls=delta>0?'heal':'dmg';
@@ -552,10 +567,10 @@ function updateHUD(){
 
   mAtk.textContent=G.ATK; mBj.textContent=Math.trunc(G.BJ*100)+'%'; mBs.textContent=Math.trunc(G.BS*100)+'%';
   mCrt.textContent=Math.trunc(G.CRT*100)+'%';
-  mHpText.textContent=`${Math.trunc(G.ZDYHP)}/${G.HP}`+(overflowAmt>0?` (+${overflowAmt})`:'');
+  mHpText.textContent=`${Math.trunc(dispCur)}/${G.HP}`+(overflowAmt>0?` (+${overflowAmt})`:'');
   mHpText.classList.toggle('overflow',overflowAmt>0);
   mHpFill.style.width=hpPct+'%';
-  mHpFill.className='fill '+hpBarClass(G.ZDYHP,G.HP);
+  mHpFill.className='fill '+hpBarClass(dispCur,G.HP);
 
   prevHUD={ATK:G.ATK,ZDYHP:G.ZDYHP,BJ:G.BJ,BS:G.BS,CRT:G.CRT};
 
@@ -571,6 +586,8 @@ function updateHUD(){
       el.innerHTML=`<div class="slot-empty">空槽位 ${i}</div>`;
     }
   }
+  const filledCount=[1,2,3].filter(i=>G['ZB'+i]===1).length;
+  document.getElementById('equipDetails').querySelector('summary').textContent=`装备 ${filledCount}/3`;
 
   const tp=document.getElementById('turnProgress');
   tp.innerHTML='';
@@ -703,10 +720,10 @@ async function equipDropFlow(){
   const hasEmpty=[1,2,3].some(i=>G['ZB'+i]===0);
   await L(`1.${name1}\nATK: + ${item1.atk}\nHP: + ${item1.hp}\nBJ： + ${Math.trunc(item1.bj*100)} %\nBS： + ${Math.trunc(item1.bs*100)} %\nCRT： + ${Math.trunc(item1.crt*100)} %`,tm.t0);
   if (hasEmpty) appendHTMLBlock(equipPreviewHTML(item1));
-  else appendHTMLBlock('三槽已满，替换预览见下一步');
+  else appendHTMLBlock(fullSlotsPreviewHTML(item1));
   await L(`2.${name2}\nATK: + ${item2.atk}\nHP: + ${item2.hp}\nBJ： + ${Math.trunc(item2.bj*100)} %\nBS： + ${Math.trunc(item2.bs*100)} %\nCRT： + ${Math.trunc(item2.crt*100)} %`,0);
   if (hasEmpty) appendHTMLBlock(equipPreviewHTML(item2));
-  else appendHTMLBlock('三槽已满，替换预览见下一步');
+  else appendHTMLBlock(fullSlotsPreviewHTML(item2));
   await L(`要装备${name1}还是装备${name2}，又或者是不装备呢？`,0);
   const a4=await choose([
     {label:`1 装备${name1}`,value:1},{label:`2 装备${name2}`,value:2},{label:'3 不装备',value:3}
@@ -782,12 +799,14 @@ async function mainRounds(){
     const nameDisplay=`【${DRM}】`;
     const DRHPMax=DRHP;
     showEnemyCard(DRM,DRHP,DRHPMax,DRATK);
+    G.combat=true;
     while (G.ZDYHP>0 && DRHP>0){
       await combatTurn({
         nameDisplay, getHP:()=>DRHP, setHP:v=>{DRHP=v;}, enemyMaxHP:DRHPMax,
         enemyAtk:DRATK, dmgMin:-3, dmgMax:3, pauseSec:tm.t0, crtDecay:false
       });
     }
+    G.combat=false;
     hideEnemyCard();
 
     if (DRHP<=0 && G.ZDYHP>0){
@@ -807,22 +826,31 @@ async function mainRounds(){
 
 /* ---------- 第20回合：魔王 / 隐藏路线 ---------- */
 async function bossNode(){
+  updateHUD();
   const tm=timeMap();
   await L('你终于来到了魔王的面前。',tm.t0);
   await L('魔王只是冷漠地看着你。',0);
 
   await L('（请输入1开始战斗！请勿输入其他数字！）',0);
   let raw,val;
-  do { raw=await promptNumber('请输入数字'); val=validIntOrNaN(raw); } while (Number.isNaN(val));
+  do {
+    raw=await promptNumber('请输入数字');
+    val=validIntOrNaN(raw);
+    if (Number.isNaN(val)) await L('请输入一个整数。',0);
+  } while (Number.isNaN(val));
   let Q2=0,Q3=0;
 
   if (val===1){
     Q2=1;
   } else {
-    await L('（请不要输入1以外的数字！）',0);
     let chanceCount=0;
     while (chanceCount<5 && Q2===0){
-      do { raw=await promptNumber('请输入数字'); val=validIntOrNaN(raw); } while (Number.isNaN(val));
+      await L('（请不要输入1以外的数字！）',0);
+      do {
+        raw=await promptNumber('请输入数字');
+        val=validIntOrNaN(raw);
+        if (Number.isNaN(val)) await L('请输入一个整数。',0);
+      } while (Number.isNaN(val));
       if (val===1){
         await L('这才像话。',0);
         Q2=1;
@@ -854,9 +882,9 @@ async function princeBattle(){
     G['ZB'+idx]=0; G['slot'+idx]=null;
     updateHUD();
     await L(`不好！魔王的威压让你浑身颤抖，导致你的“【${s.name}】掉在了地上！”`,TIME_LAST,'bad');
-    await L('这是你现在的面板。',TIME_LAST);
-    await L(panelText(),TIME_LAST);
   }
+  await L('这是你现在的面板。',TIME_LAST);
+  await L(panelText(),TIME_LAST);
   await L('事已至此，只能继续战斗了……',TIME_LAST);
   await L('准备好了，就按下“1”吧。',TIME_LAST);
   await choose([{label:'1 继续',value:1}]);
@@ -881,9 +909,11 @@ async function princeBattle(){
   let HPPrince=100000;
   const nameDisplay='魔王';
   showEnemyCard('魔王',HPPrince,100000,1500);
+  G.combat=true;
   while (HPPrince>0 && G.ZDYHP>0){
     await combatTurn({nameDisplay,hpPhrase:'血量还剩',getHP:()=>HPPrince,setHP:v=>{HPPrince=v;},enemyMaxHP:100000,enemyAtk:1500,dmgMin:-10,dmgMax:20,pauseSec:TIME_LAST,crtDecay:false});
   }
+  G.combat=false;
   hideEnemyCard();
 
   if (HPPrince<=0 && G.ZDYHP>0){
@@ -935,9 +965,11 @@ async function itBattle(){
   let HPIt=200000;
   const nameDisplay='“它”';
   showEnemyCard('“它”',HPIt,200000,3000);
+  G.combat=true;
   while (HPIt>0 && G.ZDYHP>0){
     await combatTurn({nameDisplay,getHP:()=>HPIt,setHP:v=>{HPIt=v;},enemyMaxHP:200000,enemyAtk:3000,dmgMin:-10,dmgMax:30,pauseSec:TIME_LAST,crtDecay:true});
   }
+  G.combat=false;
   hideEnemyCard();
 
   if (HPIt<=0 && G.ZDYHP>0){
@@ -1054,9 +1086,10 @@ async function introAndPlay(){
 function boot(){
   resetState();
   autoStick=true; scrollLatestBtn.hidden=true; termEl.scrollTop=0;
+  hideEnemyCard();
   if (window.matchMedia('(max-width:820px)').matches) document.getElementById('equipDetails').removeAttribute('open');
   updateHUD();
-  introAndPlay();
+  introAndPlay().catch(e=>{ console.error(e); L('发生了意外错误，请重新开始。',0,'bad'); });
 }
 boot();
 </script>
