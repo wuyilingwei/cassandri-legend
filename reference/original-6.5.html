@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>卡桑德里传说6.5</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#1a1a2e;color:#e0e0e0;font-family:"Microsoft YaHei",sans-serif;display:flex;justify-content:center;padding:20px;min-height:100vh;}
+#game{display:flex;gap:20px;max-width:1200px;width:100%;}
+#mainArea{flex:1;display:flex;flex-direction:column;gap:10px;}
+#title{text-align:center;font-size:24px;color:#ffd700;padding:10px;letter-spacing:4px;}
+#output{background:#0f0f1a;border:2px solid #444;border-radius:8px;padding:15px;height:500px;overflow-y:auto;line-height:1.8;font-size:15px;white-space:normal;}
+#output div{margin-bottom:2px;}
+#choices{display:flex;flex-wrap:wrap;gap:8px;min-height:50px;}
+.btn{background:#2d2d44;color:#e0e0e0;border:1px solid #555;padding:10px 18px;border-radius:6px;cursor:pointer;font-size:14px;transition:all .2s;}
+.btn:hover{background:#4a4a6a;border-color:#888;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-danger{border-color:#c0392b;color:#e74c3c;}
+.btn-danger:hover{background:#3d1a1a;}
+#statPanel{width:280px;background:#0f0f1a;border:2px solid #444;border-radius:8px;padding:15px;font-size:13px;}
+#statPanel h3{color:#ffd700;margin-bottom:10px;text-align:center;}
+.stat-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #222;}
+.stat-row .label{color:#aaa;}
+.stat-row .value{color:#fff;font-weight:bold;}
+.equip-slots{margin-top:12px;}
+.equip-slots h4{color:#aaa;margin-bottom:6px;font-size:12px;}
+.slot{background:#1a1a2e;border:1px dashed #444;border-radius:4px;padding:8px;margin-bottom:6px;min-height:50px;font-size:11px;line-height:1.5;}
+.slot.filled{border-style:solid;border-color:#666;}
+.slot .ename{color:#ffd700;font-weight:bold;}
+.slot .trait{color:#ff69b4;font-size:10px;margin-top:3px;}
+.point-controls{margin-top:10px;padding-top:10px;border-top:1px solid #333;}
+.point-row{display:flex;align-items:center;justify-content:space-between;padding:3px 0;font-size:12px;}
+.point-row button{width:24px;height:24px;background:#2d2d44;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;font-size:14px;line-height:1;}
+.point-row button:hover{background:#4a4a6a;}
+.point-row button:disabled{opacity:.3;cursor:not-allowed;}
+.point-row .plabel{flex:1;color:#aaa;}
+.point-row .pval{width:30px;text-align:center;color:#fff;}
+.eye-info{text-align:center;color:#ffd700;font-size:12px;margin-bottom:8px;}
+.elem-fire{color:#ff6b35;}
+.elem-water{color:#4fc3f7;}
+.elem-grass{color:#81c784;}
+.elem-thunder{color:#ffd54f;}
+.stat-atk{color:#ff8c00;}
+.stat-hp{color:#66bb6a;}
+.stat-bj{color:#ffd54f;}
+.stat-bs{color:#4fc3f7;}
+.stat-crt{color:#ba68c8;}
+#hpBarArea{background:#0f0f1a;border:2px solid #444;border-radius:8px;padding:10px 15px;}
+#hpBarArea .hp-label{font-size:13px;color:#aaa;margin-bottom:4px;}
+#hpBarArea .hp-nums{font-size:18px;font-weight:bold;color:#66bb6a;margin-bottom:6px;}
+#hpBarTrack{width:100%;height:18px;background:#222;border-radius:9px;overflow:hidden;}
+#hpBarFill{height:100%;background:linear-gradient(90deg,#4caf50,#81c784);transition:width .3s;border-radius:9px;}
+#hpBarFill.low{background:linear-gradient(90deg,#e74c3c,#ff7043);}
+#shieldBarWrap{margin-top:6px;display:none;}
+#shieldBarWrap .hp-label{color:#ccc;}
+#shieldBarTrack{width:100%;height:12px;background:#222;border-radius:6px;overflow:hidden;}
+#shieldBarFill{height:100%;background:linear-gradient(90deg,#e0e0e0,#ffffff);transition:width .3s;border-radius:6px;}
+#enemyBarArea{background:#0f0f1a;border:2px solid #553333;border-radius:8px;padding:10px 15px;display:none;}
+#enemyBarArea .hp-label{font-size:13px;color:#ff9999;margin-bottom:4px;}
+#enemyBarArea .hp-nums{font-size:16px;font-weight:bold;color:#ff6b6b;margin-bottom:6px;}
+#enemyBarTrack{width:100%;height:16px;background:#222;border-radius:8px;overflow:hidden;}
+#enemyBarFill{height:100%;background:linear-gradient(90deg,#c62828,#ef5350);transition:width .3s;border-radius:8px;}
+.enemy-trait-desc{margin-top:8px;font-size:12px;color:#cc9999;line-height:1.6;}
+.enemy-trait-desc .trait-item{display:inline-block;background:#2a1a2a;border:1px solid #553355;border-radius:4px;padding:2px 8px;margin:2px 4px 2px 0;}
+.slot-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.slot-grid .slot:nth-child(5){grid-column:1/-1;}
+.slot{font-size:11px;line-height:1.6;}
+.slot .estats{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;}
+.slot .estat-item{font-size:10px;}
+.set-info-btn{background:#2d2d44;color:#ffd700;border:1px solid #555;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;width:100%;margin-top:6px;}
+.set-info-btn:hover{background:#4a4a6a;}
+</style>
+</head>
+<body>
+<div id="game">
+<div id="mainArea">
+<div id="title">卡桑德里传说6.5</div>
+<div id="output"></div>
+<div id="enemyBarArea">
+<div class="hp-label" id="enemyBarLabel">敌人</div>
+<div class="hp-nums" id="enemyHpNums">0 / 0</div>
+<div id="enemyBarTrack"><div id="enemyBarFill" style="width:0%"></div></div>
+<div id="enemyTraitDesc" class="enemy-trait-desc"></div>
+</div>
+<div id="hpBarArea">
+<div class="hp-label">当前生命值</div>
+<div class="hp-nums" id="hpNums">0 / 0</div>
+<div id="hpBarTrack"><div id="hpBarFill" style="width:0%"></div></div>
+<div id="shieldBarWrap">
+<div class="hp-label">生命护盾</div>
+<div id="shieldBarTrack"><div id="shieldBarFill" style="width:0%"></div></div>
+</div>
+</div>
+<div id="choices"></div>
+</div>
+<div id="statPanel">
+<h3>勇者面板</h3>
+<div id="statContent"></div>
+</div>
+</div>
+<script>
+const outputDom=document.getElementById("output");
+const choicesDom=document.getElementById("choices");
+const statContent=document.getElementById("statContent");
+
+let save={eyeTotal:0,blood:0,pointAtk:0,pointHp:0,pointBj:0,pointBs:0,pointCrt:0,useBlood:0,gold:0,purchased:{egg:0,potion:0,boots:0,hat:0,doll:0},slot5Unlocked:false};
+function loadSave(){try{let s=localStorage.getItem("kasandri6_save");if(s){save=JSON.parse(s);if(save.gold===undefined)save.gold=0;if(!save.purchased)save.purchased={egg:0,potion:0,boots:0,hat:0,doll:0};if(save.slot5Unlocked===undefined)save.slot5Unlocked=false;}}catch(e){}}
+function writeSave(){localStorage.setItem("kasandri6_save",JSON.stringify(save));}
+loadSave();
+
+let player={name:"",job:"",atk:0,hp:0,maxHp:0,bj:0,bs:0,crt:0,ZDYHP:0,slots:[null,null,null,null],Q3:0,Q4:0,ZBSPECIALUSED1:0,ZBSPECIALUSED2:false,ZBSPECIALUSED3:false,nextDodgeBoost:false,canAdjustPoint:true,wave:0,blessAtkAdd:0,blessHpAdd:0,blessBjAdd:0,blessBsAdd:0,blessCrtAdd:0,energy:0,nextDefendBoost:false,permAtkAdd:0,permHpAdd:0};
+function getSlotCount(){return save.slot5Unlocked?5:4;}
+function initSlots(){player.slots=[];for(let i=0;i<getSlotCount();i++)player.slots.push(null);}
+let enemy={name:"",atk:0,hp:0,maxHp:0,trait:null,dots:[],firstStrikeUsed:false};
+let gameState="start";
+let pendingLoot=null;
+let lastEquipAction=null;
+let autoBattle=false;
+
+const jobData={
+"战士":{atk:240,hp:900,bj:0.08,bs:1.5,crt:0.03,desc:"高攻击，攻击吸血20%，战胜加攻击"},
+"天使":{atk:130,hp:1600,bj:0.08,bs:1.5,crt:0.05,desc:"高血量，血量增伤，战胜加血量"},
+"勇者":{atk:180,hp:950,bj:0.28,bs:2.2,crt:0.05,desc:"高暴击，受击反伤10%"},
+"隐士":{atk:170,hp:800,bj:0.10,bs:1.6,crt:0.30,desc:"高闪避，溢出闪避增伤，战胜加闪避"}
+};
+
+const blessingData={
+"战士的祝福":{atk:60,hp:100,bj:0,bs:0,crt:0,desc:"攻击+60血量+100，战胜攻击+5%，攻击回血3%"},
+"天使的祝福":{atk:20,hp:400,bj:0,bs:0,crt:0,desc:"血量+400攻击+20，满血增伤30%，战胜血量+5%"},
+"勇者的祝福":{atk:-30,hp:0,bj:0.20,bs:0.4,crt:0,desc:"暴击+20%爆伤+40%攻击-30，溢出暴击转护盾，战胜暴击+3%爆伤+5%"},
+"隐士的祝福":{atk:0,hp:0,bj:-0.10,bs:-0.3,crt:0.20,desc:"闪避+20%暴击-10%爆伤-30%，溢出闪避转增伤，战胜闪避+3%"}
+};
+
+const monsterAdj=["凶猛的","狡猾的","嗜血的","狂暴的","阴暗的","腐朽的","狰狞的","咆哮的","巨型的","毒液的","烈焰的","寒冰的","暗影的","亡灵的","恶魔的","蛮荒的","深渊的","噩梦的","绝望的","快乐的","无语的","痴呆的","游荡的","成群的","路过的","帅气的","喝水的","发光的","癫狂的","丑陋的","散发香味的","散发臭气的","刻薄的","自大的","年老的","年幼的","会飞的","长翅膀的","胆小的","自卑的","写歌的","画画的","听虚拟歌姬的","试图逃跑的","讲笑话的","唱歌的","跳舞的","咬打火机的","玩游戏的","死翘翘的","尖叫的","状况外的","不想活了的","玩手指的","咬指甲的","打电动的","打音游的","悲鸣的","蠕动的","患有精神病的","好胜的","因为怕死就全点血量的","寂寞的","参悟人生的","立地成佛的","学猫叫的","愚蠢的","无聊的","只是来打着玩玩的","尿急的","正在吃饭的","多愁善感的","锈蚀的","冒烟的","覆满苔藓的","骨甲包裹的","吐毒沫的","浑身溃烂的","被诅咒的","星光笼罩的","暴怒的","昏昏欲睡的","幻视的","狂躁的","流亡的","洞穴栖息的","沼泽潜伏的","熔岩蛰伏的","雾中徘徊的"];
+const monsterNoun=["哥布林","狼人","骷髅兵","史莱姆","蝙蝠","蜘蛛","食人魔","僵尸","幽灵","巨魔","石像鬼","九头蛇","奇美拉","蝎尾狮","地狱犬","巫医","死灵法师","暗影刺客","蛮荒战士","深渊领主","巨人","宝箱怪","矮人","兽人","精灵","拾荒者","不可名状物","吸血鬼","鬼怪","植物","人","眼镜蛇","大甲虫","狼","狐狸","猫","狗","老鼠","蜈蚣","蟒蛇","独角兽","外星人","妖精","魅魔","恶魔","梦魇","邪灵","三脚鸡","亡灵","树人","海妖","半人马","熔岩元素","冰霜元素","阴影","巨章鱼","骨龙","腐狼","泥浆怪","鸦人","石傀儡","飞虫群"];
+const lootAdj=["锋利的","坚固的","华丽的","古老的","神秘的","闪耀的","诅咒的","圣光的","龙鳞的","暗影的","烈焰的","寒冰的","雷霆的","剧毒的","嗜血的","不朽的","传说的","史诗的","远古的","神圣的","闪亮的","坚硬的","破损的","有污渍的","光滑的","明亮的","弯曲的","简朴的","粗糙的","丑陋的","独一无二的","尖锐的","珍贵的","遗失的","会飞的","长翅膀的","普通的","环保的","纸扎的","可食用的","冰冷的","烫手的","没用的","金灿灿的","需要充电的","沉重的","轻盈的","会尖叫的","哭泣的","充满好奇心的","白色的","黑色的","有毒的","沾着血的","奇妙的","一般的","绿色的","蓝色的","紫色的","红色的","干净的","漂亮的","整洁的","古怪的","银色的","金色的","奇葩的","脆弱的","柔软的","寒冷的","沉甸甸的","炙热的","滚烫的","散发着诡异光芒的","破烂的","吹口哨的","吐舌头的","变成猴子的","锈蚀的","星陨的","亡灵浸染的","妖精锻造的","熔岩浇筑的","月光祝福的","梦境的","砂砾覆盖的","雷霆轰鸣的","腐臭的","半融化的","泡沫编织的","暗影缠绕的","苔藓密布的","冰晶凝结的","混沌的","流光溢彩的","萤火萦绕的"];
+const lootNoun=["长剑","战斧","巨锤","匕首","法杖","盾牌","铠甲","头盔","靴子","戒指","项链","护符","披风","手套","腰带","长弓","弩","长矛","双刃剑","权杖","宝剑","大剑","剑","盾","矛","弓","针","小刀","刀","长刀","短刀","锁链","锤子","翅膀","水杯","镰刀","破烂","冰箱","洗衣机","鞋子","裤子","手机","充电宝","假发","假牙","背包","钥匙","钱包","塑料袋","饭卡","毛衣","连衣裙","盒子","毛巾","纸","战戟","斗篷","臂甲","胫甲","念珠","骨刃","巨斧","飞镖","号角","香炉","水晶球","石锤","骨盾","面纱"];
+
+const traitList=[
+{id:"reviveOnce",name:"不死意志",desc:"被杀死时满血复活，仅生效一次",prob:1},
+{id:"revive30",name:"苟延残喘",desc:"被杀死时30%概率保留1血，可多次生效",prob:1},
+{id:"deadlyStrike",name:"致命一击",desc:"攻击-50%，但5%概率直接秒杀敌人",prob:1},
+{id:"crit20x",name:"会心一击",desc:"攻击-30%，但20%概率造成20倍伤害",prob:1},
+{id:"critHeal",name:"吸血暴击",desc:"暴击时回复10%生命值",prob:1},
+{id:"attackHeal",name:"生命汲取",desc:"攻击时回复3%生命值",prob:1},
+{id:"dodgeBoost",name:"闪避反击",desc:"闪避后下次攻击伤害变为10倍",prob:1},
+{id:"berserk",name:"狂暴之力",desc:"血量低于30%时攻击力提升50%",prob:1},
+{id:"ironWall",name:"铁壁守护",desc:"受到的所有伤害降低15%",prob:1},
+{id:"critEnergy",name:"暴击充能",desc:"暴击时额外获得10点能量",prob:1},
+{id:"execute",name:"斩杀",desc:"敌人血量低于20%时造成的伤害翻倍",prob:1},
+{id:"dodgeHeal",name:"灵动自愈",desc:"闪避时回复5%最大生命值",prob:1},
+{id:"thorns",name:"荆棘反伤",desc:"被攻击时反弹10%伤害给敌人",prob:1},
+{id:"shieldGain",name:"护盾之核",desc:"装备时获得护盾值，战斗中优先消耗",prob:1},
+{id:"burn",name:"烈焰灼烧",desc:"攻击时使敌人灼烧，每回合受到攻击力20%伤害，持续3回合",prob:1},
+{id:"poison",name:"剧毒腐蚀",desc:"攻击时使敌人中毒，每回合损失最大血量3%，持续3回合",prob:1},
+{id:"bleed",name:"撕裂流血",desc:"攻击时使敌人流血，每回合损失当前血量5%，持续3回合",prob:1},
+{id:"critShield",name:"暴击护盾",desc:"暴击时获得最大血量5%的护盾",prob:1},
+{id:"killHeal",name:"斩杀回复",desc:"击杀敌人时回复30%最大生命值",prob:1},
+{id:"firstStrike",name:"先发制人",desc:"每场战斗首次攻击伤害翻倍",prob:1},
+{id:"highHpBoost",name:"全盛之势",desc:"血量高于80%时攻击力提升30%",prob:1},
+{id:"energySurge",name:"能量涌动",desc:"每次攻击额外获得5点能量",prob:1},
+{id:"lifesteal",name:"生命汲取·强",desc:"攻击时回复造成伤害的10%生命值",prob:1},
+{id:"doubleStrike",name:"连击",desc:"攻击时有20%概率额外攻击一次",prob:1}
+];
+
+const elements=["火","水","草","雷"];
+function elemClass(e){return e==="火"?"elem-fire":e==="水"?"elem-water":e==="草"?"elem-grass":"elem-thunder";}
+
+const enemyTraitList=[
+{id:"dot",name:"剧毒之体",desc:"攻击附加无法闪避的持续伤害"},
+{id:"thief",name:"小偷",desc:"战斗中有概率偷走一件装备"},
+{id:"heal",name:"再生",desc:"每次攻击后回复5%最大生命值"},
+{id:"berserker",name:"战狂",desc:"攻击有概率连击，连击时损失10%生命"},
+{id:"pierce",name:"隔山打牛",desc:"攻击无视护盾（可被闪避）"},
+{id:"armor",name:"重甲",desc:"受到的所有伤害减少30%"},
+{id:"thorns",name:"荆棘之甲",desc:"被攻击时反弹15%伤害"},
+{id:"lifesteal",name:"嗜血",desc:"攻击时回复造成伤害20%的生命值"},
+{id:"rage",name:"狂暴",desc:"血量低于50%时攻击力提升50%"},
+{id:"dodge",name:"灵巧",desc:"有20%概率闪避玩家的攻击"},
+{id:"crit",name:"致命",desc:"攻击有25%概率造成1.5倍伤害"},
+{id:"trueSight",name:"真实之眼",desc:"攻击完全无视闪避（必中）"},
+{id:"phase",name:"相位",desc:"攻击有50%概率无视闪避"},
+{id:"weaken",name:"虚弱",desc:"攻击命中后降低玩家攻击力"},
+{id:"curse",name:"诅咒",desc:"攻击命中后降低玩家暴击率"},
+{id:"enrage",name:"激怒",desc:"每次被攻击后攻击力提升10%"},
+{id:"explode",name:"爆裂",desc:"死亡时对玩家造成最大血量10%的伤害"},
+{id:"shield",name:"护盾",desc:"开局自带最大血量20%的护盾"}
+];
+function hasETrait(id){return enemy.traits&&enemy.traits.some(t=>t.id===id);}
+function getETraitNames(){return enemy.traits&&enemy.traits.length>0?enemy.traits.map(t=>t.name).join("·"):"";}
+
+function print(s,cls="",raw=false){
+    let html;
+    if(raw){html=String(s).replace(/\n/g,"<br>");}
+    else{let escaped=String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");html=escaped.replace(/\n/g,"<br>");}
+    if(cls){outputDom.innerHTML+=`<div class="${cls}">${html}</div>`;}
+    else{outputDom.innerHTML+=`<div>${html}</div>`;}
+    outputDom.scrollTop=outputDom.scrollHeight;
+}
+
+function clearChoices(){choicesDom.innerHTML="";}
+function addChoice(text,callback,cls=""){
+    let b=document.createElement("button");
+    b.className="btn "+cls;
+    b.textContent=text;
+    b.onclick=callback;
+    choicesDom.appendChild(b);
+}
+
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function getElemCount(){
+    let count={火:0,水:0,草:0,雷:0};
+    for(let s of player.slots){if(s)count[s.element]++;}
+    return count;
+}
+function getSetBonus(){
+    let c=getElemCount();
+    let active=[];
+    for(let e of elements){
+        if(c[e]>=4)active.push(e+"4");
+        else if(c[e]>=2)active.push(e+"2");
+    }
+    return active;
+}
+function hasSet(tag){return getSetBonus().indexOf(tag)>=0;}
+
+function getTraitMult(){
+    let atkMult=1;
+    for(let s of player.slots){
+        if(s&&s.trait){
+            if(s.trait.id==="deadlyStrike")atkMult*=0.5;
+            if(s.trait.id==="crit20x")atkMult*=0.7;
+        }
+    }
+    return atkMult;
+}
+
+function hasTrait(id){
+    for(let s of player.slots){if(s&&s.trait&&s.trait.id===id)return true;}
+    return false;
+}
+function countTrait(id){
+    let c=0;
+    for(let s of player.slots){if(s&&s.trait&&s.trait.id===id)c++;}
+    return c;
+}
+
+function getTraitProbMult(){
+    if(hasSet("草4"))return 2.5;
+    if(hasSet("草2"))return 1.5;
+    return 1;
+}
+
+function calcBaseStats(){
+    let j=jobData[player.job];
+    let b=blessingData[player.blessing];
+    let p=save.purchased||{egg:0,potion:0,boots:0,hat:0,doll:0};
+    let atk=j.atk+b.atk+save.pointAtk*8+p.egg*10;
+    let hp=j.hp+b.hp+save.pointHp*5+p.potion*100;
+    let bj=j.bj+b.bj+save.pointBj*0.03+p.boots*0.05;
+    let bs=j.bs+b.bs+save.pointBs*0.06+p.hat*0.10;
+    let crt=j.crt+b.crt+save.pointCrt*0.025+p.doll*0.05;
+    return {atk,hp,bj,bs,crt};
+}
+
+function applyEquipStats(){
+    let base=calcBaseStats();
+    let atk=base.atk,hp=base.hp,bj=base.bj,bs=base.bs,crt=base.crt;
+    for(let s of player.slots){
+        if(s){atk+=s.atk;hp+=s.hp;bj+=s.bj;bs+=s.bs;crt+=s.crt;}
+    }
+    atk=Math.floor(atk*getTraitMult());
+    atk+=player.blessAtkAdd||0;
+    atk+=player.permAtkAdd||0;
+    hp+=player.blessHpAdd||0;
+    hp+=player.permHpAdd||0;
+    bj+=player.blessBjAdd||0;
+    bs+=player.blessBsAdd||0;
+    crt+=player.blessCrtAdd||0;
+    player.atk=atk;player.maxHp=hp;player.hp=hp;player.bj=bj;player.bs=bs;player.crt=crt;
+}
+
+function oneSlotHtml(idx){
+    let s=player.slots[idx];
+    if(!s)return `<div class="slot">槽位${idx+1}：空</div>`;
+    let traitHtml=s.trait?`<div class="trait">【${s.trait.name}】${s.trait.desc}</div>`:"";
+    return `<div class="slot filled"><span class="ename">${s.name}</span> <span class="${elemClass(s.element)}">【${s.element}】</span>
+    <div class="estats">
+    <span class="estat-item stat-atk">ATK+${s.atk}</span>
+    <span class="estat-item stat-hp">HP+${s.hp}</span>
+    <span class="estat-item stat-bj">BJ+${Math.floor(s.bj*100)}%</span>
+    <span class="estat-item stat-bs">BS+${Math.floor(s.bs*100)}%</span>
+    <span class="estat-item stat-crt">CRT+${Math.floor(s.crt*100)}%</span>
+    </div>${traitHtml}</div>`;
+}
+
+function refreshHpBar(){
+    let hpNums=document.getElementById("hpNums");
+    let hpFill=document.getElementById("hpBarFill");
+    if(hpNums)hpNums.textContent=`${player.hp} / ${player.maxHp}`;
+    if(hpFill){
+        let pct=player.maxHp>0?Math.max(0,Math.min(100,player.hp/player.maxHp*100)):0;
+        hpFill.style.width=pct+"%";
+        hpFill.className=pct<30?"low":"";
+    }
+    let shieldWrap=document.getElementById("shieldBarWrap");
+    let shieldFill=document.getElementById("shieldBarFill");
+    if(shieldWrap&&shieldFill){
+        if(player.ZDYHP>0){
+            shieldWrap.style.display="block";
+            let spct=player.maxHp>0?Math.min(100,player.ZDYHP/player.maxHp*100):0;
+            shieldFill.style.width=spct+"%";
+        }else{
+            shieldWrap.style.display="none";
+        }
+    }
+    let enemyArea=document.getElementById("enemyBarArea");
+    let enemyLabel=document.getElementById("enemyBarLabel");
+    let enemyNums=document.getElementById("enemyHpNums");
+    let enemyFill=document.getElementById("enemyBarFill");
+    let enemyTraitDesc=document.getElementById("enemyTraitDesc");
+    if(enemyArea&&enemy.name&&enemy.maxHp>0&&(gameState==="battle"||gameState==="bossBattle")){
+        enemyArea.style.display="block";
+        let traitStr=getETraitNames()?` 【${getETraitNames()}】`:"";
+        enemyLabel.textContent=`【${enemy.name}】 ATK:${enemy.atk}${traitStr}`;
+        enemyNums.textContent=`${Math.max(0,enemy.hp)} / ${enemy.maxHp}`;
+        let epct=enemy.maxHp>0?Math.max(0,Math.min(100,enemy.hp/enemy.maxHp*100)):0;
+        enemyFill.style.width=epct+"%";
+        if(enemyTraitDesc){
+            if(enemy.traits&&enemy.traits.length>0){
+                enemyTraitDesc.innerHTML=enemy.traits.map(t=>`<span class="trait-item">【${t.name}】${t.desc}</span>`).join("");
+                enemyTraitDesc.style.display="block";
+            }else{
+                enemyTraitDesc.style.display="none";
+            }
+        }
+    }else if(enemyArea){
+        enemyArea.style.display="none";
+    }
+}
+function showSetInfo(){
+    print("\n=== 套装效果一览 ===");
+    print("<span class='elem-fire'>【火】</span> 两件：攻击伤害+10%，战胜攻击+4% | 四件：攻击伤害+25%，战胜攻击+10%","",true);
+    print("<span class='elem-water'>【水】</span> 两件：受到伤害-8%，战胜血量+4% | 四件：受到伤害-20%，战胜血量+10%","",true);
+    print("<span class='elem-grass'>【草】</span> 两件：装备特性触发概率×1.5 | 四件：装备特性触发概率×2.5","",true);
+    print("<span class='elem-thunder'>【雷】</span> 两件：攻击附加敌人3%当前血量伤害 | 四件：攻击附加敌人6%当前血量伤害","",true);
+    let c=getElemCount();
+    print(`\n当前装备属性：火${c.火} 水${c.水} 草${c.草} 雷${c.雷}`);
+}
+function openShop(){
+    print("\n=== 商城 ===");
+    print(`当前金币：${save.gold||0}`);
+    let p=save.purchased;
+    print(`1. 美味的鸡蛋 - 500金币，永久+10攻击力（已购${p.egg}/10）`);
+    print(`2. 难闻的药水 - 500金币，永久+100生命值（已购${p.potion}/10）`);
+    print(`3. 很热的长靴 - 700金币，永久+5%暴击率（已购${p.boots}/10）`);
+    print(`4. 很凉的帽子 - 800金币，永久+10%暴击伤害（已购${p.hat}/10）`);
+    print(`5. 可爱的替身娃娃 - 800金币，永久+5%闪避率（已购${p.doll}/10）`);
+    print(`6. 大记忆消失术 - 10金币，清除所有商城购买效果并返还限购`);
+    print(`7. 潘多拉之盒 - 200金币，随机奖励`);
+    if(save.slot5Unlocked){print(`8. 额外装备槽位 - 已解锁`);}
+    else{print(`8. 额外装备槽位 - 5000金币，永久解锁第五个装备槽`);}
+    clearChoices();
+    addChoice("1. 美味的鸡蛋(500)",()=>buyItem("egg",500,10));
+    addChoice("2. 难闻的药水(500)",()=>buyItem("potion",500,10));
+    addChoice("3. 很热的长靴(700)",()=>buyItem("boots",700,10));
+    addChoice("4. 很凉的帽子(800)",()=>buyItem("hat",800,10));
+    addChoice("5. 可爱的替身娃娃(800)",()=>buyItem("doll",800,10));
+    addChoice("6. 大记忆消失术(10)",()=>buyReset());
+    addChoice("7. 潘多拉之盒(200)",()=>buyPandora());
+    if(!save.slot5Unlocked){addChoice("8. 额外装备槽位(5000)",()=>buySlot5());}
+    addChoice("返回",()=>shopReturn());
+}
+function buySlot5(){
+    if(save.slot5Unlocked){print("已解锁！");openShop();return;}
+    if((save.gold||0)<5000){print("金币不足！");openShop();return;}
+    save.gold-=5000;
+    save.slot5Unlocked=true;
+    writeSave();
+    if(player.job){player.slots.push(null);applyEquipStats();refreshStatPanel();}
+    print("第五个装备槽位已永久解锁！");
+    openShop();
+}
+function shopReturn(){
+    if(gameState==="start"||gameState==="select"){startGame();}
+    else if(gameState==="battle"||gameState==="bossBattle"){battleLoop();}
+    else if(gameState==="loot"||gameState==="bossLoot"){if(pendingLoot){showLootChoice(pendingLoot.e1,pendingLoot.e2,pendingLoot.source);}else{nextWave();}}
+    else{startGame();}
+}
+function buyItem(key,price,limit){
+    let p=save.purchased;
+    if(p[key]>=limit){print("已达限购上限！");openShop();return;}
+    if((save.gold||0)<price){print("金币不足！");openShop();return;}
+    save.gold-=price;
+    p[key]++;
+    writeSave();
+    if(player.job){applyEquipStats();refreshStatPanel();}
+    print(`购买成功！剩余金币：${save.gold}`);
+    openShop();
+}
+function buyReset(){
+    if((save.gold||0)<10){print("金币不足！");openShop();return;}
+    save.gold-=10;
+    save.purchased={egg:0,potion:0,boots:0,hat:0,doll:0};
+    writeSave();
+    if(player.job){applyEquipStats();refreshStatPanel();}
+    print("大记忆消失术生效！所有商城购买效果已清除，限购已返还。");
+    openShop();
+}
+function buyPandora(){
+    if((save.gold||0)<200){print("金币不足！");openShop();return;}
+    save.gold-=200;
+    let r=Math.random()*100;
+    if(r<10){save.gold+=10;print("潘多拉之盒：获得10金币！");}
+    else if(r<30){save.gold+=50;print("潘多拉之盒：获得50金币！");}
+    else if(r<68){save.gold+=100;print("潘多拉之盒：获得100金币！");}
+    else if(r<78){save.gold+=500;print("潘多拉之盒：获得500金币！");}
+    else if(r<88){save.gold+=800;print("潘多拉之盒：获得800金币！");}
+    else if(r<98){
+        let items=["egg","potion","boots","hat","doll"];
+        let prices=[500,500,700,800,800];
+        let names=["美味的鸡蛋","难闻的药水","很热的长靴","很凉的帽子","可爱的替身娃娃"];
+        let idx=Math.floor(Math.random()*5);
+        let key=items[idx];
+        if(save.purchased[key]<10){
+            save.purchased[key]++;
+            print(`潘多拉之盒：获得商品【${names[idx]}】！`);
+        }else{
+            save.gold+=prices[idx];
+            print(`潘多拉之盒：本应获得【${names[idx]}】，但已达限购，返还${prices[idx]}金币！`);
+        }
+    }else{
+        save.purchased={egg:0,potion:0,boots:0,hat:0,doll:0};
+        print("潘多拉之盒：触发大记忆消失术！所有商城购买效果已清除！");
+    }
+    writeSave();
+    if(player.job){applyEquipStats();refreshStatPanel();}
+    print(`当前金币：${save.gold}`);
+    openShop();
+}
+function refreshStatPanel(){
+    let sets=getSetBonus();
+    let setText=sets.length>0?sets.map(t=>`<span class="${elemClass(t.charAt(0))}">【${t.charAt(0)}${t.length>1&&t.charAt(1)==="4"?"四件":"两件"}】</span>`).join(" "):"无";
+    let usedEye=save.pointAtk+save.pointHp+save.pointBj+save.pointBs+save.pointCrt;
+    let html=`
+    <div class="eye-info">魔王之眼：${save.eyeTotal}/24 | 已用：${usedEye}</div>
+    <div class="eye-info">它之血珠：${save.blood} | 难度：${save.useBlood}/10</div>
+    <div class="eye-info">金币：${save.gold||0}</div>
+    <button class="set-info-btn" onclick="openShop()">商城</button>
+    <div class="stat-row"><span class="label">职业</span><span class="value">${player.job||"-"}</span></div>
+    <div class="stat-row"><span class="label">祝福</span><span class="value">${player.blessing||"-"}</span></div>
+    <div class="stat-row"><span class="label">攻击力</span><span class="value stat-atk">${player.atk}</span></div>
+    <div class="stat-row"><span class="label">血量上限</span><span class="value stat-hp">${player.maxHp}</span></div>
+    <div class="stat-row"><span class="label">暴击率</span><span class="value stat-bj">${Math.floor(player.bj*100)}%</span></div>
+    <div class="stat-row"><span class="label">暴击伤害</span><span class="value stat-bs">${Math.floor(player.bs*100)}%</span></div>
+    <div class="stat-row"><span class="label">闪避率</span><span class="value stat-crt">${Math.floor(player.crt*100)}%</span></div>
+    <div class="stat-row"><span class="label">能量</span><span class="value">${player.energy}/100</span></div>
+    <div class="stat-row"><span class="label">套装效果</span><span class="value">${setText}</span></div>
+    <button class="set-info-btn" onclick="showSetInfo()">查看套装效果详情</button>
+    <div class="equip-slots"><h4>装备槽位</h4><div class="slot-grid">__SLOTS__</div></div>
+    <div class="point-controls">
+    <div class="point-row"><span class="plabel">难度等级</span><button onclick="adjPoint('blood',-1)" ${player.canAdjustPoint&&save.useBlood>0?"":"disabled"}>-</button><span class="pval">${save.useBlood}</span><button onclick="adjPoint('blood',1)" ${player.canAdjustPoint&&save.useBlood<10&&save.blood>save.useBlood?"":"disabled"}>+</button></div>
+    <div class="point-row"><span class="plabel stat-atk">攻击力</span><button onclick="adjPoint('atk',-1)" ${player.canAdjustPoint&&save.pointAtk>0?"":"disabled"}>-</button><span class="pval stat-atk">${save.pointAtk}</span><button onclick="adjPoint('atk',1)" ${player.canAdjustPoint&&usedEye<save.eyeTotal?"":"disabled"}>+</button></div>
+    <div class="point-row"><span class="plabel stat-hp">血量</span><button onclick="adjPoint('hp',-1)" ${player.canAdjustPoint&&save.pointHp>0?"":"disabled"}>-</button><span class="pval stat-hp">${save.pointHp}</span><button onclick="adjPoint('hp',1)" ${player.canAdjustPoint&&usedEye<save.eyeTotal?"":"disabled"}>+</button></div>
+    <div class="point-row"><span class="plabel stat-bj">暴击率</span><button onclick="adjPoint('bj',-1)" ${player.canAdjustPoint&&save.pointBj>0?"":"disabled"}>-</button><span class="pval stat-bj">${save.pointBj}</span><button onclick="adjPoint('bj',1)" ${player.canAdjustPoint&&usedEye<save.eyeTotal?"":"disabled"}>+</button></div>
+    <div class="point-row"><span class="plabel stat-bs">暴击伤害</span><button onclick="adjPoint('bs',-1)" ${player.canAdjustPoint&&save.pointBs>0?"":"disabled"}>-</button><span class="pval stat-bs">${save.pointBs}</span><button onclick="adjPoint('bs',1)" ${player.canAdjustPoint&&usedEye<save.eyeTotal?"":"disabled"}>+</button></div>
+    <div class="point-row"><span class="plabel stat-crt">闪避率</span><button onclick="adjPoint('crt',-1)" ${player.canAdjustPoint&&save.pointCrt>0?"":"disabled"}>-</button><span class="pval stat-crt">${save.pointCrt}</span><button onclick="adjPoint('crt',1)" ${player.canAdjustPoint&&usedEye<save.eyeTotal?"":"disabled"}>+</button></div>
+    </div>`;
+    let slotsHtml="";
+    for(let i=0;i<player.slots.length;i++)slotsHtml+=oneSlotHtml(i);
+    html=html.replace("__SLOTS__",slotsHtml);
+    statContent.innerHTML=html;
+    refreshHpBar();
+}
+
+function adjPoint(type,delta){
+    if(!player.canAdjustPoint)return;
+    let usedEye=save.pointAtk+save.pointHp+save.pointBj+save.pointBs+save.pointCrt;
+    if(type==="blood"){
+        if(delta>0&&save.useBlood<10&&save.blood>save.useBlood){save.useBlood++;}
+        else if(delta<0&&save.useBlood>0){save.useBlood--;}
+    }else{
+        let key="point"+type.charAt(0).toUpperCase()+type.slice(1);
+        if(delta>0&&usedEye<save.eyeTotal){save[key]++;}
+        else if(delta<0&&save[key]>0){save[key]--;}
+    }
+    writeSave();
+    if(player.job){applyEquipStats();}
+    refreshStatPanel();
+}
+
+function genEquip(wave){
+    if(wave===undefined)wave=player.wave;
+    let name=pick(lootAdj)+pick(lootNoun);
+    let element=pick(elements);
+    let scale=1+Math.min(1,wave/20)*1.0;
+    let atk=Math.floor(rand(5,25)*scale),hp=Math.floor(rand(10,80)*scale),bj=rand(0,8)/100,bs=rand(0,10)/100,crt=rand(0,6)/100;
+    bj=Math.floor(bj*scale*100)/100;bs=Math.floor(bs*scale*100)/100;crt=Math.floor(crt*scale*100)/100;
+    let trait=null;
+    let traitProb=0.15+Math.min(1,wave/20)*0.15;
+    if(Math.random()<traitProb){
+        trait=pick(traitList);
+        if(trait.id==="shieldGain"){trait={...trait,value:pick([1000,800,500])};}
+    }
+    return {name,element,atk,hp,bj,bs,crt,trait};
+}
+
+function showEquip(e){
+    print(`${e.name} <span class="${elemClass(e.element)}">【${e.element}】</span>`,"",true);
+    print(`<span class="stat-atk">ATK: +${e.atk}</span>  <span class="stat-hp">HP: +${e.hp}</span>  <span class="stat-bj">BJ: +${Math.floor(e.bj*100)}%</span>  <span class="stat-bs">BS: +${Math.floor(e.bs*100)}%</span>  <span class="stat-crt">CRT: +${Math.floor(e.crt*100)}%</span>`,"",true);
+    if(e.trait){
+        let tdesc=e.trait.id==="shieldGain"?`装备时获得${e.trait.value}点护盾`:e.trait.desc;
+        print(`<span class="trait">【${e.trait.name}】${tdesc}</span>`,"",true);
+    }
+}
+
+function equipToSlot(e,chosenIdx){
+    let empty=player.slots.indexOf(null);
+    if(empty>=0){
+        lastEquipAction={slotIdx:empty,oldEquip:null,newEquip:e,chosenIdx:chosenIdx};
+        player.slots[empty]=e;print(`你装备了 ${e.name}`);
+    }else{
+        clearChoices();
+        print("装备槽已满，请选择要替换的装备：");
+        for(let i=0;i<player.slots.length;i++){
+            let s=player.slots[i];
+            addChoice(`替换[${i+1}] ${s.name}`,()=>{
+                lastEquipAction={slotIdx:i,oldEquip:s,newEquip:e,chosenIdx:chosenIdx};
+                player.slots[i]=e;print(`你替换了装备`);applyEquipStats();refreshStatPanel();confirmEquip();
+            });
+        }
+        addChoice("返回，重新选择",()=>{if(pendingLoot)showLootChoice(pendingLoot.e1,pendingLoot.e2,pendingLoot.source);else afterEquip();});
+        addChoice("放弃装备",()=>{print("你放弃了这件装备");afterEquip();});
+        return;
+    }
+    applyEquipStats();
+    refreshStatPanel();
+    confirmEquip();
+}
+function confirmEquip(){
+    clearChoices();
+    addChoice("确认选择，继续冒险",()=>afterEquip());
+    addChoice("反悔，重新选择",()=>undoEquip());
+}
+function undoEquip(){
+    if(!lastEquipAction)return;
+    let act=lastEquipAction;
+    player.slots[act.slotIdx]=act.oldEquip;
+    applyEquipStats();
+    refreshStatPanel();
+    print("你卸下了刚才的装备，重新选择。");
+    lastEquipAction=null;
+    if(pendingLoot){
+        showLootChoice(pendingLoot.e1,pendingLoot.e2,pendingLoot.source);
+    }else{
+        afterEquip();
+    }
+}
+function showLootChoice(e1,e2,source){
+    pendingLoot={e1,e2,source};
+    print("\n敌人掉落了两件装备，请选择其一：");
+    print("【装备一】");
+    showEquip(e1);
+    print("【装备二】");
+    showEquip(e2);
+    clearChoices();
+    addChoice("选择装备一",()=>equipToSlot(e1,1));
+    addChoice("选择装备二",()=>equipToSlot(e2,2));
+    addChoice("都放弃",()=>{pendingLoot=null;print("你放弃了两件装备");afterEquip();});
+}
+
+function afterEquip(){
+    pendingLoot=null;
+    lastEquipAction=null;
+    player.hp=player.maxHp;
+    let sg=countTrait("shieldGain");
+    if(sg>0){
+        let totalShield=0;
+        for(let s of player.slots){if(s&&s.trait&&s.trait.id==="shieldGain")totalShield+=s.trait.value;}
+        player.ZDYHP=Math.max(player.ZDYHP,totalShield);
+        print(`【护盾之核】获得${totalShield}点生命护盾！`);
+    }
+    refreshStatPanel();
+    if(gameState==="loot"){nextWave();}
+    else if(gameState==="bossLoot"){enterBoss();}
+}
+
+function genEnemy(isBoss,bossType){
+    let diffMult=Math.pow(1.4,save.useBlood);
+    if(isBoss){
+        if(bossType==="魔王"){
+            enemy={name:"魔王",atk:Math.floor(2000*diffMult),hp:Math.floor(200000*diffMult),maxHp:Math.floor(200000*diffMult),traits:[],shield:0,dots:[],firstStrikeUsed:false};
+        }else{
+            enemy={name:"它",atk:Math.floor(3000*diffMult),hp:Math.floor(300000*diffMult),maxHp:Math.floor(300000*diffMult),traits:[],shield:0,dots:[],firstStrikeUsed:false};
+        }
+        return;
+    }
+    let wave=player.wave;
+    let baseAtk=Math.floor((50+wave*15)*(0.5+Math.random()*1.0));
+    let baseHp=Math.floor((300+wave*80)*(0.5+Math.random()*1.0));
+    if(wave>=7){
+        if(player.job==="战士")baseHp=Math.floor(baseHp*rand(4,6));
+        else if(player.job==="勇者")baseHp=Math.floor(baseHp*rand(3,5));
+    }
+    let eTraits=[];
+    let eTraitProb=0.15+Math.min(1,wave/20)*0.15;
+    if(save.useBlood>=6)eTraitProb*=1.5;
+    let maxTraits=save.useBlood>=4?3:1;
+    let tried={};
+    for(let t=0;t<maxTraits;t++){
+        if(Math.random()<eTraitProb){
+            let candidates=enemyTraitList.filter(x=>!tried[x.id]);
+            if(candidates.length>0){
+                let picked=candidates[Math.floor(Math.random()*candidates.length)];
+                tried[picked.id]=true;
+                eTraits.push(picked);
+            }
+        }
+    }
+    if(save.useBlood>=8&&eTraits.length===0){
+        let picked=enemyTraitList[Math.floor(Math.random()*enemyTraitList.length)];
+        eTraits.push(picked);
+    }
+    let eShield=0;
+    if(eTraits.some(t=>t.id==="shield")){eShield=Math.floor((300+wave*80)*0.20*diffMult);}
+    let eAtk=Math.floor(baseAtk*diffMult);
+    if(eTraits.some(t=>t.id==="trueSight")){eAtk=Math.floor(eAtk*0.70);}
+    enemy={name:pick(monsterAdj)+pick(monsterNoun),atk:eAtk,hp:Math.floor(baseHp*diffMult),maxHp:Math.floor(baseHp*diffMult),traits:eTraits,shield:eShield,dots:[],firstStrikeUsed:false};
+    if(eTraits.length>0){for(let et of eTraits){print(`【敌人特性】这只敌人拥有【${et.name}】：${et.desc}`);}}
+    if(save.useBlood>=9&&Math.random()<0.30){
+        let filled=[];
+        for(let i=0;i<player.slots.length;i++){if(player.slots[i])filled.push(i);}
+        if(filled.length>0){
+            let ridx=filled[Math.floor(Math.random()*filled.length)];
+            let lost=player.slots[ridx];
+            player.slots[ridx]=null;
+            applyEquipStats();
+            print(`【难度${save.useBlood}】黑暗的力量侵蚀了你，你失去了一件装备：`);
+            showEquip(lost);
+        }
+    }
+}
+
+function applyDots(){
+    if(!enemy.dots||enemy.dots.length===0)return;
+    let totalDot=0;
+    let newDots=[];
+    for(let d of enemy.dots){
+        let dmg=0;
+        if(d.type==="burn"){dmg=Math.floor(player.atk*0.20*d.stacks);}
+        else if(d.type==="poison"){dmg=Math.floor(enemy.maxHp*0.03*d.stacks);}
+        else if(d.type==="bleed"){dmg=Math.floor(enemy.hp*0.05*d.stacks);}
+        totalDot+=dmg;
+        d.turns--;
+        if(d.turns>0)newDots.push(d);
+    }
+    enemy.dots=newDots;
+    if(totalDot>0){
+        if(enemy.shield>0){
+            if(enemy.shield>=totalDot){enemy.shield-=totalDot;print(`敌人护盾吸收了${totalDot}点持续伤害，剩余护盾${enemy.shield}`);totalDot=0;}
+            else{totalDot-=enemy.shield;print(`敌人护盾吸收了${enemy.shield}点持续伤害`);enemy.shield=0;}
+        }
+        if(totalDot>0){enemy.hp-=totalDot;print(`【持续伤害】敌人受到${totalDot}点持续伤害！`);}
+    }
+}
+function addDot(type,name){
+    if(!enemy.dots)enemy.dots=[];
+    let existing=enemy.dots.find(d=>d.type===type);
+    if(existing){existing.stacks=Math.min(5,existing.stacks+1);existing.turns=3;}
+    else{enemy.dots.push({type,name,stacks:1,turns:3});}
+    print(`【${name}】敌人陷入了${name}状态！`);
+}
+function playerAttack(){
+    let dmg=Math.floor(player.atk*(0.85+Math.random()*0.30));
+    let isCrit=false;
+    let pmult=getTraitProbMult();
+    if(player.nextDefendBoost){dmg=Math.floor(dmg*1.5);player.nextDefendBoost=false;print("【蓄力一击】伤害提升50%！");}
+    if(countTrait("firstStrike")>0&&!enemy.firstStrikeUsed){dmg=Math.floor(dmg*2);enemy.firstStrikeUsed=true;print("【先发制人】首次攻击伤害翻倍！");}
+    let hh=countTrait("highHpBoost");
+    if(hh>0&&player.hp/player.maxHp>0.8){dmg=Math.floor(dmg*(1+0.30*hh));print(`【全盛之势】血量高于80%，攻击+${30*hh}%！`);}
+    let bz=countTrait("berserk");
+    if(bz>0&&player.hp/player.maxHp<0.3){dmg=Math.floor(dmg*(1+0.50*bz));print(`【狂暴之力】血量低于30%，攻击+${50*bz}%！`);}
+    if(player.blessing==="天使的祝福"){
+        let hpRatio=player.hp/player.maxHp;
+        dmg=Math.floor(dmg*(1+hpRatio*0.3));
+    }
+    if(player.job==="天使"){
+        let hpBonus=Math.floor(player.maxHp/100)*0.01;
+        dmg=Math.floor(dmg*(1+hpBonus));
+    }
+    if(player.blessing==="隐士的祝福"&&player.crt>1){
+        dmg=Math.floor(dmg*(1+(player.crt-1)));
+    }
+    if(player.job==="隐士"&&player.crt>1){
+        let excessCrt=player.crt-1;
+        let dodgeBonus=Math.floor(excessCrt*100/5)*0.02;
+        dmg=Math.floor(dmg*(1+dodgeBonus));
+    }
+    let ds=countTrait("deadlyStrike");
+    let c20=countTrait("crit20x");
+    if(ds>0&&Math.random()<0.05*ds*pmult){
+        dmg=enemy.hp;
+        print("【致命一击】你直接秒杀了敌人！");
+    }else if(c20>0&&Math.random()<0.20*c20*pmult){
+        dmg=Math.floor(player.atk*20);
+        print("【会心一击】造成20倍伤害！");
+    }else{
+        if(Math.random()<player.bj){isCrit=true;dmg=Math.floor(dmg*player.bs);}
+        if(player.nextDodgeBoost){dmg=Math.floor(dmg*10);player.nextDodgeBoost=false;print("【闪避反击】伤害变为10倍！");}
+    }
+    let ex=countTrait("execute");
+    if(ex>0&&enemy.hp/enemy.maxHp<0.2){dmg=Math.floor(dmg*(1+1.0*ex));print(`【斩杀】敌人血量低于20%，伤害×${1+ex}！`);}
+    if(hasSet("雷4")){
+        let thunderDmg=Math.floor(enemy.hp*0.06);
+        dmg+=thunderDmg;
+        print(`【雷电四件】额外造成${thunderDmg}点雷电伤害`);
+    }else if(hasSet("雷2")){
+        let thunderDmg=Math.floor(enemy.hp*0.03);
+        dmg+=thunderDmg;
+        print(`【雷电两件】额外造成${thunderDmg}点雷电伤害`);
+    }
+    if(hasSet("火4")){dmg=Math.floor(dmg*1.25);}
+    else if(hasSet("火2")){dmg=Math.floor(dmg*1.10);}
+    if(hasETrait("dodge")&&Math.random()<0.20){
+        print(`【灵巧】敌人闪避了你的攻击！`);
+        dmg=0;
+    }
+    if(dmg>0&&hasETrait("armor")){
+        dmg=Math.floor(dmg*0.70);
+        print(`【重甲】敌人的护甲减免了部分伤害！`);
+    }
+    if(dmg>0&&save.useBlood>=7){dmg=Math.floor(dmg*0.80);}
+    if(dmg>0&&enemy.shield>0){
+        if(enemy.shield>=dmg){enemy.shield-=dmg;print(`敌人护盾吸收了${dmg}点伤害，剩余护盾${enemy.shield}`);dmg=0;}
+        else{dmg-=enemy.shield;print(`敌人护盾吸收了${enemy.shield}点伤害`);enemy.shield=0;}
+    }
+    if(dmg>0&&hasETrait("thorns")){
+        let reflect=Math.floor(dmg*0.15);
+        player.hp-=reflect;
+        print(`【荆棘之甲】你受到${reflect}点反伤！`);
+    }
+    enemy.hp-=dmg;
+    if(dmg>0&&hasETrait("enrage")&&enemy.hp>0){
+        enemy.atk=Math.floor(enemy.atk*1.10);
+        print(`【激怒】敌人的攻击力提升了！`);
+    }
+    if(isCrit)print(`你暴击造成 ${dmg} 点伤害！`);
+    else print(`你造成 ${dmg} 点伤害`);
+    if(player.job==="战士"){
+        let heal=Math.floor(dmg*0.20);
+        player.hp=Math.min(player.maxHp,player.hp+heal);
+        print(`【战士】吸血回复${heal}点生命`);
+    }
+    if(player.blessing==="战士的祝福"){
+        let heal=Math.floor(player.maxHp*0.03);
+        player.hp=Math.min(player.maxHp,player.hp+heal);
+        print(`【战士的祝福】回复${heal}点生命`);
+    }
+    let ah=countTrait("attackHeal");
+    if(ah>0){
+        let heal=Math.floor(player.maxHp*0.03*ah);
+        player.hp=Math.min(player.maxHp,player.hp+heal);
+        print(`【生命汲取】回复${heal}点生命`);
+    }
+    let ch=countTrait("critHeal");
+    if(isCrit&&ch>0){
+        let heal=Math.floor(player.maxHp*0.10*ch);
+        player.hp=Math.min(player.maxHp,player.hp+heal);
+        print(`【吸血暴击】回复${heal}点生命`);
+    }
+    let ce=countTrait("critEnergy");
+    if(isCrit&&ce>0){
+        player.energy=Math.min(100,player.energy+10*ce);
+        print(`【暴击充能】额外获得${10*ce}点能量！`);
+    }
+    player.energy=Math.min(100,player.energy+15);
+    let es=countTrait("energySurge");
+    if(es>0){player.energy=Math.min(100,player.energy+5*es);}
+    if(countTrait("burn")>0&&!enemy.dots.find(d=>d.type==="burn"&&d.stacks>=5)){addDot("burn","烈焰灼烧");}
+    if(countTrait("poison")>0&&!enemy.dots.find(d=>d.type==="poison"&&d.stacks>=5)){addDot("poison","剧毒腐蚀");}
+    if(countTrait("bleed")>0&&!enemy.dots.find(d=>d.type==="bleed"&&d.stacks>=5)){addDot("bleed","撕裂流血");}
+    let cs=countTrait("critShield");
+    if(isCrit&&cs>0){
+        let shield=Math.floor(player.maxHp*0.05*cs);
+        player.ZDYHP+=shield;
+        print(`【暴击护盾】获得${shield}点护盾！`);
+    }
+    let ls=countTrait("lifesteal");
+    if(ls>0){
+        let heal=Math.floor(dmg*0.10*ls);
+        player.hp=Math.min(player.maxHp,player.hp+heal);
+        print(`【生命汲取·强】回复${heal}点生命`);
+    }
+    refreshStatPanel();
+    let dbl=countTrait("doubleStrike");
+    if(dbl>0&&Math.random()<0.20*dbl&&enemy.hp>0){
+        print("【连击】你追加了一次攻击！");
+        let dmg2=Math.floor(player.atk*(0.85+Math.random()*0.30));
+        if(Math.random()<player.bj){dmg2=Math.floor(dmg2*player.bs);print(`连击暴击造成 ${dmg2} 点伤害！`);}
+        else{print(`连击造成 ${dmg2} 点伤害`);}
+        enemy.hp-=dmg2;
+    }
+}
+function burstAttack(){
+    player.energy=0;
+    let dmg=Math.floor(player.atk*5*(0.9+Math.random()*0.2));
+    if(player.blessing==="天使的祝福"){
+        let hpRatio=player.hp/player.maxHp;
+        dmg=Math.floor(dmg*(1+hpRatio*0.3));
+    }
+    if(player.job==="天使"){
+        let hpBonus=Math.floor(player.maxHp/100)*0.01;
+        dmg=Math.floor(dmg*(1+hpBonus));
+    }
+    if(player.blessing==="隐士的祝福"&&player.crt>1){
+        dmg=Math.floor(dmg*(1+(player.crt-1)));
+    }
+    if(player.job==="隐士"&&player.crt>1){
+        let excessCrt=player.crt-1;
+        let dodgeBonus=Math.floor(excessCrt*100/5)*0.02;
+        dmg=Math.floor(dmg*(1+dodgeBonus));
+    }
+    if(hasSet("雷4")){
+        let thunderDmg=Math.floor(enemy.hp*0.06);
+        dmg+=thunderDmg;
+        print(`【雷电四件】额外造成${thunderDmg}点雷电伤害`);
+    }else if(hasSet("雷2")){
+        let thunderDmg=Math.floor(enemy.hp*0.03);
+        dmg+=thunderDmg;
+        print(`【雷电两件】额外造成${thunderDmg}点雷电伤害`);
+    }
+    if(hasSet("火4")){dmg=Math.floor(dmg*1.25);}
+    else if(hasSet("火2")){dmg=Math.floor(dmg*1.10);}
+    if(hasETrait("dodge")&&Math.random()<0.20){
+        print(`【灵巧】敌人闪避了你的必杀技！`);
+        dmg=0;
+    }
+    if(dmg>0&&hasETrait("armor")){
+        dmg=Math.floor(dmg*0.70);
+        print(`【重甲】敌人的护甲减免了部分必杀技伤害！`);
+    }
+    if(dmg>0&&save.useBlood>=7){dmg=Math.floor(dmg*0.80);}
+    if(dmg>0&&enemy.shield>0){
+        if(enemy.shield>=dmg){enemy.shield-=dmg;print(`敌人护盾吸收了${dmg}点必杀技伤害，剩余护盾${enemy.shield}`);dmg=0;}
+        else{dmg-=enemy.shield;print(`敌人护盾吸收了${enemy.shield}点必杀技伤害`);enemy.shield=0;}
+    }
+    if(dmg>0&&hasETrait("thorns")){
+        let reflect=Math.floor(dmg*0.15);
+        player.hp-=reflect;
+        print(`【荆棘之甲】你受到${reflect}点反伤！`);
+    }
+    enemy.hp-=dmg;
+    if(dmg>0&&hasETrait("enrage")&&enemy.hp>0){
+        enemy.atk=Math.floor(enemy.atk*1.10);
+        print(`【激怒】敌人的攻击力提升了！`);
+    }
+    print(`【必杀技】你释放了必杀技，造成 ${dmg} 点伤害！`);
+    refreshStatPanel();
+}
+
+function enemyAttack(){
+    let effCrt=player.crt;
+    if(save.useBlood>=5){effCrt=Math.max(0,effCrt-0.30);}
+    if(hasETrait("trueSight")){effCrt=0;print("【真实之眼】敌人的攻击完全无视你的闪避！");}
+    else if(hasETrait("phase")&&Math.random()<0.50){effCrt=0;print("【相位】敌人的攻击穿透了你的闪避！");}
+    if(enemy.name==="魔王"&&Math.random()<0.05){effCrt=effCrt*0.5;print("【魔王】魔王的攻势凌厉，你的闪避率减半！");}
+    if(Math.random()<effCrt){
+        print("你闪避了敌人的攻击！");
+        if(hasTrait("dodgeBoost")){player.nextDodgeBoost=true;print("【闪避反击】下次攻击伤害变为10倍！");}
+        let dh=countTrait("dodgeHeal");
+        if(dh>0){
+            let heal=Math.floor(player.maxHp*0.05*dh);
+            player.hp=Math.min(player.maxHp,player.hp+heal);
+            print(`【灵动自愈】闪避回复${heal}点生命！`);
+        }
+        if(hasETrait("dot")){
+            let dotDmg=Math.floor(enemy.atk*0.15);
+            if(player.ZDYHP>0){
+                if(player.ZDYHP>=dotDmg){player.ZDYHP-=dotDmg;print(`【剧毒之体】护盾吸收了${dotDmg}点持续伤害，剩余护盾${player.ZDYHP}`);dotDmg=0;}
+                else{dotDmg-=player.ZDYHP;print(`【剧毒之体】护盾吸收了${player.ZDYHP}点持续伤害`);player.ZDYHP=0;}
+            }
+            if(dotDmg>0){player.hp-=dotDmg;print(`【剧毒之体】你受到${dotDmg}点无法闪避的持续伤害！`);}
+        }
+        return;
+    }
+    let dmg=Math.floor(enemy.atk*(0.8+Math.random()*0.40));
+    if(hasETrait("rage")&&enemy.hp/enemy.maxHp<0.5){
+        dmg=Math.floor(dmg*1.50);
+        print(`【狂暴】敌人血量低于50%，攻击力提升50%！`);
+    }
+    if(hasETrait("crit")&&Math.random()<0.25){
+        dmg=Math.floor(dmg*1.5);
+        print(`【致命】敌人造成了1.5倍伤害！`);
+    }
+    if(save.useBlood>=5){dmg=Math.floor(dmg*0.90);}
+    let iw=countTrait("ironWall");
+    if(iw>0){dmg=Math.floor(dmg*Math.max(0.1,1-0.15*iw));}
+    if(hasSet("水4")){dmg=Math.floor(dmg*0.80);}
+    else if(hasSet("水2")){dmg=Math.floor(dmg*0.92);}
+    let isPierce=hasETrait("pierce");
+    if(!isPierce&&player.ZDYHP>0){
+        if(player.ZDYHP>=dmg){player.ZDYHP-=dmg;print(`护盾吸收了${dmg}点伤害，剩余护盾${player.ZDYHP}`);dmg=0;}
+        else{dmg-=player.ZDYHP;print(`护盾吸收了${player.ZDYHP}点伤害`);player.ZDYHP=0;}
+    }
+    if(isPierce&&dmg>0){print("【隔山打牛】敌人的攻击无视了你的护盾！");}
+    if(dmg>0){
+        player.hp-=dmg;
+        print(`敌人造成 ${dmg} 点伤害`);
+        player.energy=Math.min(100,player.energy+10);
+        let th=countTrait("thorns");
+        if(th>0){
+            let reflect=Math.floor(dmg*0.10*th);
+            enemy.hp-=reflect;
+            print(`【荆棘反伤】反弹${reflect}点伤害给敌人！`);
+        }
+        if(player.job==="勇者"){
+            let reflect=Math.floor(dmg*0.10);
+            enemy.hp-=reflect;
+            print(`【勇者】反弹${reflect}点伤害给敌人！`);
+        }
+        if(hasETrait("lifesteal")){
+            let heal=Math.floor(dmg*0.20);
+            enemy.hp=Math.min(enemy.maxHp,enemy.hp+heal);
+            print(`【嗜血】敌人回复了${heal}点生命值！`);
+        }
+        if(hasETrait("weaken")){
+            let v=rand(1,3);
+            player.atk=Math.max(1,player.atk-v);
+            print(`【虚弱】你的攻击力降低了${v}点！`);
+        }
+        if(hasETrait("curse")){
+            let v=rand(3,8)/1000;
+            player.bj=Math.max(0,player.bj-v);
+            print(`【诅咒】你的暴击率降低了${Math.floor(v*1000)/10}%！`);
+        }
+        if(hasETrait("dot")){
+            let dotDmg=Math.floor(enemy.atk*0.15);
+            if(player.ZDYHP>0){
+                if(player.ZDYHP>=dotDmg){player.ZDYHP-=dotDmg;print(`【剧毒之体】护盾吸收了${dotDmg}点持续伤害，剩余护盾${player.ZDYHP}`);dotDmg=0;}
+                else{dotDmg-=player.ZDYHP;print(`【剧毒之体】护盾吸收了${player.ZDYHP}点持续伤害`);player.ZDYHP=0;}
+            }
+            if(dotDmg>0){player.hp-=dotDmg;print(`【剧毒之体】你受到${dotDmg}点无法闪避的持续伤害！`);}
+        }
+    }
+    if(enemy.name==="它"){
+        let stats=["atk","maxHp","bj","bs","crt"];
+        let pickStat=pick(stats);
+        if(pickStat==="atk"){let v=rand(1,2);player.atk-=v;print(`【它的侵蚀】攻击力-${v}`);}
+        else if(pickStat==="maxHp"){let v=rand(3,8);player.maxHp-=v;if(player.hp>player.maxHp)player.hp=player.maxHp;print(`【它的侵蚀】血量上限-${v}`);}
+        else if(pickStat==="bj"){let v=rand(3,8)/1000;player.bj-=v;print(`【它的侵蚀】暴击率-${Math.floor(v*1000)/10}%`);}
+        else if(pickStat==="bs"){let v=rand(5,15)/1000;player.bs-=v;print(`【它的侵蚀】暴击伤害-${Math.floor(v*1000)/10}%`);}
+        else if(pickStat==="crt"){let v=rand(3,8)/1000;player.crt-=v;print(`【它的侵蚀】闪避率-${Math.floor(v*1000)/10}%`);}
+    }
+    if(hasETrait("heal")&&enemy.hp>0){
+        let heal=Math.floor(enemy.maxHp*0.05);
+        enemy.hp=Math.min(enemy.maxHp,enemy.hp+heal);
+        print(`【再生】敌人回复了${heal}点生命值！`);
+    }
+    if(hasETrait("berserker")&&enemy.hp>0&&Math.random()<0.35){
+        let comboDmg=Math.floor(enemy.atk*(0.8+Math.random()*0.40));
+        if(iw>0){comboDmg=Math.floor(comboDmg*Math.max(0.1,1-0.15*iw));}
+        if(hasSet("水4")){comboDmg=Math.floor(comboDmg*0.80);}
+        else if(hasSet("水2")){comboDmg=Math.floor(comboDmg*0.92);}
+        if(!isPierce&&player.ZDYHP>0){
+            if(player.ZDYHP>=comboDmg){player.ZDYHP-=comboDmg;print(`【战狂连击】护盾吸收了${comboDmg}点伤害，剩余护盾${player.ZDYHP}`);comboDmg=0;}
+            else{comboDmg-=player.ZDYHP;print(`【战狂连击】护盾吸收了${player.ZDYHP}点伤害`);player.ZDYHP=0;}
+        }
+        if(comboDmg>0){player.hp-=comboDmg;print(`【战狂连击】敌人追加攻击造成${comboDmg}点伤害！`);}
+        let selfDmg=Math.floor(enemy.maxHp*0.10);
+        enemy.hp-=selfDmg;
+        print(`【战狂】敌人因连击损失${selfDmg}点生命值！`);
+    }
+    if(hasETrait("thief")&&Math.random()<0.25){
+        let filled=[];
+        for(let i=0;i<player.slots.length;i++){if(player.slots[i])filled.push(i);}
+        if(filled.length>0){
+            let ridx=filled[Math.floor(Math.random()*filled.length)];
+            let stolen=player.slots[ridx];
+            player.slots[ridx]=null;
+            applyEquipStats();
+            print(`【小偷】敌人偷走了你的装备：`);
+            showEquip(stolen);
+        }
+    }
+    if(player.hp<=0){
+        let pmult=getTraitProbMult();
+        let ro=countTrait("reviveOnce");
+        if(ro>0&&player.ZBSPECIALUSED1<ro){
+            player.hp=player.maxHp;player.ZBSPECIALUSED1++;
+            print(`【不死意志】你满血复活了！（剩余${ro-player.ZBSPECIALUSED1}次）`);
+        }else{
+            let r30=countTrait("revive30");
+            if(r30>0&&Math.random()<0.30*r30*pmult){
+                player.hp=1;
+                print("【苟延残喘】你保留了1点生命！");
+            }
+        }
+    }
+    refreshStatPanel();
+}
+
+function doAttackRound(){
+    if(autoBattle&&player.energy>=100){
+        burstAttack();
+    }else{
+        playerAttack();
+    }
+    if(enemy.hp<=0){onEnemyDefeat();return;}
+    applyDots();
+    if(enemy.hp<=0){onEnemyDefeat();return;}
+    enemyAttack();
+    if(player.hp<=0){onPlayerDefeat();return;}
+    if(autoBattle){setTimeout(battleLoop,300);}
+    else{battleLoop();}
+}
+function simulateBossSkip(){
+    print("\n=== 快速模拟最终决战 ===");
+    let avgDmg=player.atk;
+    avgDmg=avgDmg*(1+Math.min(1,player.bj)*(player.bs-1));
+    if(hasSet("火4"))avgDmg*=1.25;else if(hasSet("火2"))avgDmg*=1.10;
+    let thunderDot=0;
+    if(hasSet("雷4"))thunderDot=enemy.maxHp*0.06;else if(hasSet("雷2"))thunderDot=enemy.maxHp*0.03;
+    avgDmg+=thunderDot;
+    let burstEvery=100/15;
+    avgDmg+=(player.atk*5)/burstEvery;
+    if(player.job==="天使"){avgDmg*=(1+Math.floor(player.maxHp/100)*0.01);}
+    if(player.job==="隐士"&&player.crt>1){avgDmg*=(1+Math.floor((player.crt-1)*100/5)*0.02);}
+    if(player.blessing==="天使的祝福"){avgDmg*=(1+(player.hp/player.maxHp)*0.3);}
+    if(player.blessing==="隐士的祝福"&&player.crt>1){avgDmg*=(1+(player.crt-1));}
+    let bossDmg=enemy.atk;
+    let effCrt=Math.min(0.95,player.crt);
+    if(enemy.name==="魔王"){effCrt=effCrt*0.95+effCrt*0.5*0.05;}
+    bossDmg*=(1-effCrt);
+    if(hasSet("水4"))bossDmg*=0.80;else if(hasSet("水2"))bossDmg*=0.92;
+    let iw=countTrait("ironWall");
+    if(iw>0)bossDmg*=Math.max(0.1,1-0.15*iw);
+    let healPerTurn=0;
+    if(player.job==="战士")healPerTurn+=avgDmg*0.20;
+    if(player.blessing==="战士的祝福")healPerTurn+=player.maxHp*0.03;
+    let ah=countTrait("attackHeal");
+    if(ah>0)healPerTurn+=player.maxHp*0.03*ah;
+    let ls=countTrait("lifesteal");
+    if(ls>0)healPerTurn+=avgDmg*0.10*ls;
+    let ch=countTrait("critHeal");
+    if(ch>0)healPerTurn+=player.maxHp*0.10*ch*Math.min(1,player.bj);
+    let totalHp=player.maxHp+(player.ZDYHP||0);
+    let turnsToKill=enemy.maxHp/avgDmg;
+    let netLoss=Math.max(0,bossDmg-healPerTurn);
+    let turnsSurvive=netLoss>0?totalHp/netLoss:9999;
+    print(`玩家每回合平均伤害：${Math.floor(avgDmg)}`);
+    print(`BOSS每回合平均伤害：${Math.floor(bossDmg)}`);
+    print(`玩家每回合平均回血：${Math.floor(healPerTurn)}`);
+    print(`击杀BOSS需约 ${turnsToKill.toFixed(1)} 回合`);
+    print(`玩家约能撑 ${turnsSurvive.toFixed(1)} 回合`);
+    if(turnsToKill<=turnsSurvive){
+        print("模拟结果：你成功击败了BOSS！");
+        enemy.hp=0;
+        onEnemyDefeat();
+    }else{
+        print("模拟结果：你力竭倒下了……");
+        player.hp=0;
+        onPlayerDefeat();
+    }
+}
+function battleLoop(){
+    if(enemy.hp<=0){onEnemyDefeat();return;}
+    if(player.hp<=0){onPlayerDefeat();return;}
+    clearChoices();
+    print(`\n【${enemy.name}】 ATK:${enemy.atk} HP: ${Math.max(0,enemy.hp)}/${enemy.maxHp} | 能量: ${player.energy}/100`);
+    if(autoBattle){
+        addChoice("停止自动战斗",()=>{autoBattle=false;print("已停止自动战斗。");battleLoop();},"btn-danger");
+        setTimeout(doAttackRound,300);
+        return;
+    }
+    addChoice("攻击",()=>doAttackRound());
+    addChoice("防御",()=>{print("你选择防御，伤害减少90%，积蓄能量，下次攻击伤害+50%");player.energy=Math.min(100,player.energy+25);player.nextDefendBoost=true;let origAtk=enemy.atk;enemy.atk=Math.floor(origAtk*0.1);enemyAttack();enemy.atk=origAtk;if(player.hp<=0){onPlayerDefeat();return;}battleLoop();});
+    if(player.energy>=100){
+        addChoice("必杀技",()=>{burstAttack();if(enemy.hp<=0){onEnemyDefeat();return;}applyDots();if(enemy.hp<=0){onEnemyDefeat();return;}enemyAttack();if(player.hp<=0){onPlayerDefeat();return;}battleLoop();});
+    }
+    addChoice("自动战斗",()=>{autoBattle=true;print("自动战斗开启，将持续攻击直到战斗结束。");battleLoop();});
+    if(gameState==="bossBattle"){
+        addChoice("一键跳过最终决战",()=>{simulateBossSkip();},"btn-danger");
+    }
+    addChoice("逃跑",()=>{if(Math.random()<0.3){print("你成功逃跑了！");gameState="badEnd";badEnd(1);}else{print("逃跑失败！");enemyAttack();if(player.hp<=0){onPlayerDefeat();return;}battleLoop();}});
+}
+
+function onEnemyDefeat(){
+    if(hasETrait("explode")){
+        let explodeDmg=Math.floor(player.maxHp*0.10);
+        if(player.ZDYHP>0){
+            if(player.ZDYHP>=explodeDmg){player.ZDYHP-=explodeDmg;print(`【爆裂】敌人死亡时爆炸！护盾吸收了${explodeDmg}点伤害，剩余护盾${player.ZDYHP}`);explodeDmg=0;}
+            else{explodeDmg-=player.ZDYHP;print(`【爆裂】敌人死亡时爆炸！护盾吸收了${player.ZDYHP}点伤害`);player.ZDYHP=0;}
+        }
+        if(explodeDmg>0){player.hp-=explodeDmg;print(`【爆裂】敌人死亡时爆炸，你受到${explodeDmg}点伤害！`);}
+    }
+    print(`你击败了 【${enemy.name}】！`);
+    let kh=countTrait("killHeal");
+    if(kh>0){
+        let heal=Math.floor(player.maxHp*0.30*kh);
+        player.hp=Math.min(player.maxHp,player.hp+heal);
+        print(`【斩杀回复】回复${heal}点生命！`);
+    }
+    if(gameState==="bossBattle"){
+        let gold=rand(100,200);
+        save.gold=(save.gold||0)+gold;
+        print(`你获得了 ${gold} 枚金币！当前：${save.gold}`);
+        writeSave();
+    }else{
+        let gold=rand(10,20);
+        save.gold=(save.gold||0)+gold;
+        print(`你获得了 ${gold} 枚金币！当前：${save.gold}`);
+        writeSave();
+    }
+    if(hasSet("火4")){
+        let bonus=Math.floor(player.atk*0.10);
+        player.atk+=bonus;
+        print(`【火焰四件】攻击力永久提升${bonus}点！`);
+    }else if(hasSet("火2")){
+        let bonus=Math.floor(player.atk*0.04);
+        player.atk+=bonus;
+        print(`【火焰两件】攻击力永久提升${bonus}点！`);
+    }
+    if(hasSet("水4")){
+        let bonus=Math.floor(player.maxHp*0.10);
+        player.maxHp+=bonus;player.hp+=bonus;
+        print(`【流水四件】血量上限永久提升${bonus}点！`);
+    }else if(hasSet("水2")){
+        let bonus=Math.floor(player.maxHp*0.04);
+        player.maxHp+=bonus;player.hp+=bonus;
+        print(`【流水两件】血量上限永久提升${bonus}点！`);
+    }
+    if(player.blessing==="战士的祝福"){
+        let bonus=Math.floor(player.atk*0.05);
+        player.blessAtkAdd+=bonus;player.atk+=bonus;
+        print(`【战士的祝福】攻击力提升${bonus}点！`);
+    }
+    if(player.blessing==="天使的祝福"){
+        let bonus=Math.floor(player.maxHp*0.05);
+        player.blessHpAdd+=bonus;player.maxHp+=bonus;player.hp+=bonus;
+        print(`【天使的祝福】血量上限提升${bonus}点！`);
+    }
+    if(player.blessing==="勇者的祝福"){
+        player.blessBjAdd+=0.03;player.blessBsAdd+=0.05;
+        player.bj+=0.03;player.bs+=0.05;
+        print(`【勇者的祝福】暴击率+3%，暴击伤害+5%！`);
+    }
+    if(player.blessing==="隐士的祝福"){
+        player.blessCrtAdd+=0.03;player.crt+=0.03;
+        print(`【隐士的祝福】闪避率+3%！`);
+    }
+    if(player.job==="战士"){
+        let bonus=Math.floor(player.atk*0.03);
+        player.permAtkAdd+=bonus;player.atk+=bonus;
+        print(`【战士】攻击力额外提升${bonus}点！`);
+    }
+    if(player.job==="天使"){
+        let bonus=Math.floor(player.maxHp*0.03);
+        player.permHpAdd+=bonus;player.maxHp+=bonus;player.hp+=bonus;
+        print(`【天使】血量上限额外提升${bonus}点！`);
+    }
+    if(player.job==="隐士"){
+        player.crt+=0.02;
+        print(`【隐士】闪避率+2%！`);
+    }
+    let atkGain=Math.floor(player.atk*0.02);
+    let hpGain=Math.floor(player.maxHp*0.02);
+    player.permAtkAdd+=atkGain;
+    player.permHpAdd+=hpGain;
+    player.atk+=atkGain;
+    player.maxHp+=hpGain;
+    player.hp+=hpGain;
+    print(`战胜之力：攻击力+${atkGain}，血量上限+${hpGain}（永久）`);
+    refreshStatPanel();
+    if(gameState==="bossBattle"){
+        if(enemy.name==="魔王"){trueEnd1();}
+        else{trueEnd2();}
+        return;
+    }
+    gameState="loot";
+    let e1=genEquip();
+    let e2=genEquip();
+    showLootChoice(e1,e2,"loot");
+}
+
+function onPlayerDefeat(){
+    print("你被击败了...");
+    gameState="badEnd";
+    badEnd(2);
+}
+
+function nextWave(){
+    player.wave++;
+    if(player.wave>20){
+        gameState="bossLoot";
+        let lose=1;
+        print(`\n魔王出现了！它的威压震落了你的1件装备！`);
+        let filled=[];
+        for(let i=0;i<player.slots.length;i++){if(player.slots[i])filled.push(i);}
+        for(let i=filled.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[filled[i],filled[j]]=[filled[j],filled[i]];}
+        let dropCount=Math.min(lose,filled.length);
+        for(let i=0;i<dropCount;i++){
+            let ridx=filled[i];
+            let dropped=player.slots[ridx];
+            print(`你的装备被震落了：`);
+            showEquip(dropped);
+            player.slots[ridx]=null;
+        }
+        applyEquipStats();
+        refreshStatPanel();
+        let e1=genEquip();
+        let e2=genEquip();
+        showLootChoice(e1,e2,"bossLoot");
+        return;
+    }
+    print(`\n=== 第 ${player.wave} 波 ===`);
+    genEnemy(false);
+    print(`遭遇了 【${enemy.name}】！ATK:${enemy.atk} HP:${enemy.hp}`);
+    gameState="battle";
+    battleLoop();
+}
+
+function enterBoss(){
+    gameState="bossBattle";
+    if(player.Q3>=3){
+        print("\n……你就是不肯听话，是不是？");
+        print("空间扭曲了，真正的恐怖降临了……");
+        genEnemy(true,"它");
+        print("\n【魔王的加护】魔王的力量涌入你的体内！");
+        player.atk=Math.floor(player.atk*5);
+        player.maxHp=Math.floor(player.maxHp*5);
+        player.hp=player.maxHp;
+        player.bj=player.bj*2;
+        player.bs=player.bs*2;
+        player.crt=player.crt*3;
+        print(`当前属性：ATK ${player.atk} | HP ${player.maxHp} | 暴击 ${Math.floor(player.bj*100)}% | 爆伤 ${Math.floor(player.bs*100)}% | 闪避 ${Math.floor(player.crt*100)}%`);
+    }else{
+        print("\n魔王站在你面前！");
+        genEnemy(true,"魔王");
+    }
+    print(`【${enemy.name}】 ATK:${enemy.atk} HP:${enemy.hp}`);
+    clearChoices();
+    addChoice("迎战魔王",()=>battleLoop());
+    if(player.Q3<3){
+        addChoice("拒绝迎战",()=>{
+            player.Q3++;
+            if(player.Q3>=3){
+                print("……你就是不肯听话，是不是？");
+                gameState="bossBattle";
+                setTimeout(()=>{enterBoss();},500);
+            }else{
+                print("请专注战斗。");
+                enterBoss();
+            }
+        },"btn-danger");
+    }
+}
+
+function badEnd(type){
+    clearChoices();
+    let msgs={
+        1:"【Bad End 1】你逃离了战场，传说就此终结。",
+        2:"【Bad End 2】你倒在了血泊中，再也没有醒来。",
+        3:"【Bad End 3】你被魔王的力量吞噬，成为了它的傀儡。",
+        4:"【Bad End 4】你在恐惧中放弃了，世界陷入黑暗。",
+        5:"【Bad End 5】你的装备全部损毁，手无寸铁的你无法继续。",
+        6:"【Bad End 6】你迷失在了无尽的战斗中，忘记了回家的路。"
+    };
+    print(msgs[type]||"【Bad End】故事结束了。");
+    addChoice("重新开始",()=>location.reload());
+}
+
+function trueEnd1(){
+    clearChoices();
+    print("\n【True End 1 - 浴血之剑】");
+    print("你击败了魔王！世界恢复了和平。");
+    print("你的传说将被永远传颂。");
+    save.eyeTotal=Math.min(24,save.eyeTotal+2);
+    print(`你获得了 2 枚魔王之眼！当前：${save.eyeTotal}/24`);
+    writeSave();
+    refreshStatPanel();
+    addChoice("重新开始",()=>location.reload());
+}
+
+function trueEnd2(){
+    clearChoices();
+    print("\n【True End 2 - 回家】");
+    print("你击败了它！那不可名状的存在消散了。");
+    print("你找到了回家的路。");
+    save.blood++;
+    print(`你获得了 1 颗它之血珠！当前：${save.blood}`);
+    save.eyeTotal=Math.min(24,save.eyeTotal+1);
+    print(`你获得了 1 枚魔王之眼！当前：${save.eyeTotal}/24`);
+    writeSave();
+    refreshStatPanel();
+    addChoice("重新开始",()=>location.reload());
+}
+
+let bannedJob=null,bannedBless=null;
+function startGame(){
+    gameState="start";
+    outputDom.innerHTML="";
+    print("欢迎来到卡桑德里传说6.5");
+    print("在这片被黑暗笼罩的大陆上，你将踏上讨伐魔王的旅程。");
+    bannedJob=null;bannedBless=null;
+    if(save.useBlood>=3){
+        let jobs=Object.keys(jobData);
+        bannedJob=jobs[Math.floor(Math.random()*jobs.length)];
+        let blesses=Object.keys(blessingData);
+        bannedBless=blesses[Math.floor(Math.random()*blesses.length)];
+        print(`\n【难度${save.useBlood}】黑暗的诅咒笼罩了一切！`);
+        print(`职业【${bannedJob}】被禁止选择！`);
+        print(`祝福【${bannedBless}】被禁止选择！`);
+    }
+    print("\n请选择你的职业：");
+    clearChoices();
+    for(let j in jobData){
+        if(j===bannedJob){addChoice(`【已禁用】${j} - ${jobData[j].desc}`,()=>{print("该职业已被黑暗诅咒封印，无法选择。");});}
+        else{addChoice(`${j} - ${jobData[j].desc}`,()=>selectJob(j));}
+    }
+}
+
+function selectJob(j){
+    player.job=j;
+    print(`你选择了 ${j}`);
+    print("\n请选择你的祝福：");
+    clearChoices();
+    for(let b in blessingData){
+        if(b===bannedBless){addChoice(`【已禁用】${b} - ${blessingData[b].desc}`,()=>{print("该祝福已被黑暗诅咒封印，无法选择。");});}
+        else{addChoice(`${b} - ${blessingData[b].desc}`,()=>selectBlessing(b));}
+    }
+}
+
+function selectBlessing(b){
+    player.blessing=b;
+    player.blessAtkAdd=0;player.blessHpAdd=0;player.blessBjAdd=0;player.blessBsAdd=0;player.blessCrtAdd=0;
+    player.permAtkAdd=0;player.permHpAdd=0;
+    player.energy=0;player.nextDefendBoost=false;player.ZBSPECIALUSED1=0;player.ZDYHP=0;
+    autoBattle=false;
+    initSlots();
+    print(`你获得了 ${b}`);
+    applyEquipStats();
+    if(player.blessing==="勇者的祝福"&&player.bj>1){
+        let shield=Math.floor((player.bj-1.0)*0.4*100);
+        player.ZDYHP=shield;
+        print(`【勇者的祝福】暴击溢出转化为 ${shield} 点战斗护盾！`);
+    }
+    refreshStatPanel();
+    print("\n准备好开始冒险了吗？");
+    clearChoices();
+    addChoice("极速版（直接开战）",()=>{player.canAdjustPoint=false;refreshStatPanel();player.wave=0;nextWave();});
+    addChoice("普通版（查看教程）",()=>{player.canAdjustPoint=false;refreshStatPanel();showTutorial();});
+}
+
+function showTutorial(){
+    print("\n=== 游戏教程 ===");
+    print("1. 每波战斗你可以选择攻击、防御或逃跑。");
+    print("2. 击败敌人有概率获得装备，装备可以提升属性。");
+    print("3. 装备有火/水/草/雷四种属性，2件同属性小幅加成，4件大幅加成。");
+    print("4. 部分装备带有特殊特性，效果强大。");
+    print("5. 击败20波小怪后将面对魔王。");
+    print("6. 魔王之眼可永久强化初始属性，它之血珠可提升难度。");
+    print("7. 右侧面板可在开局时分配点数，进入战斗后锁定。");
+    clearChoices();
+    addChoice("开始冒险",()=>{player.wave=0;nextWave();});
+}
+
+refreshStatPanel();
+startGame();
+</script>
+</body>
+</html>

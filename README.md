@@ -4,6 +4,10 @@
 
 在线游玩：<https://wuyilingwei.github.io/cassandri-legend/>
 
+## 原始版参考
+
+用户提供的 6.5 原始 HTML 已原样归档为 [`reference/original-6.5.html`](reference/original-6.5.html)，仅用于后续核对玩法与文案；运行入口仍为 [`index.html`](index.html)，不会加载或覆盖当前像素终端 UI。
+
 - 4 种职业 × 4 种祝福 × 20 波随机战斗
 - 随机装备、元素套装、装备与敌人特性
 - 能量必杀、防御、自动战斗和最终决战快速模拟
