@@ -54,6 +54,16 @@ function loadComparisonEngine() {
 function loadInteractiveEngine() {
   const storage = new Map();
   const elements = new Map();
+  const timers = [];
+  function makeClassList() {
+    const values = new Set();
+    return {
+      add(...names) { names.forEach((name) => values.add(name)); },
+      remove(...names) { names.forEach((name) => values.delete(name)); },
+      toggle(name, force) { if (force === false) values.delete(name); else values.add(name); },
+      contains(name) { return values.has(name); },
+    };
+  }
   function makeElement() {
     return {
       hidden: false,
@@ -63,7 +73,7 @@ function loadInteractiveEngine() {
       scrollHeight: 0,
       style: {},
       children: [],
-      classList: { add() {}, remove() {}, toggle() {} },
+      classList: makeClassList(),
       appendChild(child) { this.children.push(child); },
       append(child) { this.children.push(child); },
       prepend(child) { this.children.unshift(child); },
@@ -76,8 +86,9 @@ function loadInteractiveEngine() {
     Array,
     JSON,
     console,
-    setTimeout: () => 0,
+    setTimeout: (callback, delay) => { timers.push({ callback, delay }); return timers.length; },
     clearTimeout() {},
+    __testTimers: timers,
     localStorage: {
       getItem: (key) => storage.get(key) ?? null,
       setItem: (key, value) => storage.set(key, value),
@@ -96,7 +107,7 @@ function loadInteractiveEngine() {
   const instrumented = script.replace(/initApp\(\);\s*$/, `
     globalThis.__interactive = {
       openShop, showLootChoice, openSaveManager, deferLootChoice, resumeLootChoice,
-      renderReplacementChoices, showSetInfo, openSettings, closeSettings,
+      renderReplacementChoices, showSetInfo, openSettings, closeSettings, onEnemyDefeat,
       setState({ player: playerState, enemy: enemyState, slots, state = "battle" }) {
         Object.assign(player, playerState);
         player.slots = slots;
@@ -105,6 +116,7 @@ function loadInteractiveEngine() {
       },
       element(id) { return document.getElementById(id); },
       paused() { return gamePaused; },
+      runTimers() { while (__testTimers.length) __testTimers.shift().callback(); },
     };
   `);
   vm.createContext(context);
@@ -129,8 +141,27 @@ test('6.5 page keeps restored UI, comparison, and battle scene markers', () => {
     'function getDropAdvice(items)',
     'function equipmentRecommendationHtml(item)',
     'function showBattleFeedback(side,text,type="damage")',
+    'function playEnemyDefeatAnimation(onComplete)',
+    '<symbol id="svg-settings"',
+    '#app{display:flex;flex-direction:column;width:100%;min-width:1180px;max-width:none;',
     '#terminal-wrap #battleArena',
   ]) assert.ok(html.includes(marker), `missing ${marker}`);
+  assert.doesNotMatch(html, /#app\{display:flex;flex-direction:column;width:1180px;/);
+});
+
+test('enemy defeat animation completes before the loot modal opens', () => {
+  const engine = loadInteractiveEngine();
+  engine.setState({
+    player: { job: '战士', blessing: '战士的祝福', atk: 100, hp: 400, maxHp: 400, bj: 0.08, bs: 1.5, crt: 0.03, ZDYHP: 0, energy: 0, wave: 2, blessAtkAdd: 0, blessHpAdd: 0, blessBjAdd: 0, blessBsAdd: 0, blessCrtAdd: 0, permAtkAdd: 0, permHpAdd: 0 },
+    enemy: { name: '试炼兽', hp: 0, maxHp: 100, atk: 20, traits: [], shield: 0, dots: [] },
+    slots: [null, null, null, null],
+  });
+  engine.element('lootOverlay').hidden = true;
+  engine.onEnemyDefeat();
+  assert.equal(engine.element('enemyBarArea').classList.contains('defeated'), true);
+  assert.equal(engine.element('lootOverlay').hidden, true);
+  engine.runTimers();
+  assert.equal(engine.element('lootOverlay').hidden, false);
 });
 
 test('equipment comparison is pure and highlights a light one-percent decrease', () => {
