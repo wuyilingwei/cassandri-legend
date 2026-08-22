@@ -96,7 +96,7 @@ function loadInteractiveEngine() {
   const instrumented = script.replace(/initApp\(\);\s*$/, `
     globalThis.__interactive = {
       openShop, showLootChoice, openSaveManager, deferLootChoice, resumeLootChoice,
-      renderReplacementChoices, openSettings, closeSettings,
+      renderReplacementChoices, showSetInfo, openSettings, closeSettings,
       setState({ player: playerState, enemy: enemyState, slots, state = "battle" }) {
         Object.assign(player, playerState);
         player.slots = slots;
@@ -120,6 +120,7 @@ test('6.5 page keeps restored UI, comparison, and battle scene markers', () => {
     'id="shopOverlay"',
     'id="saveOverlay"',
     'id="lootOverlay"',
+    'id="setOverlay"',
     '#settingsOverlay{z-index:200;}',
     'function deriveBuild(slots)',
     'function snapshotRun()',
@@ -128,6 +129,7 @@ test('6.5 page keeps restored UI, comparison, and battle scene markers', () => {
     'function getDropRecommendation(items)',
     'function equipmentRecommendationHtml(item)',
     'function showBattleFeedback(side,text,type="damage")',
+    '#terminal-wrap #battleArena',
   ]) assert.ok(html.includes(marker), `missing ${marker}`);
 });
 
@@ -224,7 +226,24 @@ test('shop, save, and loot interactions render inside modal overlays', () => {
   assert.equal(engine.paused(), false);
 });
 
-test('replacement highlights one recommended slot without redundant slot deltas', () => {
+test('set detail opens in a modal and reports active and inactive tiers', () => {
+  const engine = loadInteractiveEngine();
+  engine.setState({
+    player: { job: '战士', blessing: '战士的祝福' },
+    enemy: { name: '试炼兽', hp: 100, maxHp: 100, atk: 20, traits: [], shield: 0 },
+    slots: [
+      { element: '火' }, { element: '火' }, { element: '火' }, { element: '水' },
+    ],
+  });
+  engine.showSetInfo();
+  assert.equal(engine.element('setOverlay').hidden, false);
+  const content = engine.element('setContent').innerHTML;
+  assert.match(content, /【火】 当前 3 件/);
+  assert.match(content, /二件套 · 已激活/);
+  assert.match(content, /四件套 · 未激活 · 还差 1 件/);
+});
+
+test('replacement highlights one slot while preserving details and changes', () => {
   const engine = loadInteractiveEngine();
   const slots = [
     { name: '寒冰盾牌', element: '水', atk: 10, hp: 120, bj: 0, bs: 0, crt: 0, trait: null },
@@ -243,7 +262,18 @@ test('replacement highlights one recommended slot without redundant slot deltas'
   const replacement = engine.element('lootContent').innerHTML;
   const slotList = replacement.split('<div class="modal-grid">')[1];
   assert.match(replacement, /is-recommended/);
-  assert.match(replacement, /推荐替换/);
-  assert.doesNotMatch(slotList, /输出.*生存/);
+  assert.doesNotMatch(replacement, /推荐替换/);
+  assert.doesNotMatch(replacement, /晨星法杖/);
+  assert.match(slotList, /寒冰盾牌/);
+  assert.match(slotList, /更换后：/);
+  assert.match(slotList, /输出/);
+  assert.match(slotList, /生存/);
   assert.doesNotMatch(replacement, /百分点/);
+});
+
+test('battle arena stays between terminal output and action buttons', () => {
+  const terminal = html.indexOf('id="terminal"');
+  const arena = html.indexOf('id="battleArena"');
+  const choices = html.indexOf('id="choices"');
+  assert.ok(terminal < arena && arena < choices);
 });
