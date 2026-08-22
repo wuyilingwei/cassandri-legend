@@ -35,6 +35,7 @@ function loadComparisonEngine() {
     globalThis.__comparison = {
       deriveBuild, compareCandidate, equipmentRecommendationHtml, percentDeltaHtml,
       trendGlyph, getDropRecommendation, snapshotRun, validateRunSnapshot, writeRunSave, readRunSave,
+      getSurvivalPressure, classifyRecommendation,
       setState({ player: playerState, enemy: enemyState, slots }) {
         Object.assign(player, playerState);
         player.slots = slots;
@@ -94,7 +95,8 @@ function loadInteractiveEngine() {
   };
   const instrumented = script.replace(/initApp\(\);\s*$/, `
     globalThis.__interactive = {
-      openShop, showLootChoice, openSaveManager,
+      openShop, showLootChoice, openSaveManager, deferLootChoice, resumeLootChoice,
+      renderReplacementChoices, openSettings, closeSettings,
       setState({ player: playerState, enemy: enemyState, slots, state = "battle" }) {
         Object.assign(player, playerState);
         player.slots = slots;
@@ -102,6 +104,7 @@ function loadInteractiveEngine() {
         gameState = state;
       },
       element(id) { return document.getElementById(id); },
+      paused() { return gamePaused; },
     };
   `);
   vm.createContext(context);
@@ -117,8 +120,11 @@ test('6.5 page keeps restored UI, comparison, and battle scene markers', () => {
     'id="shopOverlay"',
     'id="saveOverlay"',
     'id="lootOverlay"',
+    '#settingsOverlay{z-index:200;}',
     'function deriveBuild(slots)',
     'function snapshotRun()',
+    'function deferLootChoice()',
+    'function openSettings()',
     'function getDropRecommendation(items)',
     'function equipmentRecommendationHtml(item)',
     'function showBattleFeedback(side,text,type="damage")',
@@ -159,7 +165,7 @@ test('drop recommendation selects one item against the previous battle and grade
   engine.setLastBattle({ name: '巨岩兽', hp: 2600, maxHp: 2600, atk: 320, traits: [] });
   const choice = engine.getDropRecommendation([weakDrop, strongDrop]);
   assert.equal(choice.index, 1, 'the best item is selected from both drops');
-  assert.match(engine.equipmentRecommendationHtml(strongDrop), /巨岩兽/);
+  assert.doesNotMatch(engine.equipmentRecommendationHtml(strongDrop), /巨岩兽/);
   assert.equal(engine.trendGlyph(0.01), '▲');
   assert.equal(engine.trendGlyph(-0.05), '▼▼');
   assert.equal(engine.trendGlyph(0.15), '▲▲▲');
@@ -168,6 +174,20 @@ test('drop recommendation selects one item against the previous battle and grade
   assert.equal(engine.validateRunSnapshot(snapshot).player.job, '战士');
   assert.equal(engine.writeRunSave('1').ok, true);
   assert.equal(engine.readRunSave('1').state, 'battle');
+});
+
+test('survival pressure rejects a fragile damage-only replacement', () => {
+  const engine = loadComparisonEngine();
+  const equipped = { name: '厚甲', element: '水', atk: 10, hp: 160, bj: 0, bs: 0, crt: 0, trait: null };
+  const candidate = { name: '薄刃', element: '火', atk: 120, hp: 0, bj: 0, bs: 0, crt: 0, trait: null };
+  engine.setState({
+    player: { job: '战士', blessing: '战士的祝福', blessAtkAdd: 0, blessHpAdd: 0, blessBjAdd: 0, blessBsAdd: 0, blessCrtAdd: 0, permAtkAdd: 0, permHpAdd: 0, wave: 8 },
+    enemy: { name: '重击兽', hp: 1000, maxHp: 1000, atk: 900, traits: [], shield: 0 },
+    slots: [equipped, null, null, null],
+  });
+  const comparison = engine.compareCandidate(candidate, 0);
+  assert.equal(engine.getSurvivalPressure(comparison.current).level, 'critical');
+  assert.match(engine.classifyRecommendation(comparison).text, /生存压力高/);
 });
 
 test('shop, save, and loot interactions render inside modal overlays', () => {
@@ -189,8 +209,41 @@ test('shop, save, and loot interactions render inside modal overlays', () => {
   assert.match(engine.element('lootContent').innerHTML, /本次优先选择/);
   assert.doesNotMatch(engine.element('lootContent').innerHTML, /上一战基准/);
   assert.doesNotMatch(engine.element('lootContent').innerHTML, /▲ \/ ▲▲ \/ ▲▲▲/);
+  engine.deferLootChoice();
+  assert.equal(engine.element('lootOverlay').hidden, true);
+  assert.match(engine.element('statContent').innerHTML, /继续选择装备/);
+  engine.resumeLootChoice();
+  assert.equal(engine.element('lootOverlay').hidden, false);
 
   engine.openSaveManager();
   assert.equal(engine.element('saveOverlay').hidden, false);
   assert.match(engine.element('saveContent').innerHTML, /手动槽位 1/);
+  engine.openSettings();
+  assert.equal(engine.paused(), true);
+  engine.closeSettings();
+  assert.equal(engine.paused(), false);
+});
+
+test('replacement highlights one recommended slot without redundant slot deltas', () => {
+  const engine = loadInteractiveEngine();
+  const slots = [
+    { name: '寒冰盾牌', element: '水', atk: 10, hp: 120, bj: 0, bs: 0, crt: 0, trait: null },
+    { name: '破损洗衣机', element: '草', atk: 20, hp: 10, bj: 0, bs: 0, crt: 0, trait: null },
+    { name: '会尖叫的镰刀', element: '火', atk: 60, hp: 0, bj: 0, bs: 0, crt: 0, trait: null },
+    { name: '诅咒靴子', element: '雷', atk: 5, hp: 30, bj: 0, bs: 0, crt: 0, trait: null },
+  ];
+  const candidate = { name: '晨星法杖', element: '水', atk: 75, hp: 180, bj: 0.04, bs: 0.05, crt: 0.03, trait: null };
+  engine.setState({
+    player: { job: '战士', blessing: '战士的祝福', blessAtkAdd: 0, blessHpAdd: 0, blessBjAdd: 0, blessBsAdd: 0, blessCrtAdd: 0, permAtkAdd: 0, permHpAdd: 0, wave: 9 },
+    enemy: { name: '试炼兽', hp: 1200, maxHp: 1200, atk: 250, traits: [], shield: 0 },
+    slots,
+    state: 'loot',
+  });
+  engine.renderReplacementChoices(candidate, 1);
+  const replacement = engine.element('lootContent').innerHTML;
+  const slotList = replacement.split('<div class="modal-grid">')[1];
+  assert.match(replacement, /is-recommended/);
+  assert.match(replacement, /推荐替换/);
+  assert.doesNotMatch(slotList, /输出.*生存/);
+  assert.doesNotMatch(replacement, /百分点/);
 });
