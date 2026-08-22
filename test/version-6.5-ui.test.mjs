@@ -106,7 +106,7 @@ function loadInteractiveEngine() {
   };
   const instrumented = script.replace(/initApp\(\);\s*$/, `
     globalThis.__interactive = {
-      openShop, showLootChoice, openSaveManager, deferLootChoice, resumeLootChoice,
+      openShop, openHomeShop, showLootChoice, openSaveManager, openHomeSaveManager, deferLootChoice, resumeLootChoice,
       renderReplacementChoices, showSetInfo, openSettings, closeSettings, onEnemyDefeat,
       setState({ player: playerState, enemy: enemyState, slots, state = "battle" }) {
         Object.assign(player, playerState);
@@ -128,6 +128,8 @@ test('6.5 page keeps restored UI, comparison, and battle scene markers', () => {
   new Function(script);
   for (const marker of [
     'id="welcomeOverlay"',
+    'id="btnHomeSave"',
+    'id="btnHomeShop"',
     'id="battleArena"',
     'id="shopOverlay"',
     'id="saveOverlay"',
@@ -227,9 +229,13 @@ test('survival pressure rejects a fragile damage-only replacement', () => {
 
 test('shop, save, and loot interactions render inside modal overlays', () => {
   const engine = loadInteractiveEngine();
-  engine.openShop();
+  engine.openHomeShop();
   assert.equal(engine.element('shopOverlay').hidden, false);
   assert.match(engine.element('shopContent').innerHTML, /美味的鸡蛋/);
+
+  engine.openHomeSaveManager();
+  assert.equal(engine.element('saveOverlay').hidden, false);
+  assert.match(engine.element('saveContent').innerHTML, /自动存档/);
 
   const firstDrop = { name: '风蚀短剑', element: '火', atk: 30, hp: 35, bj: 0.02, bs: 0.04, crt: 0.01, trait: null };
   const secondDrop = { name: '守望护符', element: '水', atk: 18, hp: 90, bj: 0.01, bs: 0.02, crt: 0.04, trait: null };

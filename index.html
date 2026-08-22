@@ -123,7 +123,7 @@ header h1{font-size:16px;margin:0;letter-spacing:1px;color:var(--accent2);font-w
       <section class="hero-panel"><h2>勇者面板</h2><div id="statContent"></div></section>
     </aside>
   </div>
-  <div id="welcomeOverlay" class="overlay"><div class="overlay-panel"><div class="title-title">卡桑德里传说</div><div class="title-ver">6.5 · 像素终端版</div><div class="title-menu"><button class="choice-btn" id="btnContinue">继续自动存档</button><button class="choice-btn" id="btnNewGame">新的征途</button><button class="choice-btn" id="btnChangelog">更新内容</button></div></div></div>
+  <div id="welcomeOverlay" class="overlay"><div class="overlay-panel"><div class="title-title">卡桑德里传说</div><div class="title-ver">6.5 · 像素终端版</div><div class="title-menu"><button class="choice-btn" id="btnContinue">继续自动存档</button><button class="choice-btn" id="btnHomeSave">存档 / 读取</button><button class="choice-btn" id="btnHomeShop">流动商城</button><button class="choice-btn" id="btnNewGame">新的征途</button><button class="choice-btn" id="btnChangelog">更新内容</button></div></div></div>
   <div id="settingsOverlay" class="overlay" hidden><div class="overlay-panel"><h2>设置</h2><div class="settings-field"><label class="toggle"><input type="checkbox" id="crtToggle"> CRT 扫描线</label></div><div class="settings-field"><label class="toggle"><input type="checkbox" id="reduceMotionToggle"> 战斗反馈动画</label></div><div class="settings-field"><label class="toggle"><input type="checkbox" id="collapseEventsToggle"> 完成事件后收起终端记录</label></div><div class="title-menu"><button class="choice-btn" id="btnOpenSaveFromSettings">存档与继续</button><button class="choice-btn" id="btnSettingsClose">关闭</button></div></div></div>
   <div id="changelogOverlay" class="overlay" hidden><div class="overlay-panel"><h2>更新内容 · 6.5</h2><ol class="changelog-list"><li>完整接入职业、祝福、元素套装、敌人特性、商城和难度机制。</li><li>恢复像素终端 UI，并新增左右对阵血条场景。</li><li>战利品提供按伤害与生存拆分的装备对比和替换建议。</li></ol><div class="title-menu"><button class="choice-btn" id="btnChangelogClose">关闭</button></div></div></div>
   <div id="shopOverlay" class="overlay" hidden><div class="overlay-panel wide-modal"><h2>流动商城</h2><p class="modal-note">购买永久生效；战斗中的行动选项会在关闭商城后保留。</p><div id="shopNotice" class="modal-notice" aria-live="polite"></div><div id="shopContent" class="modal-grid"></div><div class="modal-actions"><button class="choice-btn" id="btnShopClose">关闭商城</button></div></div></div>
@@ -1759,6 +1759,8 @@ function openSaveManager(){
     document.getElementById("saveOverlay").hidden=false;
     renderSaveManager();
 }
+function openHomeSaveManager(){openSaveManager();}
+function openHomeShop(){openShop();}
 function closeSaveManager(){document.getElementById("saveOverlay").hidden=true;}
 function saveToSlot(slot){
     let result=writeRunSave(slot);
@@ -1800,6 +1802,8 @@ function initApp(){
     const continueButton=document.getElementById("btnContinue");
     document.getElementById("btnNewGame").onclick=()=>{welcome.hidden=true;startGame();};
     continueButton.onclick=()=>{let snapshot=readRunSave("auto");if(snapshot)restoreRunSnapshot(snapshot);};
+    document.getElementById("btnHomeSave").onclick=()=>openHomeSaveManager();
+    document.getElementById("btnHomeShop").onclick=()=>openHomeShop();
     document.getElementById("btnChangelog").onclick=()=>{changelog.hidden=false;};
     document.getElementById("btnChangelogClose").onclick=()=>{changelog.hidden=true;};
     document.getElementById("settingsBtn").onclick=()=>openSettings();
