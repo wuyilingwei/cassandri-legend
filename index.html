@@ -78,19 +78,18 @@ body{padding:10px;}
 }
 @font-face{font-family:'FusionPixel';src:url('fonts/fusion-pixel-12px-proportional-zh_hans.otf.woff2') format('woff2');font-display:swap;}
 :root{--bg:#0a0c0a;--panel:#10140f;--panel2:#161c14;--border:#3a4a34;--border-lit:#5c7a52;--text:#c8e6c0;--dim:#5f7a58;--accent:#ffb454;--accent2:#39ff8f;--danger:#ff4d4d;--good:#39ff8f;--crit:#ffe066;--bg-deep:#050605;}
-body{margin:0;background:var(--bg);color:var(--text);font-family:'FusionPixel','Cascadia Mono','Consolas','Noto Sans Mono CJK SC','Microsoft YaHei',monospace,sans-serif;image-rendering:pixelated;padding:0;}
-#app{display:flex;flex-direction:column;height:100vh;min-height:620px;position:relative;}
+body{margin:0;display:block;min-width:1180px;overflow-x:auto;background:var(--bg);color:var(--text);font-family:'FusionPixel','Cascadia Mono','Consolas','Noto Sans Mono CJK SC','Microsoft YaHei',monospace,sans-serif;image-rendering:pixelated;padding:0;}
+#app{display:flex;flex-direction:column;width:1180px;min-width:1180px;height:100vh;min-height:620px;margin:0 auto;position:relative;}
 #app.crt-on::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:50;background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);mix-blend-mode:multiply;opacity:.55;}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;border-bottom:3px solid var(--border);background:var(--panel);box-shadow:0 3px 0 var(--bg-deep);position:relative;z-index:101;outline:2px solid var(--border-lit);outline-offset:-6px;}
 header h1{font-size:16px;margin:0;letter-spacing:1px;color:var(--accent2);font-weight:400;text-shadow:2px 2px 0 var(--bg-deep);}header .sub{font-size:12px;color:var(--dim);margin-left:8px;}.icon-btn{background:var(--panel2);color:var(--accent2);border:2px solid var(--border-lit);width:32px;height:32px;font-size:16px;cursor:pointer;box-shadow:3px 3px 0 var(--bg-deep);}.icon-btn:active,.choice-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--bg-deep);}
-#layout{display:flex;flex:1;min-height:0;}#terminal-wrap{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;position:relative;border-right:3px solid var(--border);outline:2px solid var(--border-lit);outline-offset:-6px;}#term-titlebar{display:flex;align-items:center;gap:8px;padding:4px 10px;background:var(--panel2);border-bottom:2px solid var(--border);font-size:12px;color:var(--dim);letter-spacing:1px;flex-shrink:0;}.dots{display:flex;gap:5px;}.dot{width:8px;height:8px;background:var(--border-lit);}
+#layout{display:flex;flex:1;min-width:1180px;min-height:0;}#terminal-wrap{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;position:relative;border-right:3px solid var(--border);outline:2px solid var(--border-lit);outline-offset:-6px;}#term-titlebar{display:flex;align-items:center;gap:8px;padding:4px 10px;background:var(--panel2);border-bottom:2px solid var(--border);font-size:12px;color:var(--dim);letter-spacing:1px;flex-shrink:0;}.dots{display:flex;gap:5px;}.dot{width:8px;height:8px;background:var(--border-lit);}
 #terminal{flex:1;overflow-y:auto;padding:16px 18px 8px;min-height:0;line-height:1.7;font-size:14px;scrollbar-color:var(--border-lit) var(--bg-deep);}#terminal::-webkit-scrollbar{width:14px;}#terminal::-webkit-scrollbar-track{background:var(--bg-deep);}#terminal::-webkit-scrollbar-thumb{background:var(--border-lit);border:3px solid var(--bg-deep);}#terminal .line{white-space:pre-line;margin:0 0 8px;word-break:break-word;}#terminal .line.block{border-left:4px solid var(--border-lit);padding:6px 10px;margin:6px 0 12px;background:var(--panel2);color:var(--accent);}#terminal .line.good{color:var(--good);}#terminal .line.bad{color:var(--danger);}#terminal .line.crit{color:var(--crit);}
 #choices{display:flex;flex-wrap:wrap;gap:8px;padding:10px 18px 14px;border-top:3px solid var(--border);background:var(--panel);min-height:52px;align-items:center;}.choice-btn{background:var(--panel2);color:var(--text);border:2px solid var(--border-lit);padding:8px 14px;cursor:pointer;font-family:inherit;font-size:13px;box-shadow:3px 3px 0 var(--bg-deep);}.choice-btn:hover{background:#1e2a1a;color:var(--accent2);}.choice-btn:disabled{opacity:.4;cursor:not-allowed;}.choice-btn.btn-danger,.choice-btn.danger{border-color:var(--danger);color:var(--danger);}.choice-btn.btn-danger:hover,.choice-btn.danger:hover{background:#3a1414;}
 #hud{width:340px;flex-shrink:0;background:var(--panel);padding:12px;overflow-y:auto;scrollbar-color:var(--border-lit) var(--bg-deep);}#hud h2{font-size:12px;color:var(--dim);letter-spacing:2px;margin:0 0 8px;text-transform:uppercase;font-weight:400;}.hero-panel{border-top:2px solid var(--border);padding-top:12px;}.stat-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--border);}.stat-row .label,.stat-row .k{color:var(--dim);}.stat-row .value,.stat-row .v{color:var(--text);font-weight:400;}.slot{border:2px dashed var(--border);padding:7px 9px;min-height:44px;font-size:11.5px;background:transparent;}.slot.filled{border-style:solid;border-color:var(--accent);background:var(--panel2);}.slot .ename{color:var(--accent);font-weight:400;}.slot .trait{color:var(--accent2);font-size:10px;margin-top:3px;}.point-controls{margin-top:10px;padding-top:8px;border-top:2px solid var(--border);}.point-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;}.point-row .plabel{flex:1;color:var(--dim);}.point-row button{width:24px;height:22px;background:var(--panel2);color:var(--accent2);border:1px solid var(--border-lit);font:inherit;cursor:pointer;}.point-row .pval{min-width:22px;text-align:center;}
-#battleArena{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr);gap:6px;align-items:center;border:2px solid var(--border-lit);background:linear-gradient(180deg,#182018 0%,#10140f 100%);padding:10px;margin-bottom:12px;min-height:182px;overflow:hidden;}#battleArena[hidden]{display:none;}.combatant{position:relative;min-width:0;text-align:center;transition:filter .15s steps(3),transform .15s steps(3);}.combatant.hit{filter:brightness(1.8);transform:translateY(2px);}.combatant.heal{filter:drop-shadow(0 0 5px var(--good));}.pixel-avatar{width:42px;height:42px;margin:0 auto 6px;border:3px solid var(--border-lit);background:var(--panel);display:grid;place-items:center;font-size:22px;box-shadow:4px 4px 0 var(--bg-deep);}.combatant.enemy .pixel-avatar{border-color:var(--danger);color:var(--danger);}.combatant.player .pixel-avatar{border-color:var(--accent2);color:var(--accent2);}.combatant-name{height:32px;display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1.4;color:var(--text);word-break:break-all;}.combatant.enemy .combatant-name{color:var(--danger);}.combatant-atk{font-size:10px;color:var(--dim);margin-bottom:3px;}.battle-meter{height:14px;border:2px solid var(--border-lit);background:var(--bg-deep);overflow:hidden;position:relative;}.battle-meter::after{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.35) 0 2px,transparent 2px 8px);pointer-events:none;}.battle-meter .fill{height:100%;width:0;background:var(--good);transition:width .2s steps(8);}.battle-meter .fill.low{background:var(--danger);}.battle-meter .enemy-fill{background:var(--danger);}.battle-number{font-size:10px;text-align:right;color:var(--dim);margin-top:3px;white-space:nowrap;}.shield-number{font-size:10px;color:#d8ecff;min-height:14px;margin-top:2px;}.versus{color:var(--accent);font-size:13px;text-align:center;text-shadow:2px 2px 0 var(--bg-deep);}.battle-float{position:absolute;left:50%;top:25px;transform:translateX(-50%);font-size:12px;pointer-events:none;animation:battleFloat .8s steps(6) forwards;z-index:2;white-space:nowrap;}.battle-float.damage{color:var(--danger);}.battle-float.crit{color:var(--crit);font-size:15px;}.battle-float.heal{color:var(--good);}.battle-float.dodge{color:var(--accent2);}@keyframes battleFloat{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-24px)}}#battleEvent{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);font-size:10px;color:var(--dim);white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis;}
+#battleArena{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr);gap:6px;align-items:center;border:2px solid var(--border-lit);background:linear-gradient(180deg,#182018 0%,#10140f 100%);padding:10px;margin-bottom:12px;min-height:182px;overflow:hidden;}#battleArena[hidden]{display:none;}.combatant{position:relative;min-width:0;text-align:center;transition:filter .15s steps(3),transform .15s steps(3);}.combatant.hit{filter:brightness(1.8);transform:translateY(2px);}.combatant.heal{filter:drop-shadow(0 0 5px var(--good));}.pixel-avatar{width:42px;height:42px;margin:0 auto 6px;border:3px solid var(--border-lit);background:var(--panel);display:grid;place-items:center;font-size:22px;box-shadow:4px 4px 0 var(--bg-deep);}.combatant.enemy .pixel-avatar{border-color:var(--danger);color:var(--danger);}.combatant.player .pixel-avatar{border-color:var(--accent2);color:var(--accent2);}.combatant-name{height:32px;display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1.4;color:var(--text);word-break:break-all;}.combatant.enemy .combatant-name{color:var(--danger);}.combatant-atk{font-size:10px;color:var(--dim);margin-bottom:3px;}.battle-meter{height:14px;border:2px solid var(--border-lit);background:var(--bg-deep);overflow:hidden;position:relative;}.battle-meter::after{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.35) 0 2px,transparent 2px 8px);pointer-events:none;}.battle-meter .fill{height:100%;width:0;background:var(--good);transition:width .2s steps(8);}.battle-meter .fill.low{background:var(--danger);}.battle-meter .enemy-fill{background:var(--danger);}.battle-number{font-size:10px;text-align:right;color:var(--dim);margin-top:3px;white-space:nowrap;}.shield-number{font-size:10px;color:#d8ecff;min-height:14px;margin-top:2px;}.versus{color:var(--accent);font-size:13px;text-align:center;text-shadow:2px 2px 0 var(--bg-deep);}.battle-float{position:absolute;left:50%;top:25px;transform:translateX(-50%);font-size:12px;pointer-events:none;animation:battleFloat .8s steps(6) forwards;z-index:2;white-space:nowrap;}.battle-float.damage{color:var(--danger);}.battle-float.crit{color:var(--crit);font-size:15px;}.battle-float.heal{color:var(--good);}.battle-float.dodge{color:var(--accent2);}.reduce-motion .battle-float{animation:none;opacity:0;}@keyframes battleFloat{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-24px)}}#battleEvent{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);font-size:10px;color:var(--dim);white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis;}
 .equipment-card{border:2px solid var(--border-lit);background:var(--panel2);padding:9px 10px;margin:8px 0;}.equipment-card .equip-title{color:var(--accent);font-size:13px;margin-bottom:5px;}.equipment-card .equip-stats{font-size:11px;color:var(--text);line-height:1.6;}.recommendation{margin-top:8px;border-top:1px solid var(--border);padding-top:7px;font-size:11px;}.recommendation .recommend-title{font-size:12px;color:var(--accent2);margin-bottom:4px;}.recommendation.avoid .recommend-title{color:var(--danger);}.compare-summary{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0;}.compare-pill{border:1px solid var(--border);padding:2px 5px;color:var(--dim);}.delta-up{color:var(--good);}.delta-down{color:var(--danger);}.delta-slight{color:var(--accent);}.delta-same{color:var(--dim);}.compare-slots{display:grid;gap:4px;margin-top:5px;}.compare-slot{border-left:2px solid var(--border);padding-left:6px;}.compare-slot.recommended{border-left-color:var(--accent2);}.trait-note{color:var(--accent);}
-.overlay{position:fixed;inset:0;background:rgba(4,6,4,.82);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}.overlay[hidden]{display:none;}.overlay-panel{background:var(--panel);border:3px solid var(--border-lit);box-shadow:6px 6px 0 var(--bg-deep);max-width:520px;width:100%;max-height:86vh;overflow-y:auto;padding:20px 22px;}.overlay-panel h2{color:var(--accent2);font-size:16px;margin:0 0 14px;letter-spacing:1px;font-weight:400;}.title-title{font-size:22px;color:var(--accent2);text-shadow:3px 3px 0 var(--bg-deep);margin:0 0 4px;letter-spacing:2px;}.title-ver{color:var(--dim);font-size:12px;margin:0 0 22px;letter-spacing:1px;}.title-menu{display:flex;flex-direction:column;gap:10px;}.title-menu .choice-btn{text-align:left;}.settings-field{padding:10px 0;border-bottom:1px solid var(--border);}.toggle{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--dim);}.changelog-list{margin:0;padding-left:18px;font-size:12px;line-height:1.9;}.changelog-list li::marker{color:var(--accent2);}
-@media (max-width:900px){#layout{flex-direction:column;}#hud{width:100%;border-top:3px solid var(--border);display:grid;grid-template-columns:minmax(260px,1fr) minmax(240px,1fr);gap:12px;}#battleArena{margin:0;}.hero-panel{border-top:0;padding-top:0;}}@media (max-width:620px){#app{height:auto;min-height:100vh;}header .sub{display:none;}#terminal-wrap{min-height:52vh;}#hud{grid-template-columns:1fr;}.combatant-name{font-size:10px;}#choices{padding:8px 10px;}#terminal{padding:12px;font-size:13px;}}
+.overlay{position:fixed;inset:0;background:rgba(4,6,4,.82);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}.overlay[hidden]{display:none;}.overlay-panel{background:var(--panel);border:3px solid var(--border-lit);box-shadow:6px 6px 0 var(--bg-deep);max-width:520px;width:100%;max-height:86vh;overflow-y:auto;padding:20px 22px;}.overlay-panel.wide-modal{max-width:920px;}.overlay-panel h2{color:var(--accent2);font-size:16px;margin:0 0 14px;letter-spacing:1px;font-weight:400;}.title-title{font-size:22px;color:var(--accent2);text-shadow:3px 3px 0 var(--bg-deep);margin:0 0 4px;letter-spacing:2px;}.title-ver{color:var(--dim);font-size:12px;margin:0 0 22px;letter-spacing:1px;}.title-menu{display:flex;flex-direction:column;gap:10px;}.title-menu .choice-btn{text-align:left;}.settings-field{padding:10px 0;border-bottom:1px solid var(--border);}.toggle{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--dim);}.changelog-list{margin:0;padding-left:18px;font-size:12px;line-height:1.9;}.changelog-list li::marker{color:var(--accent2);}.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0;}.modal-note{color:var(--dim);font-size:12px;line-height:1.6;margin:-4px 0 12px;}.modal-notice{min-height:18px;color:var(--accent);font-size:12px;margin:0 0 10px;}.modal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}.modal-card{border:2px solid var(--border);background:var(--panel2);padding:10px;display:flex;flex-direction:column;gap:8px;font-size:12px;line-height:1.6;}.modal-card h3{color:var(--accent);font-size:13px;font-weight:400;}.modal-card .choice-btn{margin-top:auto;}.modal-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}.modal-actions .choice-btn{flex:1;min-width:160px;}.save-slots{display:grid;gap:8px;}.save-slot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;border:2px solid var(--border);padding:9px 10px;background:var(--panel2);}.save-slot h3{font-size:13px;color:var(--accent);font-weight:400;}.save-slot p{font-size:11px;color:var(--dim);line-height:1.5;margin-top:3px;}.save-actions{display:flex;gap:6px;}.save-actions .choice-btn{padding:6px 8px;font-size:11px;}.loot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start;}.loot-choice{border:2px solid var(--border);padding:8px 10px;background:var(--panel2);}.loot-choice.is-recommended{border-color:var(--accent2);box-shadow:3px 3px 0 #07140c;}.loot-choice h3{font-size:13px;color:var(--accent);font-weight:400;}.loot-choice .choice-btn{width:100%;margin-top:8px;}.drop-recommendation{border-left:4px solid var(--accent2);background:#102216;color:var(--text);padding:8px 10px;font-size:12px;line-height:1.6;margin:0 0 12px;}.terminal-event{border-left:4px solid var(--border-lit);padding:6px 10px;margin:8px 0;background:var(--panel2);color:var(--accent);}.terminal-event summary{cursor:pointer;list-style:none;}.terminal-event summary::-webkit-details-marker{display:none;}.terminal-event summary::before{content:'▼ ';color:var(--accent2);}.terminal-event:not([open]) summary::before{content:'▶ ';}.terminal-event .event-detail{margin-top:5px;color:var(--dim);font-size:12px;}
 </style>
 </head>
 <body>
@@ -121,9 +120,12 @@ header h1{font-size:16px;margin:0;letter-spacing:1px;color:var(--accent2);font-w
       <section class="hero-panel"><h2>勇者面板</h2><div id="statContent"></div></section>
     </aside>
   </div>
-  <div id="welcomeOverlay" class="overlay"><div class="overlay-panel"><div class="title-title">卡桑德里传说</div><div class="title-ver">6.5 · 像素终端版</div><div class="title-menu"><button class="choice-btn" id="btnNewGame">新的征途</button><button class="choice-btn" id="btnChangelog">更新内容</button></div></div></div>
-  <div id="settingsOverlay" class="overlay" hidden><div class="overlay-panel"><h2>设置</h2><div class="settings-field"><label class="toggle"><input type="checkbox" id="crtToggle" checked> CRT 扫描线</label></div><div class="title-menu"><button class="choice-btn" id="btnSettingsClose">关闭</button></div></div></div>
+  <div id="welcomeOverlay" class="overlay"><div class="overlay-panel"><div class="title-title">卡桑德里传说</div><div class="title-ver">6.5 · 像素终端版</div><div class="title-menu"><button class="choice-btn" id="btnContinue">继续自动存档</button><button class="choice-btn" id="btnNewGame">新的征途</button><button class="choice-btn" id="btnChangelog">更新内容</button></div></div></div>
+  <div id="settingsOverlay" class="overlay" hidden><div class="overlay-panel"><h2>设置</h2><div class="settings-field"><label class="toggle"><input type="checkbox" id="crtToggle"> CRT 扫描线</label></div><div class="settings-field"><label class="toggle"><input type="checkbox" id="reduceMotionToggle"> 战斗反馈动画</label></div><div class="settings-field"><label class="toggle"><input type="checkbox" id="collapseEventsToggle"> 完成事件后收起终端记录</label></div><div class="title-menu"><button class="choice-btn" id="btnOpenSaveFromSettings">存档与继续</button><button class="choice-btn" id="btnSettingsClose">关闭</button></div></div></div>
   <div id="changelogOverlay" class="overlay" hidden><div class="overlay-panel"><h2>更新内容 · 6.5</h2><ol class="changelog-list"><li>完整接入职业、祝福、元素套装、敌人特性、商城和难度机制。</li><li>恢复像素终端 UI，并新增左右对阵血条场景。</li><li>战利品提供按伤害与生存拆分的装备对比和替换建议。</li></ol><div class="title-menu"><button class="choice-btn" id="btnChangelogClose">关闭</button></div></div></div>
+  <div id="shopOverlay" class="overlay" hidden><div class="overlay-panel wide-modal"><h2>流动商城</h2><p class="modal-note">购买永久生效；战斗中的行动选项会在关闭商城后保留。</p><div id="shopNotice" class="modal-notice" aria-live="polite"></div><div id="shopContent" class="modal-grid"></div><div class="modal-actions"><button class="choice-btn" id="btnShopClose">关闭商城</button></div></div></div>
+  <div id="saveOverlay" class="overlay" hidden><div class="overlay-panel wide-modal"><h2>存档与继续</h2><p class="modal-note">自动存档会在可续玩的战斗和装备选择阶段刷新；三个手动槽可自由覆盖。存档同时保存本局状态和永久成长。</p><div id="saveContent" class="save-slots"></div><div class="modal-actions"><button class="choice-btn" id="btnSaveClose">关闭</button></div></div></div>
+  <div id="lootOverlay" class="overlay" hidden><div class="overlay-panel wide-modal"><h2>战利品选择</h2><div id="lootContent"></div></div></div>
 </div>
 <script>
 const outputDom=document.getElementById("terminal");
@@ -133,27 +135,42 @@ const statContent=document.getElementById("statContent");
 const defaultPurchased={egg:0,potion:0,boots:0,hat:0,doll:0};
 const defaultSave={eyeTotal:0,blood:0,pointAtk:0,pointHp:0,pointBj:0,pointBs:0,pointCrt:0,useBlood:0,gold:0,purchased:defaultPurchased,slot5Unlocked:false};
 let save={...defaultSave,purchased:{...defaultPurchased}};
+function isRecord(value){return Boolean(value)&&typeof value==="object"&&!Array.isArray(value);}
+function normalizeSave(stored){
+    if(!isRecord(stored))return {...defaultSave,purchased:{...defaultPurchased}};
+    let purchased=isRecord(stored.purchased)?stored.purchased:{};
+    let normalized={...defaultSave,...stored,purchased:{...defaultPurchased,...purchased}};
+    for(let key of ["eyeTotal","blood","pointAtk","pointHp","pointBj","pointBs","pointCrt","useBlood","gold"]){
+        let value=Number(normalized[key]);
+        normalized[key]=Number.isFinite(value)&&value>=0?Math.floor(value):defaultSave[key];
+    }
+    for(let key of Object.keys(defaultPurchased)){
+        let value=Number(normalized.purchased[key]);
+        normalized.purchased[key]=Number.isFinite(value)&&value>=0?Math.floor(value):defaultPurchased[key];
+    }
+    normalized.slot5Unlocked=Boolean(normalized.slot5Unlocked);
+    return normalized;
+}
 function loadSave(){
-    try{
-        let raw=localStorage.getItem("kasandri6_save");
-        if(!raw)return;
-        let stored=JSON.parse(raw);
-        if(!stored||typeof stored!=="object"||Array.isArray(stored))return;
-        let purchased=stored.purchased&&typeof stored.purchased==="object"&&!Array.isArray(stored.purchased)?stored.purchased:{};
-        save={...defaultSave,...stored,purchased:{...defaultPurchased,...purchased}};
-        for(let key of ["eyeTotal","blood","pointAtk","pointHp","pointBj","pointBs","pointCrt","useBlood","gold"]){
-            let value=Number(save[key]);
-            save[key]=Number.isFinite(value)&&value>=0?Math.floor(value):defaultSave[key];
-        }
-        for(let key of Object.keys(defaultPurchased)){
-            let value=Number(save.purchased[key]);
-            save.purchased[key]=Number.isFinite(value)&&value>=0?Math.floor(value):defaultPurchased[key];
-        }
-        save.slot5Unlocked=Boolean(save.slot5Unlocked);
-    }catch(e){save={...defaultSave,purchased:{...defaultPurchased}};}
+    try{let raw=localStorage.getItem("kasandri6_save");save=raw?normalizeSave(JSON.parse(raw)):normalizeSave(null);}
+    catch(e){save=normalizeSave(null);}
 }
 function writeSave(){localStorage.setItem("kasandri6_save",JSON.stringify(save));}
 loadSave();
+
+const defaultPreferences={crt:true,reduceMotion:false,collapseEvents:true,tutorialSeen:false};
+let preferences={...defaultPreferences};
+function loadPreferences(){
+    try{let raw=localStorage.getItem("kasandri6_preferences");let stored=raw?JSON.parse(raw):{};preferences={...defaultPreferences,...(isRecord(stored)?stored:{})};}
+    catch(e){preferences={...defaultPreferences};}
+    for(let key of Object.keys(defaultPreferences))preferences[key]=Boolean(preferences[key]);
+}
+function writePreferences(){localStorage.setItem("kasandri6_preferences",JSON.stringify(preferences));}
+function applyPreferences(){
+    let app=document.getElementById("app");
+    if(app){app.classList.toggle("crt-on",preferences.crt);app.classList.toggle("reduce-motion",preferences.reduceMotion);}
+}
+loadPreferences();
 
 let player={name:"",job:"",atk:0,hp:0,maxHp:0,bj:0,bs:0,crt:0,ZDYHP:0,slots:[null,null,null,null],Q3:0,Q4:0,ZBSPECIALUSED1:0,ZBSPECIALUSED2:false,ZBSPECIALUSED3:false,nextDodgeBoost:false,canAdjustPoint:true,wave:0,blessAtkAdd:0,blessHpAdd:0,blessBjAdd:0,blessBsAdd:0,blessCrtAdd:0,energy:0,nextDefendBoost:false,permAtkAdd:0,permHpAdd:0};
 function getSlotCount(){return save.slot5Unlocked?5:4;}
@@ -163,6 +180,56 @@ let gameState="start";
 let pendingLoot=null;
 let lastEquipAction=null;
 let autoBattle=false;
+let bannedJob=null,bannedBless=null;
+let lastBattleSnapshot=null;
+
+const runSaveSlots=["auto","1","2","3"];
+function runSaveKey(slot){return `kasandri6_run_${slot}`;}
+function cloneForStorage(value){return JSON.parse(JSON.stringify(value));}
+function isSupportedRunState(state){return ["battle","bossBattle","loot","bossLoot"].includes(state);}
+function snapshotRun(){
+    if(!isSupportedRunState(gameState)||!player.job||!player.blessing)return null;
+    return {version:1,savedAt:Date.now(),state:gameState,save:cloneForStorage(save),player:cloneForStorage(player),enemy:cloneForStorage(enemy),pendingLoot:cloneForStorage(pendingLoot),bannedJob,bannedBless,lastBattleSnapshot:cloneForStorage(lastBattleSnapshot)};
+}
+function validateRunSnapshot(snapshot){
+    if(!isRecord(snapshot)||snapshot.version!==1||!isSupportedRunState(snapshot.state)||!isRecord(snapshot.player)||!isRecord(snapshot.enemy)||!snapshot.player.job||!snapshot.player.blessing)return null;
+    if((snapshot.state==="loot"||snapshot.state==="bossLoot")&&(!isRecord(snapshot.pendingLoot)||!isRecord(snapshot.pendingLoot.e1)||!isRecord(snapshot.pendingLoot.e2)))return null;
+    return snapshot;
+}
+function readRunSave(slot){
+    try{let raw=localStorage.getItem(runSaveKey(slot));return raw?validateRunSnapshot(JSON.parse(raw)):null;}
+    catch(e){return null;}
+}
+function writeRunSave(slot){
+    let snapshot=snapshotRun();
+    if(!snapshot)return {ok:false,message:"请进入战斗或战利品选择后再保存。"};
+    localStorage.setItem(runSaveKey(slot),JSON.stringify(snapshot));
+    return {ok:true,message:slot==="auto"?"自动存档已更新。":"手动存档已写入。"};
+}
+function clearRunSave(slot){if(typeof localStorage.removeItem==="function")localStorage.removeItem(runSaveKey(slot));}
+function autoSaveRun(){writeRunSave("auto");}
+function restoreRunSnapshot(snapshot){
+    let valid=validateRunSnapshot(snapshot);
+    if(!valid)return false;
+    save=normalizeSave(valid.save);
+    player=cloneForStorage(valid.player);
+    enemy=cloneForStorage(valid.enemy);
+    gameState=valid.state;
+    pendingLoot=cloneForStorage(valid.pendingLoot);
+    bannedJob=valid.bannedJob||null;
+    bannedBless=valid.bannedBless||null;
+    lastBattleSnapshot=cloneForStorage(valid.lastBattleSnapshot);
+    lastEquipAction=null;
+    autoBattle=false;
+    writeSave();
+    hideGameOverlays();
+    outputDom.innerHTML="";
+    print(`已恢复 ${gameState==="loot"||gameState==="bossLoot"?"战利品选择":"战斗进度"}。`);
+    refreshStatPanel();
+    if(gameState==="loot"||gameState==="bossLoot")showLootChoice(pendingLoot.e1,pendingLoot.e2,pendingLoot.source);
+    else battleLoop();
+    return true;
+}
 
 const jobData={
 "战士":{atk:240,hp:900,bj:0.08,bs:1.5,crt:0.03,desc:"高攻击，攻击吸血20%，战胜加攻击"},
@@ -244,6 +311,22 @@ function print(s,cls="",raw=false){
     outputDom.scrollTop=outputDom.scrollHeight;
 }
 
+function escapeHtml(value){return String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function printEventSummary(title,detail){
+    outputDom.innerHTML+=`<details class="terminal-event" open><summary>${escapeHtml(title)}</summary><div class="event-detail">${escapeHtml(detail)}</div></details>`;
+    outputDom.scrollTop=outputDom.scrollHeight;
+}
+function collapseTerminalEvents(){
+    if(!preferences.collapseEvents||typeof document.querySelectorAll!=="function")return;
+    for(let event of document.querySelectorAll("#terminal .terminal-event[open]"))event.open=false;
+}
+function hideGameOverlays(){
+    for(let id of ["welcomeOverlay","settingsOverlay","changelogOverlay","shopOverlay","saveOverlay","lootOverlay"]){
+        let overlay=document.getElementById(id);
+        if(overlay)overlay.hidden=true;
+    }
+}
+
 function clearChoices(){choicesDom.innerHTML="";}
 function addChoice(text,callback,cls=""){
     let b=document.createElement("button");
@@ -306,6 +389,15 @@ function getSetBonusFor(slots){
 }
 function countTraitFor(slots,id){return slots.filter(slot=>slot&&slot.trait&&slot.trait.id===id).length;}
 function getTraitMultFor(slots){return Math.pow(0.5,countTraitFor(slots,"deadlyStrike"))*Math.pow(0.7,countTraitFor(slots,"crit20x"));}
+function getComparisonTarget(){
+    if(isRecord(lastBattleSnapshot)&&lastBattleSnapshot.maxHp>0)return lastBattleSnapshot;
+    return enemy;
+}
+function targetHasTrait(target,id){return target&&Array.isArray(target.traits)&&target.traits.some(trait=>trait.id===id);}
+function rememberLastBattle(){
+    if(!enemy||enemy.maxHp<=0)return;
+    lastBattleSnapshot=cloneForStorage({...enemy,hp:enemy.maxHp});
+}
 function deriveBuild(slots){
     let base=calcBaseStats();
     let atk=base.atk,hp=base.hp,bj=base.bj,bs=base.bs,crt=base.crt;
@@ -319,15 +411,26 @@ function deriveBuild(slots){
     let waterMult=sets.includes("水4")?0.80:sets.includes("水2")?0.92:1;
     let ironMult=Math.max(0.1,1-0.15*countTraitFor(slots,"ironWall"));
     let shield=slots.reduce((total,slot)=>total+(slot&&slot.trait&&slot.trait.id==="shieldGain"?(slot.trait.value||0):0),0);
-    let targetHp=enemy&&enemy.maxHp>0?Math.max(0,enemy.hp):Math.floor((300+(player.wave||1)*80)*Math.pow(1.4,save.useBlood||0));
-    let damage=atk*(1+Math.min(1,Math.max(0,bj))*(bs-1))*fireMult+targetHp*thunderRate;
-    let survival=(hp+shield)/Math.max(0.1,(1-Math.min(0.85,Math.max(0,crt)))*waterMult*ironMult);
-    return {atk,hp,bj,bs,crt,sets,shield,damage,survival};
+    let target=getComparisonTarget();
+    let targetHp=target&&target.maxHp>0?target.maxHp:Math.floor((300+(player.wave||1)*80)*Math.pow(1.4,save.useBlood||0));
+    let targetDodge=targetHasTrait(target,"dodge")?0.20:0;
+    let targetArmor=targetHasTrait(target,"armor")?0.70:1;
+    let targetAtk=target&&target.atk>0?target.atk:50;
+    let damage=(atk*(1+Math.min(1,Math.max(0,bj))*(bs-1))*fireMult*(1-targetDodge)*targetArmor)+targetHp*thunderRate;
+    let incoming=targetAtk*(1-Math.min(0.85,Math.max(0,crt)))*waterMult*ironMult;
+    let survival=(hp+shield)/Math.max(1,incoming);
+    return {atk,hp,bj,bs,crt,sets,shield,damage,survival,target};
 }
 function pctDelta(next,current){return current>0?(next-current)/current:next>0?1:0;}
 function deltaClass(value){let absolute=Math.abs(value);return absolute<0.005?"delta-same":absolute<0.02?"delta-slight":value>0?"delta-up":"delta-down";}
+function trendGlyph(value){
+    let absolute=Math.abs(value);
+    if(absolute<0.005)return "—";
+    let count=absolute<0.03?1:absolute<0.10?2:3;
+    return (value>0?"▲":"▼").repeat(count);
+}
 function percentDeltaHtml(value){
-    let absolute=Math.abs(value*100).toFixed(1),direction=value>0?"▲":value<0?"▼":"—";
+    let absolute=Math.abs(value*100).toFixed(1),direction=trendGlyph(value);
     let label=Math.abs(value)<0.005?"几乎无变化":Math.abs(value)<0.02?(value<0?"轻微下降":"轻微提升"):"";
     return `<span class="${deltaClass(value)}">${direction} ${absolute}%${label?` ${label}`:""}</span>`;
 }
@@ -356,6 +459,12 @@ function getEquipmentComparisons(item){
     let indexes=empty>=0?[empty]:player.slots.map((_,index)=>index);
     return indexes.map(index=>({...compareCandidate(item,index),oldEquip:player.slots[index]})).sort((a,b)=>b.score-a.score);
 }
+function getDropRecommendation(items){
+    return items.map((item,index)=>{
+        let comparisons=getEquipmentComparisons(item);
+        return {item,index,comparison:comparisons[0],decision:classifyRecommendation(comparisons[0])};
+    }).sort((a,b)=>b.comparison.score-a.comparison.score)[0];
+}
 function equipmentRecommendationHtml(item){
     let comparisons=getEquipmentComparisons(item),best=comparisons[0],decision=classifyRecommendation(best);
     let slotLines=comparisons.map(result=>{
@@ -365,7 +474,9 @@ function equipmentRecommendationHtml(item){
     let before=best.current,after=best.next;
     let beforeTrait=best.oldEquip&&best.oldEquip.trait?best.oldEquip.trait.name:"无";
     let afterTrait=item.trait?item.trait.name:"无";
-    return `<div class="recommendation ${decision.tone==="avoid"?"avoid":""}"><div class="recommend-title">${decision.text}：${best.oldEquip?`替换槽位${best.slotIndex+1}`:`装备到槽位${best.slotIndex+1}`}</div><div class="compare-summary"><span class="compare-pill">输出 ${percentDeltaHtml(best.damageDelta)}</span><span class="compare-pill">生存 ${percentDeltaHtml(best.survivalDelta)}</span></div><div>${statDeltaHtml("ATK",after.atk,before.atk)} · ${statDeltaHtml("HP",after.hp,before.hp)} · ${statDeltaHtml("BJ",after.bj,before.bj,true)} · ${statDeltaHtml("BS",after.bs,before.bs,true)} · ${statDeltaHtml("闪避",after.crt,before.crt,true)}</div><div class="trait-note">套装：${describeSets(before.sets)} → ${describeSets(after.sets)} · 特性：${beforeTrait} → ${afterTrait}</div><div class="compare-slots">${slotLines}</div></div>`;
+    let target=before.target;
+    let targetText=target&&target.name?`依据上一战【${target.name}】（ATK ${target.atk} / HP ${target.maxHp}）`:`依据当前战斗基准`;
+    return `<div class="recommendation ${decision.tone==="avoid"?"avoid":""}"><div class="recommend-title">${decision.text}：${best.oldEquip?`替换槽位${best.slotIndex+1}`:`装备到槽位${best.slotIndex+1}`}</div><div class="compare-summary"><span class="compare-pill">输出 ${percentDeltaHtml(best.damageDelta)}</span><span class="compare-pill">生存 ${percentDeltaHtml(best.survivalDelta)}</span></div><div>${statDeltaHtml("ATK",after.atk,before.atk)} · ${statDeltaHtml("HP",after.hp,before.hp)} · ${statDeltaHtml("BJ",after.bj,before.bj,true)} · ${statDeltaHtml("BS",after.bs,before.bs,true)} · ${statDeltaHtml("闪避",after.crt,before.crt,true)}</div><div class="trait-note">${targetText}</div><div class="trait-note">套装：${describeSets(before.sets)} → ${describeSets(after.sets)} · 特性：${beforeTrait} → ${afterTrait}</div><div class="compare-slots">${slotLines}</div></div>`;
 }
 
 function calcBaseStats(){
@@ -492,74 +603,72 @@ function showSetInfo(){
     print(`\n当前装备属性：火${c.火} 水${c.水} 草${c.草} 雷${c.雷}`);
 }
 function openShop(){
-    print("\n=== 商城 ===");
-    print(`当前金币：${save.gold||0}`);
+    document.getElementById("shopOverlay").hidden=false;
+    renderShop();
+}
+function renderShop(notice=""){
     let p=save.purchased;
-    print(`1. 美味的鸡蛋 - 500金币，永久+10攻击力（已购${p.egg}/10）`);
-    print(`2. 难闻的药水 - 500金币，永久+100生命值（已购${p.potion}/10）`);
-    print(`3. 很热的长靴 - 700金币，永久+5%暴击率（已购${p.boots}/10）`);
-    print(`4. 很凉的帽子 - 800金币，永久+10%暴击伤害（已购${p.hat}/10）`);
-    print(`5. 可爱的替身娃娃 - 800金币，永久+5%闪避率（已购${p.doll}/10）`);
-    print(`6. 大记忆消失术 - 10金币，清除所有商城购买效果并返还限购`);
-    print(`7. 潘多拉之盒 - 200金币，随机奖励`);
-    if(save.slot5Unlocked){print(`8. 额外装备槽位 - 已解锁`);}
-    else{print(`8. 额外装备槽位 - 5000金币，永久解锁第五个装备槽`);}
-    clearChoices();
-    addChoice("1. 美味的鸡蛋(500)",()=>buyItem("egg",500,10));
-    addChoice("2. 难闻的药水(500)",()=>buyItem("potion",500,10));
-    addChoice("3. 很热的长靴(700)",()=>buyItem("boots",700,10));
-    addChoice("4. 很凉的帽子(800)",()=>buyItem("hat",800,10));
-    addChoice("5. 可爱的替身娃娃(800)",()=>buyItem("doll",800,10));
-    addChoice("6. 大记忆消失术(10)",()=>buyReset());
-    addChoice("7. 潘多拉之盒(200)",()=>buyPandora());
-    if(!save.slot5Unlocked){addChoice("8. 额外装备槽位(5000)",()=>buySlot5());}
-    addChoice("返回",()=>shopReturn());
+    let products=[
+        ["美味的鸡蛋","永久 +10 攻击力","egg",500],
+        ["难闻的药水","永久 +100 生命值","potion",500],
+        ["很热的长靴","永久 +5% 暴击率","boots",700],
+        ["很凉的帽子","永久 +10% 暴击伤害","hat",800],
+        ["可爱的替身娃娃","永久 +5% 闪避率","doll",800]
+    ];
+    document.getElementById("shopNotice").textContent=notice||`当前金币：${save.gold||0}`;
+    document.getElementById("shopContent").innerHTML=products.map(([name,desc,key,price])=>`<article class="modal-card"><h3>${name}</h3><div>${desc}</div><div>价格：${price} 金币 · 已购 ${p[key]}/10</div><button class="choice-btn" onclick="buyItem('${key}',${price},10)">${p[key]>=10?"已达限购":"购买"}</button></article>`).join("")+`
+    <article class="modal-card"><h3>大记忆消失术</h3><div>清除所有商城购买效果，返还限购次数。</div><div>价格：10 金币</div><button class="choice-btn danger" onclick="buyReset()">施放</button></article>
+    <article class="modal-card"><h3>潘多拉之盒</h3><div>随机奖励，也可能触发大记忆消失术。</div><div>价格：200 金币</div><button class="choice-btn" onclick="buyPandora()">开启</button></article>
+    <article class="modal-card"><h3>额外装备槽位</h3><div>永久解锁第五个装备槽位。</div><div>${save.slot5Unlocked?"已解锁":"价格：5000 金币"}</div><button class="choice-btn" onclick="buySlot5()" ${save.slot5Unlocked?"disabled":""}>${save.slot5Unlocked?"已解锁":"购买"}</button></article>`;
+}
+function closeShop(){
+    document.getElementById("shopOverlay").hidden=true;
+    collapseTerminalEvents();
+    refreshStatPanel();
 }
 function buySlot5(){
-    if(save.slot5Unlocked){print("已解锁！");openShop();return;}
-    if((save.gold||0)<5000){print("金币不足！");openShop();return;}
+    if(save.slot5Unlocked){renderShop("第五个装备槽位已经解锁。");return;}
+    if((save.gold||0)<5000){renderShop("金币不足，无法购买第五个装备槽位。");return;}
     save.gold-=5000;
     save.slot5Unlocked=true;
     writeSave();
     if(player.job){player.slots.push(null);applyEquipStats();refreshStatPanel();}
-    print("第五个装备槽位已永久解锁！");
-    openShop();
+    autoSaveRun();
+    renderShop("第五个装备槽位已永久解锁！");
 }
 function shopReturn(){
-    if(gameState==="start"||gameState==="select"){startGame();}
-    else if(gameState==="battle"||gameState==="bossBattle"){battleLoop();}
-    else if(gameState==="loot"||gameState==="bossLoot"){if(pendingLoot){showLootChoice(pendingLoot.e1,pendingLoot.e2,pendingLoot.source);}else{nextWave();}}
-    else{startGame();}
+    closeShop();
 }
 function buyItem(key,price,limit){
     let p=save.purchased;
-    if(p[key]>=limit){print("已达限购上限！");openShop();return;}
-    if((save.gold||0)<price){print("金币不足！");openShop();return;}
+    if(p[key]>=limit){renderShop("该商品已达限购上限。");return;}
+    if((save.gold||0)<price){renderShop("金币不足，购买失败。");return;}
     save.gold-=price;
     p[key]++;
     writeSave();
     if(player.job){applyEquipStats();refreshStatPanel();}
-    print(`购买成功！剩余金币：${save.gold}`);
-    openShop();
+    autoSaveRun();
+    renderShop(`购买成功！剩余金币：${save.gold}`);
 }
 function buyReset(){
-    if((save.gold||0)<10){print("金币不足！");openShop();return;}
+    if((save.gold||0)<10){renderShop("金币不足，无法施放大记忆消失术。");return;}
     save.gold-=10;
     save.purchased={egg:0,potion:0,boots:0,hat:0,doll:0};
     writeSave();
     if(player.job){applyEquipStats();refreshStatPanel();}
-    print("大记忆消失术生效！所有商城购买效果已清除，限购已返还。");
-    openShop();
+    autoSaveRun();
+    renderShop("大记忆消失术生效！所有商城购买效果已清除，限购已返还。");
 }
 function buyPandora(){
-    if((save.gold||0)<200){print("金币不足！");openShop();return;}
+    if((save.gold||0)<200){renderShop("金币不足，无法开启潘多拉之盒。");return;}
     save.gold-=200;
     let r=Math.random()*100;
-    if(r<10){save.gold+=10;print("潘多拉之盒：获得10金币！");}
-    else if(r<30){save.gold+=50;print("潘多拉之盒：获得50金币！");}
-    else if(r<68){save.gold+=100;print("潘多拉之盒：获得100金币！");}
-    else if(r<78){save.gold+=500;print("潘多拉之盒：获得500金币！");}
-    else if(r<88){save.gold+=800;print("潘多拉之盒：获得800金币！");}
+    let result="";
+    if(r<10){save.gold+=10;result="潘多拉之盒：获得10金币！";}
+    else if(r<30){save.gold+=50;result="潘多拉之盒：获得50金币！";}
+    else if(r<68){save.gold+=100;result="潘多拉之盒：获得100金币！";}
+    else if(r<78){save.gold+=500;result="潘多拉之盒：获得500金币！";}
+    else if(r<88){save.gold+=800;result="潘多拉之盒：获得800金币！";}
     else if(r<98){
         let items=["egg","potion","boots","hat","doll"];
         let prices=[500,500,700,800,800];
@@ -568,19 +677,19 @@ function buyPandora(){
         let key=items[idx];
         if(save.purchased[key]<10){
             save.purchased[key]++;
-            print(`潘多拉之盒：获得商品【${names[idx]}】！`);
+            result=`潘多拉之盒：获得商品【${names[idx]}】！`;
         }else{
             save.gold+=prices[idx];
-            print(`潘多拉之盒：本应获得【${names[idx]}】，但已达限购，返还${prices[idx]}金币！`);
+            result=`潘多拉之盒：本应获得【${names[idx]}】，但已达限购，返还${prices[idx]}金币！`;
         }
     }else{
         save.purchased={egg:0,potion:0,boots:0,hat:0,doll:0};
-        print("潘多拉之盒：触发大记忆消失术！所有商城购买效果已清除！");
+        result="潘多拉之盒：触发大记忆消失术！所有商城购买效果已清除！";
     }
     writeSave();
     if(player.job){applyEquipStats();refreshStatPanel();}
-    print(`当前金币：${save.gold}`);
-    openShop();
+    autoSaveRun();
+    renderShop(`${result} 当前金币：${save.gold}`);
 }
 function refreshStatPanel(){
     let sets=getSetBonus();
@@ -590,7 +699,7 @@ function refreshStatPanel(){
     <div class="eye-info">魔王之眼：${save.eyeTotal}/24 | 已用：${usedEye}</div>
     <div class="eye-info">它之血珠：${save.blood} | 难度：${save.useBlood}/10</div>
     <div class="eye-info">金币：${save.gold||0}</div>
-    <button class="set-info-btn" onclick="openShop()">商城</button>
+    <div class="quick-actions"><button class="set-info-btn" onclick="openSaveManager()">存档</button><button class="set-info-btn" onclick="openShop()">商城</button></div>
     <div class="stat-row"><span class="label">职业</span><span class="value">${player.job||"-"}</span></div>
     <div class="stat-row"><span class="label">祝福</span><span class="value">${player.blessing||"-"}</span></div>
     <div class="stat-row"><span class="label">攻击力</span><span class="value stat-atk">${player.atk}</span></div>
@@ -649,46 +758,52 @@ function genEquip(wave){
     return {name,element,atk,hp,bj,bs,crt,trait};
 }
 
-function showEquip(e,includeRecommendation=false){
+function equipmentCardHtml(e,includeRecommendation=false){
     let traitHtml="";
     if(e.trait){
         let tdesc=e.trait.id==="shieldGain"?`装备时获得${e.trait.value}点护盾`:e.trait.desc;
         traitHtml=`<div class="trait">【${e.trait.name}】${tdesc}</div>`;
     }
     let recommendation=includeRecommendation?equipmentRecommendationHtml(e):"";
-    print(`<div class="equipment-card"><div class="equip-title">${e.name} <span class="${elemClass(e.element)}">【${e.element}】</span></div><div class="equip-stats"><span class="stat-atk">ATK +${e.atk}</span> · <span class="stat-hp">HP +${e.hp}</span> · <span class="stat-bj">BJ +${Math.floor(e.bj*100)}%</span> · <span class="stat-bs">BS +${Math.floor(e.bs*100)}%</span> · <span class="stat-crt">CRT +${Math.floor(e.crt*100)}%</span></div>${traitHtml}${recommendation}</div>`,"",true);
+    return `<div class="equipment-card"><div class="equip-title">${e.name} <span class="${elemClass(e.element)}">【${e.element}】</span></div><div class="equip-stats"><span class="stat-atk">ATK +${e.atk}</span> · <span class="stat-hp">HP +${e.hp}</span> · <span class="stat-bj">BJ +${Math.floor(e.bj*100)}%</span> · <span class="stat-bs">BS +${Math.floor(e.bs*100)}%</span> · <span class="stat-crt">CRT +${Math.floor(e.crt*100)}%</span></div>${traitHtml}${recommendation}</div>`;
+}
+function showEquip(e,includeRecommendation=false){
+    print(equipmentCardHtml(e,includeRecommendation),"",true);
 }
 
 function equipToSlot(e,chosenIdx){
     let empty=player.slots.indexOf(null);
     if(empty>=0){
         lastEquipAction={slotIdx:empty,oldEquip:null,newEquip:e,chosenIdx:chosenIdx};
-        player.slots[empty]=e;print(`你装备了 ${e.name}`);
+        player.slots[empty]=e;
     }else{
-        clearChoices();
-        print("装备槽已满，请选择要替换的装备：");
-        for(let i=0;i<player.slots.length;i++){
-            let s=player.slots[i];
-            let comparison=compareCandidate(e,i);
-            let decision=classifyRecommendation(comparison);
-            let output=Math.abs(comparison.damageDelta*100).toFixed(1),survival=Math.abs(comparison.survivalDelta*100).toFixed(1);
-            addChoice(`${decision.text}：替换[${i+1}] ${s.name}（输出${comparison.damageDelta>=0?"+":"-"}${output}% / 生存${comparison.survivalDelta>=0?"+":"-"}${survival}%）`,()=>{
-                lastEquipAction={slotIdx:i,oldEquip:s,newEquip:e,chosenIdx:chosenIdx};
-                player.slots[i]=e;print(`你替换了装备`);applyEquipStats();refreshStatPanel();confirmEquip();
-            });
-        }
-        addChoice("返回，重新选择",()=>{if(pendingLoot)showLootChoice(pendingLoot.e1,pendingLoot.e2,pendingLoot.source);else afterEquip();});
-        addChoice("放弃装备",()=>{print("你放弃了这件装备");afterEquip();});
+        renderReplacementChoices(e,chosenIdx);
         return;
     }
     applyEquipStats();
     refreshStatPanel();
     confirmEquip();
 }
+function renderReplacementChoices(e,chosenIdx){
+    let choices=player.slots.map((oldEquip,index)=>{
+        let comparison=compareCandidate(e,index),decision=classifyRecommendation(comparison);
+        return `<article class="modal-card"><h3>槽位 ${index+1} · ${oldEquip.name}</h3><div>${decision.text}</div><div>输出 ${percentDeltaHtml(comparison.damageDelta)} · 生存 ${percentDeltaHtml(comparison.survivalDelta)}</div><button class="choice-btn" onclick="replaceEquip(${index},${chosenIdx})">替换此槽位</button></article>`;
+    }).join("");
+    document.getElementById("lootContent").innerHTML=`<p class="modal-note">装备槽已满。三角数量表示相对上一战的预估变动幅度。</p><div class="loot-choice">${equipmentCardHtml(e,true)}</div><div class="modal-grid">${choices}</div><div class="modal-actions"><button class="choice-btn" onclick="renderLootChoice()">返回掉落选择</button><button class="choice-btn danger" onclick="declineLoot()">放弃这件装备</button></div>`;
+}
+function replaceEquip(slotIndex,chosenIdx){
+    if(!pendingLoot)return;
+    let e=chosenIdx===1?pendingLoot.e1:pendingLoot.e2;
+    lastEquipAction={slotIdx:slotIndex,oldEquip:player.slots[slotIndex],newEquip:e,chosenIdx};
+    player.slots[slotIndex]=e;
+    applyEquipStats();
+    refreshStatPanel();
+    confirmEquip();
+}
 function confirmEquip(){
-    clearChoices();
-    addChoice("确认选择，继续冒险",()=>afterEquip());
-    addChoice("反悔，重新选择",()=>undoEquip());
+    if(!lastEquipAction)return;
+    let action=lastEquipAction;
+    document.getElementById("lootContent").innerHTML=`<div class="drop-recommendation">已将【${action.newEquip.name}】${action.oldEquip?`替换【${action.oldEquip.name}】`:`装备至空槽位${action.slotIdx+1}`}。确认后进入下一阶段。</div><div class="loot-choice">${equipmentCardHtml(action.newEquip,true)}</div><div class="modal-actions"><button class="choice-btn" onclick="afterEquip()">确认选择，继续冒险</button><button class="choice-btn" onclick="undoEquip()">反悔，重新选择</button></div>`;
 }
 function undoEquip(){
     if(!lastEquipAction)return;
@@ -696,30 +811,41 @@ function undoEquip(){
     player.slots[act.slotIdx]=act.oldEquip;
     applyEquipStats();
     refreshStatPanel();
-    print("你卸下了刚才的装备，重新选择。");
     lastEquipAction=null;
     if(pendingLoot){
-        showLootChoice(pendingLoot.e1,pendingLoot.e2,pendingLoot.source);
+        renderLootChoice();
     }else{
         afterEquip();
     }
 }
 function showLootChoice(e1,e2,source){
     pendingLoot={e1,e2,source};
-    print("\n敌人掉落了两件装备，请选择其一：");
-    print("【装备一】");
-    showEquip(e1,true);
-    print("【装备二】");
-    showEquip(e2,true);
+    lastEquipAction=null;
+    printEventSummary("战利品已掉落","已打开装备选择弹窗；确认或放弃后将自动收起这条记录。");
     clearChoices();
-    addChoice("选择装备一",()=>equipToSlot(e1,1));
-    addChoice("选择装备二",()=>equipToSlot(e2,2));
-    addChoice("都放弃",()=>{pendingLoot=null;print("你放弃了两件装备");afterEquip();});
+    document.getElementById("lootOverlay").hidden=false;
+    renderLootChoice();
+    autoSaveRun();
+}
+function renderLootChoice(){
+    if(!pendingLoot)return;
+    let drops=[pendingLoot.e1,pendingLoot.e2];
+    let recommendation=getDropRecommendation(drops);
+    let recommendationText=`本次优先选择：装备${recommendation.index+1}【${recommendation.item.name}】；${recommendation.decision.text}，输出 ${percentDeltaHtml(recommendation.comparison.damageDelta)}，生存 ${percentDeltaHtml(recommendation.comparison.survivalDelta)}。`;
+    document.getElementById("lootContent").innerHTML=`<div class="drop-recommendation">${recommendationText}</div><div class="loot-grid">${drops.map((item,index)=>`<article class="loot-choice ${index===recommendation.index?"is-recommended":""}"><h3>${index===recommendation.index?"★ 本次推荐 · ":""}装备${index+1}</h3>${equipmentCardHtml(item,true)}<button class="choice-btn" onclick="chooseLoot(${index+1})">选择装备${index+1}</button></article>`).join("")}</div><div class="modal-actions"><button class="choice-btn danger" onclick="declineLoot()">都放弃</button></div>`;
+}
+function chooseLoot(chosenIdx){if(pendingLoot)equipToSlot(chosenIdx===1?pendingLoot.e1:pendingLoot.e2,chosenIdx);}
+function declineLoot(){
+    afterEquip("已放弃本次掉落，继续冒险。");
 }
 
-function afterEquip(){
+function afterEquip(settledMessage=""){
+    let settled=settledMessage||(lastEquipAction?`已确认装备【${lastEquipAction.newEquip.name}】，继续冒险。`:"战利品选择已完成，继续冒险。");
     pendingLoot=null;
     lastEquipAction=null;
+    document.getElementById("lootOverlay").hidden=true;
+    printEventSummary("战利品结算",settled);
+    collapseTerminalEvents();
     player.hp=player.maxHp;
     let sg=countTrait("shieldGain");
     if(sg>0){
@@ -1222,6 +1348,7 @@ function simulateBossSkip(){
 function battleLoop(){
     if(enemy.hp<=0){onEnemyDefeat();return;}
     if(player.hp<=0){onPlayerDefeat();return;}
+    autoSaveRun();
     refreshStatPanel();
     clearChoices();
     print(`\n【${enemy.name}】 ATK:${enemy.atk} HP: ${Math.max(0,enemy.hp)}/${enemy.maxHp} | 能量: ${player.energy}/100`);
@@ -1243,6 +1370,7 @@ function battleLoop(){
 }
 
 function onEnemyDefeat(){
+    rememberLastBattle();
     if(hasETrait("explode")){
         let explodeDmg=Math.floor(player.maxHp*0.10);
         if(player.ZDYHP>0){
@@ -1344,6 +1472,7 @@ function onEnemyDefeat(){
 function onPlayerDefeat(){
     print("你被击败了...");
     gameState="badEnd";
+    clearRunSave("auto");
     refreshStatPanel();
     badEnd(2);
 }
@@ -1398,6 +1527,7 @@ function enterBoss(){
         genEnemy(true,"魔王");
     }
     print(`【${enemy.name}】 ATK:${enemy.atk} HP:${enemy.hp}`);
+    autoSaveRun();
     clearChoices();
     addChoice("迎战魔王",()=>battleLoop());
     if(player.Q3<3){
@@ -1416,6 +1546,7 @@ function enterBoss(){
 }
 
 function badEnd(type){
+    clearRunSave("auto");
     clearChoices();
     let msgs={
         1:"【Bad End 1】你逃离了战场，传说就此终结。",
@@ -1437,6 +1568,7 @@ function trueEnd1(){
     save.eyeTotal=Math.min(24,save.eyeTotal+2);
     print(`你获得了 2 枚魔王之眼！当前：${save.eyeTotal}/24`);
     writeSave();
+    clearRunSave("auto");
     refreshStatPanel();
     addChoice("重新开始",()=>location.reload());
 }
@@ -1451,13 +1583,14 @@ function trueEnd2(){
     save.eyeTotal=Math.min(24,save.eyeTotal+1);
     print(`你获得了 1 枚魔王之眼！当前：${save.eyeTotal}/24`);
     writeSave();
+    clearRunSave("auto");
     refreshStatPanel();
     addChoice("重新开始",()=>location.reload());
 }
 
-let bannedJob=null,bannedBless=null;
 function startGame(){
     gameState="start";
+    clearRunSave("auto");
     outputDom.innerHTML="";
     refreshStatPanel();
     print("欢迎来到卡桑德里传说6.5");
@@ -1508,8 +1641,21 @@ function selectBlessing(b){
     refreshStatPanel();
     print("\n准备好开始冒险了吗？");
     clearChoices();
-    addChoice("极速版（直接开战）",()=>{player.canAdjustPoint=false;refreshStatPanel();player.wave=0;nextWave();});
-    addChoice("普通版（查看教程）",()=>{player.canAdjustPoint=false;refreshStatPanel();showTutorial();});
+    if(!preferences.tutorialSeen){
+        addChoice("新手教程（仅首次）",()=>beginAdventure(true));
+        addChoice("跳过教程，直接开战",()=>beginAdventure(false));
+    }else{
+        addChoice("开始冒险",()=>beginAdventure(false));
+    }
+}
+
+function beginAdventure(showTutorialFirst){
+    player.canAdjustPoint=false;
+    preferences.tutorialSeen=true;
+    writePreferences();
+    refreshStatPanel();
+    if(showTutorialFirst){showTutorial();}
+    else{player.wave=0;nextWave();}
 }
 
 function showTutorial(){
@@ -1525,19 +1671,67 @@ function showTutorial(){
     addChoice("开始冒险",()=>{player.wave=0;nextWave();});
 }
 
+function runStateLabel(state){return state==="loot"||state==="bossLoot"?"装备选择中":state==="bossBattle"?"BOSS 战斗中":"战斗中";}
+function formatSavedAt(value){
+    let date=new Date(value);
+    return Number.isNaN(date.getTime())?"时间未知":date.toLocaleString("zh-CN",{hour12:false});
+}
+function renderSaveManager(notice=""){
+    let canSave=Boolean(snapshotRun());
+    document.getElementById("saveContent").innerHTML=runSaveSlots.map(slot=>{
+        let snapshot=readRunSave(slot),title=slot==="auto"?"自动存档":`手动槽位 ${slot}`;
+        let description=snapshot?`${runStateLabel(snapshot.state)} · 第 ${snapshot.player.wave||0} 波 · ${formatSavedAt(snapshot.savedAt)}`:"暂无可恢复的 6.5 存档";
+        let controls=slot==="auto"?`<button class="choice-btn" onclick="loadRunSlot('auto')" ${snapshot?"":"disabled"}>继续</button>`:`<button class="choice-btn" onclick="saveToSlot('${slot}')" ${canSave?"":"disabled"}>保存</button><button class="choice-btn" onclick="loadRunSlot('${slot}')" ${snapshot?"":"disabled"}>读取</button>`;
+        return `<article class="save-slot"><div><h3>${title}</h3><p>${description}</p></div><div class="save-actions">${controls}</div></article>`;
+    }).join("");
+    if(notice){let summary=document.createElement("p");summary.className="modal-notice";summary.textContent=notice;document.getElementById("saveContent").prepend(summary);}
+}
+function openSaveManager(){
+    document.getElementById("saveOverlay").hidden=false;
+    renderSaveManager();
+}
+function closeSaveManager(){document.getElementById("saveOverlay").hidden=true;}
+function saveToSlot(slot){
+    let result=writeRunSave(slot);
+    renderSaveManager(result.message);
+}
+function loadRunSlot(slot){
+    let snapshot=readRunSave(slot);
+    if(!snapshot){renderSaveManager("该槽位没有兼容的 6.5 存档。");return;}
+    restoreRunSnapshot(snapshot);
+}
+function syncPreferenceControls(){
+    let crt=document.getElementById("crtToggle"),motion=document.getElementById("reduceMotionToggle"),collapse=document.getElementById("collapseEventsToggle");
+    if(crt)crt.checked=preferences.crt;
+    if(motion)motion.checked=!preferences.reduceMotion;
+    if(collapse)collapse.checked=preferences.collapseEvents;
+}
+
 function initApp(){
     const app=document.getElementById("app");
     const welcome=document.getElementById("welcomeOverlay");
     const settings=document.getElementById("settingsOverlay");
     const changelog=document.getElementById("changelogOverlay");
     const crtToggle=document.getElementById("crtToggle");
+    const reduceMotionToggle=document.getElementById("reduceMotionToggle");
+    const collapseEventsToggle=document.getElementById("collapseEventsToggle");
+    const continueButton=document.getElementById("btnContinue");
     document.getElementById("btnNewGame").onclick=()=>{welcome.hidden=true;startGame();};
+    continueButton.onclick=()=>{let snapshot=readRunSave("auto");if(snapshot)restoreRunSnapshot(snapshot);};
     document.getElementById("btnChangelog").onclick=()=>{changelog.hidden=false;};
     document.getElementById("btnChangelogClose").onclick=()=>{changelog.hidden=true;};
-    document.getElementById("settingsBtn").onclick=()=>{settings.hidden=false;};
+    document.getElementById("settingsBtn").onclick=()=>{syncPreferenceControls();settings.hidden=false;};
     document.getElementById("btnSettingsClose").onclick=()=>{settings.hidden=true;};
-    crtToggle.onchange=()=>app.classList.toggle("crt-on",crtToggle.checked);
-    document.addEventListener("keydown",event=>{if(event.key==="Escape"){settings.hidden=true;changelog.hidden=true;}});
+    document.getElementById("btnOpenSaveFromSettings").onclick=()=>{settings.hidden=true;openSaveManager();};
+    document.getElementById("btnShopClose").onclick=()=>closeShop();
+    document.getElementById("btnSaveClose").onclick=()=>closeSaveManager();
+    crtToggle.onchange=()=>{preferences.crt=crtToggle.checked;writePreferences();applyPreferences();};
+    reduceMotionToggle.onchange=()=>{preferences.reduceMotion=!reduceMotionToggle.checked;writePreferences();applyPreferences();};
+    collapseEventsToggle.onchange=()=>{preferences.collapseEvents=collapseEventsToggle.checked;writePreferences();};
+    document.addEventListener("keydown",event=>{if(event.key!=="Escape")return;settings.hidden=true;changelog.hidden=true;document.getElementById("shopOverlay").hidden=true;closeSaveManager();});
+    applyPreferences();
+    syncPreferenceControls();
+    continueButton.disabled=!readRunSave("auto");
     refreshStatPanel();
     welcome.hidden=false;
 }
