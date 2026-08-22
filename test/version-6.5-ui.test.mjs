@@ -34,7 +34,7 @@ function loadComparisonEngine() {
   const instrumented = script.replace(/initApp\(\);\s*$/, `
     globalThis.__comparison = {
       deriveBuild, compareCandidate, equipmentRecommendationHtml, percentDeltaHtml,
-      trendGlyph, getDropRecommendation, snapshotRun, validateRunSnapshot, writeRunSave, readRunSave,
+      trendGlyph, getDropAdvice, snapshotRun, validateRunSnapshot, writeRunSave, readRunSave,
       getSurvivalPressure, classifyRecommendation,
       setState({ player: playerState, enemy: enemyState, slots }) {
         Object.assign(player, playerState);
@@ -126,7 +126,7 @@ test('6.5 page keeps restored UI, comparison, and battle scene markers', () => {
     'function snapshotRun()',
     'function deferLootChoice()',
     'function openSettings()',
-    'function getDropRecommendation(items)',
+    'function getDropAdvice(items)',
     'function equipmentRecommendationHtml(item)',
     'function showBattleFeedback(side,text,type="damage")',
     '#terminal-wrap #battleArena',
@@ -154,7 +154,7 @@ test('equipment comparison is pure and highlights a light one-percent decrease',
   assert.match(engine.percentDeltaHtml(-0.01), /delta-slight/);
 });
 
-test('drop recommendation selects one item against the previous battle and grades change with triangles', () => {
+test('drop advice identifies only a traitless item dominated on every base stat', () => {
   const engine = loadComparisonEngine();
   const equipped = { name: '旧剑', element: '火', atk: 20, hp: 40, bj: 0.02, bs: 0.05, crt: 0.01, trait: null };
   const weakDrop = { name: '破布', element: '水', atk: 10, hp: 10, bj: 0, bs: 0, crt: 0, trait: null };
@@ -165,8 +165,10 @@ test('drop recommendation selects one item against the previous battle and grade
     slots: [equipped, null, null, null],
   });
   engine.setLastBattle({ name: '巨岩兽', hp: 2600, maxHp: 2600, atk: 320, traits: [] });
-  const choice = engine.getDropRecommendation([weakDrop, strongDrop]);
-  assert.equal(choice.index, 1, 'the best item is selected from both drops');
+  const advice = engine.getDropAdvice([weakDrop, strongDrop]);
+  assert.equal(JSON.stringify(advice.inferiorIndexes), '[0]');
+  const traitDrop = { ...weakDrop, trait: { id: 'ironWall', name: '铁壁守护', desc: '减伤', prob: 1 } };
+  assert.equal(JSON.stringify(engine.getDropAdvice([traitDrop, strongDrop]).inferiorIndexes), '[]');
   assert.doesNotMatch(engine.equipmentRecommendationHtml(strongDrop), /巨岩兽/);
   assert.equal(engine.trendGlyph(0.01), '▲');
   assert.equal(engine.trendGlyph(-0.05), '▼▼');
@@ -208,7 +210,8 @@ test('shop, save, and loot interactions render inside modal overlays', () => {
   });
   engine.showLootChoice(firstDrop, secondDrop, 'loot');
   assert.equal(engine.element('lootOverlay').hidden, false);
-  assert.match(engine.element('lootContent').innerHTML, /本次优先选择/);
+  assert.match(engine.element('lootContent').innerHTML, /两件装备各有取舍/);
+  assert.doesNotMatch(engine.element('lootContent').innerHTML, /★ 本次推荐/);
   assert.doesNotMatch(engine.element('lootContent').innerHTML, /上一战基准/);
   assert.doesNotMatch(engine.element('lootContent').innerHTML, /▲ \/ ▲▲ \/ ▲▲▲/);
   engine.deferLootChoice();
@@ -224,6 +227,23 @@ test('shop, save, and loot interactions render inside modal overlays', () => {
   assert.equal(engine.paused(), true);
   engine.closeSettings();
   assert.equal(engine.paused(), false);
+});
+
+test('traitless drops dominated by the alternative are marked red without a forced choice', () => {
+  const engine = loadInteractiveEngine();
+  const weakDrop = { name: '平凡木棍', element: '火', atk: 5, hp: 5, bj: 0, bs: 0, crt: 0, trait: null };
+  const strongDrop = { name: '优质战戟', element: '水', atk: 30, hp: 60, bj: 0.03, bs: 0.04, crt: 0.02, trait: null };
+  engine.setState({
+    player: { job: '战士', blessing: '战士的祝福', blessAtkAdd: 0, blessHpAdd: 0, blessBjAdd: 0, blessBsAdd: 0, blessCrtAdd: 0, permAtkAdd: 0, permHpAdd: 0, wave: 5 },
+    enemy: { name: '试炼兽', hp: 0, maxHp: 1200, atk: 150, traits: [], shield: 0 },
+    slots: [null, null, null, null],
+    state: 'loot',
+  });
+  engine.showLootChoice(weakDrop, strongDrop, 'loot');
+  const content = engine.element('lootContent').innerHTML;
+  assert.match(content, /基础属性全面不占优的装备已标红/);
+  assert.match(content, /loot-choice is-inferior/);
+  assert.doesNotMatch(content, /★ 本次推荐/);
 });
 
 test('set detail opens in a modal and reports active and inactive tiers', () => {
